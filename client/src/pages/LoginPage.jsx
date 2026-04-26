@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { authService } from '../services/api'
 
 function AppGlyph() {
   return (
@@ -30,10 +31,28 @@ function LockIcon() {
 export default function LoginPage({ variant = 'v1' }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
   const showToast = variant === 'v2'
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    setLoading(true)
+    try {
+      const response = await authService.login(email, password)
+      const { token, user } = response.data
+      
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      
+      alert('Logged in successfully!')
+      navigate('/marketplace')
+    } catch (error) {
+      console.error('Login Error:', error)
+      alert(error.response?.data?.error || 'Login failed. Please check your credentials.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

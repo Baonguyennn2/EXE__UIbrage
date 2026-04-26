@@ -1,262 +1,242 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
+import { assetService } from '../services/api'
 
-const heroPreviewUrl = 'https://www.figma.com/api/mcp/asset/8b6a8cb2-137b-4fd3-824d-348246480897'
+const heroPreviewUrl = 'https://res.cloudinary.com/dz0v7n8m0/image/upload/v1700000000/ui-pack-preview.png' // Placeholder for the fantasy UI pack
 
-const homepageVariants = {
-  v1: {
-    pill: 'Featured Asset',
-    heading: 'Ultimate Fantasy UI Pack',
-    copy: 'Professional 4K game interface assets for high-end RPGs and Adventure games. Vector-based and fully customizable.',
-    price: '$29.99',
-    cta: 'Get Asset Pack',
-    sectionTitle: 'Featured UI Packs',
-  },
-  v2: {
-    pill: 'New Release',
-    heading: 'Seasonal Marketplace Collection',
-    copy: 'Fresh storefront-ready HUD, card, and menu components curated for teams shipping faster this quarter.',
-    price: '$39.00',
-    cta: 'Explore Collection',
-    sectionTitle: 'Top Picks This Week',
-  },
-}
+export default function HomepagePage() {
+  const [featuredAssets, setFeaturedAssets] = useState([])
+  const [latestAssets, setLatestAssets] = useState([])
+  const [trendingAssets, setTrendingAssets] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ category: '', engine: '', search: '' })
 
-const featuredAssets = [
-  {
-    id: 'hud',
-    title: 'Cyber HUD...',
-    author: 'NeonSystems',
-    description: 'Complete futuristic interface with 50+ animated HUD modules.',
-    price: '$19',
-    tags: ['Unity', '4K'],
-    tone: 'market-card__image--cyan',
-  },
-  {
-    id: 'pixel-art',
-    title: 'Pixel Art',
-    author: 'BitPixels',
-    description: 'Charming 16-bit style UI for platformers and adventures.',
-    price: 'Free',
-    tags: ['Godot', 'PNG'],
-    tone: 'market-card__image--green',
-  },
-  {
-    id: 'dragon-realm',
-    title: 'DragonRealm',
-    author: 'DesignFlux',
-    description: 'A clean, distraction-free UI set for modern mobile games.',
-    price: '$12',
-    tags: ['Vector', 'Unreal'],
-    tone: 'market-card__image--purple',
-  },
-  {
-    id: 'empire-strategy',
-    title: 'Empire Strategy',
-    author: 'LogicArts',
-    description: 'Comprehensive UI kit designed for deep real-time strategy.',
-    price: '$45',
-    tags: ['4K', 'PSD'],
-    tone: 'market-card__image--amber',
-  },
-]
+  const fetchAssets = async () => {
+    setLoading(true)
+    try {
+      const response = await assetService.getAll(filters)
+      const allAssets = response.data
+      
+      setFeaturedAssets(allAssets.filter(a => a.status === 'published').slice(0, 4))
+      setLatestAssets(allAssets.filter(a => a.status === 'published').slice(4, 8))
+      setTrendingAssets(allAssets.filter(a => a.status === 'published').slice(0, 2))
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching assets:', error)
+      setLoading(false)
+    }
+  }
 
-const latestAssets = [
-  { id: 'latest-1', title: 'Elemental Spell Icons', author: 'Firefly Studio', price: '$5' },
-  { id: 'latest-2', title: 'Rustic Wood UI Kit', author: 'NatureBits', price: 'Free' },
-  { id: 'latest-3', title: 'Glass UI Pack', author: 'LucidDesign', price: 'Free' },
-  { id: 'latest-4', title: 'Classic Inventory Grid', author: 'RPGMaster', price: 'Free' },
-]
+  useEffect(() => {
+    fetchAssets()
+  }, [filters])
 
-const trendingAssets = [
-  {
-    id: 'trend-1',
-    title: 'Cyberpunk Menu Suite',
-    copy: 'Fast growing popularity in Sci-Fi category',
-    price: '$25',
-    badge: 'Hot Asset',
-  },
-  {
-    id: 'trend-2',
-    title: 'Parchment Quest Journals',
-    copy: 'Over 500 downloads this week',
-    price: 'Free',
-    badge: '',
-  },
-]
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }
 
-export default function HomepagePage({ variant = 'v1' }) {
-  const content = homepageVariants[variant] ?? homepageVariants.v1
+  if (loading) return <div className="loading-screen">Loading Marketplace...</div>
 
   return (
-    <main className="market-home">
-      <AppHeader />
+    <div className="homepage-container">
+      <AppHeader onSearch={(val) => handleFilterChange('search', val)} />
 
-      <section className="market-layout">
-        <aside className="market-filters">
-          <h2>Filters</h2>
-          <button type="button" className="market-tag-button">Popular Tags</button>
-
-          <div className="market-filter-group">
-            <h3>UI Style</h3>
-            <a href="#fantasy">Fantasy</a>
-            <a href="#sci-fi">Sci-Fi</a>
-            <a href="#pixel-art">Pixel Art</a>
-            <a href="#minimalist">Minimalist</a>
+      <main className="main-layout">
+        <aside className="sidebar-filters">
+          <div className="filter-group">
+            <h3>FILTERS</h3>
+            <button className="pill-button">✨ Popular Tags</button>
           </div>
 
-          <div className="market-filter-group">
-            <h3>Game Genre</h3>
-            <a href="#rpg">RPG</a>
-            <a href="#platformer">Platformer</a>
-            <a href="#strategy">Strategy</a>
-            <a href="#casual">Casual</a>
+          <div className="filter-group">
+            <h3>UI STYLE</h3>
+            <button onClick={() => handleFilterChange('category', 'Fantasy')}>Fantasy</button>
+            <button onClick={() => handleFilterChange('category', 'Sci-Fi')}>Sci-Fi</button>
+            <button onClick={() => handleFilterChange('category', 'Pixel Art')}>Pixel Art</button>
+            <button onClick={() => handleFilterChange('category', 'Minimalist')}>Minimalist</button>
           </div>
 
-          <div className="market-filter-group">
-            <h3>Engine</h3>
-            <a href="#unity">Unity</a>
-            <a href="#unreal">Unreal Engine</a>
-            <a href="#godot">Godot</a>
+          <div className="filter-group">
+            <h3>GAME GENRE</h3>
+            <button onClick={() => handleFilterChange('genre', 'RPG')}>RPG</button>
+            <button onClick={() => handleFilterChange('genre', 'Platformer')}>Platformer</button>
+            <button onClick={() => handleFilterChange('genre', 'Strategy')}>Strategy</button>
+            <button onClick={() => handleFilterChange('genre', 'Casual')}>Casual</button>
           </div>
 
-          <div className="market-filter-group">
-            <h3>Price</h3>
-            <a href="#free">Free</a>
-            <a href="#paid">Paid</a>
-            <a href="#top-rated">Top Rated</a>
+          <div className="filter-group">
+            <h3>ENGINE</h3>
+            <button onClick={() => handleFilterChange('engine', 'Unity')}>Unity</button>
+            <button onClick={() => handleFilterChange('engine', 'Unreal Engine')}>Unreal Engine</button>
+            <button onClick={() => handleFilterChange('engine', 'Godot')}>Godot</button>
+          </div>
+
+          <div className="filter-group">
+            <h3>PRICE</h3>
+            <button onClick={() => handleFilterChange('price', 'free')}>Free</button>
+            <button onClick={() => handleFilterChange('price', 'paid')}>Paid</button>
+            <button onClick={() => handleFilterChange('price', 'top-rated')}>Top Rated</button>
           </div>
         </aside>
 
-        <div className="market-content">
-          <section className="market-hero">
-            <div className="market-hero__content">
-              <p className="market-pill">{content.pill}</p>
-              <h1>{content.heading}</h1>
-              <p>{content.copy}</p>
-              <div className="market-hero__cta">
-                <div>
-                  <small>Price</small>
-                  <strong>{content.price}</strong>
+        <section className="content-area">
+          {/* Hero Section */}
+          <section className="hero-banner">
+            <div className="hero-banner__content">
+              <span className="featured-label">FEATURED ASSET</span>
+              <h1>Ultimate Fantasy UI Pack</h1>
+              <p>Professional 4K game interface assets for high-end RPGs and Adventure games. Vector-based and fully customizable.</p>
+              <div className="hero-banner__footer">
+                <div className="price-info">
+                  <small>PRICE</small>
+                  <strong>$29.99</strong>
                 </div>
-                <button type="button">{content.cta}</button>
+                <button className="btn-get-pack">Get Asset Pack</button>
               </div>
             </div>
-            <div className="market-hero__preview">
-              <img src={heroPreviewUrl} alt="Fantasy UI pack preview" />
+            <div className="hero-banner__image">
+              <img src="https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/Screenshot_2024-04-26_234907_v04hvx.png" alt="Fantasy UI Pack" />
             </div>
           </section>
 
-          <section className="market-section">
-            <div className="market-section__header">
-              <h2>{content.sectionTitle}</h2>
-              <Link to="/marketplace/assets/ultimate-fantasy-ui-pack">View All</Link>
-            </div>
-
-            <div className="market-cards market-cards--four">
+          {/* Featured Section */}
+          <section className="section-block">
+            <header className="section-header">
+              <div className="section-title">
+                <span className="icon">✨</span>
+                <h2>Featured UI Packs</h2>
+              </div>
+              <Link to="/marketplace" className="view-all">View All</Link>
+            </header>
+            <div className="asset-grid">
               {featuredAssets.map((asset) => (
-                <article key={asset.id} className="market-card">
-                  <div className={`market-card__image ${asset.tone}`} />
-                  <div className="market-card__body">
-                    <div className="market-card__title-row">
+                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="asset-card">
+                  <div className="asset-card__preview" style={{ backgroundImage: `url(${asset.coverImageUrl})` }}>
+                    <span className="asset-card__badge">{asset.category?.toUpperCase()}</span>
+                  </div>
+                  <div className="asset-card__body">
+                    <div className="asset-card__title-row">
                       <h3>{asset.title}</h3>
-                      <strong>{asset.price}</strong>
+                      <span className="price">${asset.price}</span>
                     </div>
-                    <p className="market-card__author">By {asset.author}</p>
-                    <p>{asset.description}</p>
-                    <div className="market-tags">
-                      {asset.tags.map((tag) => (
-                        <span key={tag}>{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="market-section">
-            <div className="market-section__header">
-              <h2>Latest Assets</h2>
-            </div>
-
-            <div className="market-cards market-cards--latest">
-              {latestAssets.map((asset, index) => (
-                <article key={asset.id} className="market-latest-card">
-                  <div className={`market-latest-card__thumb market-latest-card__thumb--${index}`} />
-                  <h3>{asset.title}</h3>
-                  <p>By {asset.author}</p>
-                  <strong>{asset.price}</strong>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="market-section market-section--trending">
-            <div className="market-section__header">
-              <h2>Trending This Week</h2>
-            </div>
-
-            <div className="market-cards market-cards--two">
-              {trendingAssets.map((asset, index) => (
-                <article key={asset.id} className="market-trend-card">
-                  <div className={`market-trend-card__thumb market-trend-card__thumb--${index}`} />
-                  <div>
-                    <h3>{asset.title}</h3>
-                    <p>{asset.copy}</p>
-                    <div className="market-trend-card__meta">
-                      <strong>{asset.price}</strong>
-                      {asset.badge ? <span>{asset.badge}</span> : null}
+                    <p className="author">By <span>{asset.author?.username || 'Creator'}</span></p>
+                    <p className="desc">{asset.description?.substring(0, 80)}...</p>
+                    <div className="asset-card__tags">
+                      {asset.engine && <span>{asset.engine.toUpperCase()}</span>}
+                      <span>4K</span>
                     </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </section>
 
-          <footer className="market-footer">
-            <div className="market-footer__cols">
-              <div>
-                <div className="market-nav__brand">
-                  <span className="market-brand-tile" aria-hidden="true">
-                    <div />
-                    <div />
-                    <div />
-                    <div />
-                  </span>
-                  <strong>UIbrage</strong>
+          {/* Latest Assets */}
+          <section className="section-block">
+            <header className="section-header">
+              <div className="section-title">
+                <span className="icon">🕒</span>
+                <h2>Latest Assets</h2>
+              </div>
+              <div className="carousel-nav">
+                <button>‹</button>
+                <button>›</button>
+              </div>
+            </header>
+            <div className="latest-grid">
+              {latestAssets.map((asset) => (
+                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="latest-card">
+                  <div className="latest-card__img" style={{ backgroundImage: `url(${asset.coverImageUrl})` }} />
+                  <h4>{asset.title}</h4>
+                  <div className="latest-card__meta">
+                    <span>By {asset.author?.username}</span>
+                    <strong className={asset.price === 0 ? 'free' : ''}>{asset.price === 0 ? 'Free' : `$${asset.price}`}</strong>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Trending Section */}
+          <section className="section-block">
+            <header className="section-header">
+              <div className="section-title">
+                <span className="icon">📈</span>
+                <h2>Trending This Week</h2>
+              </div>
+            </header>
+            <div className="trending-row">
+              <div className="trend-item">
+                <div className="trend-item__img" style={{ backgroundImage: 'url(https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/cyberpunk_menu_preview.png)' }} />
+                <div className="trend-item__info">
+                  <h4>Cyberpunk Menu Suite</h4>
+                  <p>Fast growing popularity in Sci-Fi category</p>
+                  <div className="trend-item__meta">
+                    <strong>$25</strong>
+                    <span className="hot-badge">HOT ASSET</span>
+                  </div>
                 </div>
-                <p>The premier marketplace for high-quality game user interface assets.</p>
               </div>
-              <div>
-                <h4>Explore</h4>
-                <Link to="/marketplace">Featured Assets</Link>
-                <Link to="/marketplace/discover">New Releases</Link>
-                <Link to="/marketplace">Top Rated</Link>
-                <Link to="/marketplace">Freebies</Link>
-              </div>
-              <div>
-                <h4>Community</h4>
-                <Link to="/community">Forums</Link>
-                <Link to="/community">Discord</Link>
-                <Link to="/community">Blog</Link>
-                <Link to="/community">Events</Link>
-              </div>
-              <div>
-                <h4>Help</h4>
-                <Link to="/routes">Contact Support</Link>
-                <Link to="/community">Sell your assets</Link>
-                <Link to="/routes">Privacy Policy</Link>
-                <Link to="/routes">Terms of Service</Link>
+              <div className="trend-item">
+                <div className="trend-item__img" style={{ backgroundImage: 'url(https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/parchment_preview.png)' }} />
+                <div className="trend-item__info">
+                  <h4>Parchment Quest Journals</h4>
+                  <p>Over 500 downloads this week</p>
+                  <strong className="free">FREE</strong>
+                </div>
               </div>
             </div>
-            <div className="market-footer__bottom">
-              <small>© 2026 UIbrage Marketplace. All rights reserved.</small>
-              <div>↗︎ ◎</div>
+          </section>
+        </section>
+      </main>
+
+      <footer className="site-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <div className="logo-icon small">
+                <div className="icon-grid">
+                  <div /><div />
+                  <div /><div />
+                </div>
+              </div>
+              <strong>UIbrage</strong>
             </div>
-          </footer>
+            <p>The premier marketplace for high-quality game user interface assets.</p>
+          </div>
+          <div className="footer-links">
+            <div>
+              <h4>Explore</h4>
+              <Link to="/">Featured Assets</Link>
+              <Link to="/">New Releases</Link>
+              <Link to="/">Top Rated</Link>
+              <Link to="/">Freebies</Link>
+            </div>
+            <div>
+              <h4>Community</h4>
+              <Link to="/">Forums</Link>
+              <Link to="/">Discord</Link>
+              <Link to="/">Blog</Link>
+              <Link to="/">Events</Link>
+            </div>
+            <div>
+              <h4>Help</h4>
+              <Link to="/">Contact Support</Link>
+              <Link to="/">Sell your assets</Link>
+              <Link to="/">Privacy Policy</Link>
+              <Link to="/">Terms of Service</Link>
+            </div>
+          </div>
         </div>
-      </section>
-    </main>
+        <div className="footer-bottom">
+          <small>© 2026 UIbrage Marketplace. All rights reserved.</small>
+          <div className="footer-socials">
+             <span>🔗</span>
+             <span>🌐</span>
+          </div>
+        </div>
+      </footer>
+    </div>
   )
 }

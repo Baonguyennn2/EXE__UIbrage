@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { authService } from '../services/api'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -9,13 +10,36 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   })
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   function setField(field) {
     return (event) => setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    if (form.password !== form.confirmPassword) {
+      alert('Passwords do not match')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await authService.register({
+        email: form.email,
+        password: form.password,
+        fullName: form.fullName,
+        username: form.email.split('@')[0]
+      })
+      alert('Registration successful! Please check your email to verify your account.')
+      navigate('/auth/login')
+    } catch (error) {
+      console.error('Registration Error:', error)
+      alert(error.response?.data?.error || 'Registration failed.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

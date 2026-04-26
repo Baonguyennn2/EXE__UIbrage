@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { adminService } from '../services/api'
 
 const viewContent = {
   users: { title: 'Creators Management', filter: 'Newest first', action: 'Invite Creator' },
@@ -46,24 +48,6 @@ const dashboardStats = [
   { label: 'Monthly Revenue', value: '$850.12', trend: '+22%' },
 ]
 
-const bestSelling = [
-  { asset: 'Epic RPG Inventory UI', category: 'Fantasy Kits', downloads: '1,204', revenue: '$34,916' },
-  { asset: 'Futuristic Sci-Fi HUD', category: 'Tech', downloads: '842', revenue: '$37,890' },
-  { asset: 'Mobile Skill Icons', category: 'Mobile', downloads: '1,502', revenue: '$18,024' },
-]
-
-const underperforming = [
-  { asset: 'Pixel Art Game Menu', hint: '0 sales this month', visits: '42', conversion: '0%' },
-  { asset: 'Draft: Cyberpunk UI', hint: 'awaiting review', visits: '0', conversion: 'N/A' },
-  { asset: 'Minimalist Vector Kit', hint: 'Low engagement', visits: '156', conversion: '0.2%' },
-]
-
-const topCreators = [
-  { rank: '1', name: 'Alex Rivera (You)', role: 'Top Rated', spec: 'Game UI', assets: '128', revenue: '$142,850.12' },
-  { rank: '2', name: 'Elena Kostic', role: 'Product Designer', spec: 'Icon Sets', assets: '412', revenue: '$121,420.00' },
-  { rank: '3', name: 'Marcus Thorne', role: 'Illustration Artist', spec: 'Vector Art', assets: '85', revenue: '$98,110.50' },
-]
-
 function getInitials(name) {
   return name
     .split(' ')
@@ -74,10 +58,62 @@ function getInitials(name) {
 }
 
 export default function AdminDashboardPage({ variant = 'overview' }) {
+  const [stats, setStats] = useState({ totalAssets: 0, revenue: 0, totalCreators: 0, pendingAssets: 0 })
+  const [approvalQueue, setApprovalQueue] = useState([])
+  const [bestSelling, setBestSelling] = useState([])
+  const [underperforming, setUnderperforming] = useState([])
+  const [topCreators, setTopCreators] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, pendingRes] = await Promise.all([
+          adminService.getStats(),
+          adminService.getPending()
+        ])
+        setStats(statsRes.data)
+        setApprovalQueue(pendingRes.data)
+        
+        // Mocking other lists for now as DB is empty
+        setBestSelling([])
+        setUnderperforming([])
+        setTopCreators([])
+        
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching admin data:', error)
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const handleApprove = async (id, status) => {
+    try {
+      await adminService.approve(id, status)
+      setApprovalQueue(prev => prev.filter(a => a.id !== id))
+      // Refresh stats
+      const statsRes = await adminService.getStats()
+      setStats(statsRes.data)
+    } catch (error) {
+      console.error('Error updating asset status:', error)
+    }
+  }
+
+  const dashboardStats = [
+    { label: 'Total Assets', value: stats.totalAssets, trend: '+21%' },
+    { label: 'Total Sales', value: `$${stats.revenue}`, trend: '+5%' },
+    { label: 'Creators', value: stats.totalCreators, trend: '+2%' },
+    { label: 'Pending', value: stats.pendingAssets, trend: '' },
+  ]
+
   const content = viewContent[variant] ?? viewContent.users
   const activeKey = variant === 'moderation' ? 'approval' : variant === 'users' ? 'creators' : 'dashboard'
   const isOverview = variant === 'overview'
   const isApproval = variant === 'moderation'
+
+  if (loading) return <div>Loading...</div>
 
   const renderOverview = () => (
     <>
@@ -258,16 +294,19 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
           <span>Action</span>
         </header>
         {approvalQueue.map((row) => (
-          <div key={row.asset} className="admin-table__row">
+          <div key={row.id} className="admin-table__row">
             <div>
-              <strong>{row.asset}</strong>
-              <small>{row.type}</small>
+              <strong>{row.title}</strong>
+              <small>{row.category}</small>
             </div>
-            <span>{row.creator}</span>
-            <span>{row.price}</span>
-            <span>{row.date}</span>
+            <span>{row.author?.username}</span>
+            <span>${row.price}</span>
+            <span>{new Date(row.createdAt).toLocaleDateString()}</span>
             <span className={`state state--${row.status.toLowerCase()}`}>{row.status}</span>
-            <span className="admin-table__actions">Approve Reject</span>
+            <span className="admin-table__actions">
+              <button onClick={() => handleApprove(row.id, 'published')}>Approve</button>
+              <button onClick={() => handleApprove(row.id, 'rejected')}>Reject</button>
+            </span>
           </div>
         ))}
         <footer>

@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { adminService } from '../services/api'
 
 const uploadVariants = {
   create: { title: 'Upload New Asset', action: 'Publish Asset' },
@@ -7,6 +9,62 @@ const uploadVariants = {
 
 export default function UploadAssetPage({ variant = 'create' }) {
   const content = uploadVariants[variant] ?? uploadVariants.create
+  const navigate = useNavigate()
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    tags: '',
+    price: '',
+    engine: 'Unity',
+    category: 'Fantasy',
+    licenseType: 'standard',
+    isFree: false
+  })
+  const [coverImage, setCoverImage] = useState(null)
+  const [assetFile, setAssetFile] = useState(null)
+  const [screenshots, setScreenshots] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  const handleFileChange = (e, setter) => {
+    if (e.target.files) {
+      setter(e.target.files[0])
+    }
+  }
+
+  const handleScreenshotsChange = (e) => {
+    if (e.target.files) {
+      setScreenshots(Array.from(e.target.files))
+    }
+  }
+
+  const handlePublish = async () => {
+    setLoading(true)
+    const data = new FormData()
+    Object.keys(formData).forEach(key => data.append(key, formData[key]))
+    if (coverImage) data.append('coverImage', coverImage)
+    if (assetFile) data.append('assetFile', assetFile)
+    screenshots.forEach(file => data.append('screenshots', file))
+
+    try {
+      await adminService.upload(data)
+      alert('Asset uploaded successfully and pending approval!')
+      navigate('/admin/dashboard')
+    } catch (error) {
+      console.error('Error uploading asset:', error)
+      alert('Upload failed: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="admin-shell">
@@ -47,13 +105,13 @@ export default function UploadAssetPage({ variant = 'create' }) {
           <section className="surface-card adminx-upload-section">
             <h3><span>1</span> Media Assets</h3>
             <label>Main Cover Image</label>
-            <div className="adminx-upload-cover">Drop your 1920x1080 cover image here or browse</div>
+            <input type="file" onChange={(e) => handleFileChange(e, setCoverImage)} />
+            
+            <label>Asset File (ZIP/RAR)</label>
+            <input type="file" onChange={(e) => handleFileChange(e, setAssetFile)} />
+
             <label>Screenshots (Up to 10)</label>
-            <div className="adminx-upload-shots">
-              <button type="button">+</button>
-              <div />
-              <div />
-            </div>
+            <input type="file" multiple onChange={handleScreenshotsChange} />
           </section>
 
           <section className="surface-card adminx-upload-section">
@@ -61,30 +119,57 @@ export default function UploadAssetPage({ variant = 'create' }) {
             <div className="adminx-upload-form-grid">
               <label>
                 Asset Title
-                <input type="text" placeholder="e.g. Modern Cyberpunk HUD Pack" />
+                <input 
+                  type="text" 
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Modern Cyberpunk HUD Pack" 
+                />
               </label>
               <label>
                 Description
-                <textarea rows={4} placeholder="Describe the features, layout, and contents of your pack..." />
+                <textarea 
+                  rows={4} 
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the features, layout, and contents of your pack..." 
+                />
               </label>
               <label>
                 Tags
-                <input type="text" placeholder="Separated by commas (e.g. rpg, sci-fi, 4k, vector)" />
+                <input 
+                  type="text" 
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleInputChange}
+                  placeholder="Separated by commas (e.g. rpg, sci-fi, 4k, vector)" 
+                />
               </label>
             </div>
           </section>
 
           <section className="surface-card adminx-upload-section">
             <h3><span>3</span> Technical Spec</h3>
-            <div className="adminx-checkbox-grid">
-              <label><input type="checkbox" /> RPG</label>
-              <label><input type="checkbox" /> Sci-Fi</label>
-              <label><input type="checkbox" defaultChecked /> Unity</label>
-              <label><input type="checkbox" defaultChecked /> Unreal Engine</label>
-              <label><input type="checkbox" defaultChecked /> Fantasy</label>
-              <label><input type="checkbox" /> Mobile / Casual</label>
-              <label><input type="checkbox" /> Godot</label>
-              <label><input type="checkbox" /> Figma / Source</label>
+            <div className="adminx-upload-form-grid">
+               <label>
+                Engine
+                <select name="engine" value={formData.engine} onChange={handleInputChange}>
+                  <option value="Unity">Unity</option>
+                  <option value="Unreal">Unreal</option>
+                  <option value="Godot">Godot</option>
+                </select>
+              </label>
+              <label>
+                Category
+                <select name="category" value={formData.category} onChange={handleInputChange}>
+                  <option value="Fantasy">Fantasy</option>
+                  <option value="Sci-Fi">Sci-Fi</option>
+                  <option value="RPG">RPG</option>
+                  <option value="Casual">Casual</option>
+                </select>
+              </label>
             </div>
           </section>
 
@@ -93,24 +178,42 @@ export default function UploadAssetPage({ variant = 'create' }) {
             <div className="adminx-upload-form-grid adminx-upload-form-grid--two-col">
               <label>
                 Price (USD)
-                <input type="text" placeholder="$ 29.99" />
+                <input 
+                  type="number" 
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="29.99" 
+                />
               </label>
               <label>
                 License Type
-                <select defaultValue="standard">
+                <select name="licenseType" value={formData.licenseType} onChange={handleInputChange}>
                   <option value="standard">Standard Commercial</option>
                   <option value="extended">Extended Commercial</option>
                 </select>
               </label>
               <label className="adminx-upload-check-row">
-                <input type="checkbox" /> Make this asset available for free
+                <input 
+                  type="checkbox" 
+                  name="isFree"
+                  checked={formData.isFree}
+                  onChange={handleInputChange}
+                /> Make this asset available for free
               </label>
             </div>
           </section>
 
           <div className="adminx-upload-actions">
             <button type="button" className="library-btn-muted">Save Draft</button>
-            <button type="button" className="btn-solid">{content.action}</button>
+            <button 
+              type="button" 
+              className="btn-solid" 
+              onClick={handlePublish}
+              disabled={loading}
+            >
+              {loading ? 'Uploading...' : content.action}
+            </button>
           </div>
         </section>
       </section>

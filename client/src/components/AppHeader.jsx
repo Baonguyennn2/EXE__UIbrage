@@ -1,37 +1,60 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function BrandTile() {
   return (
-    <span className="market-brand-tile" aria-hidden="true">
-      <div />
-      <div />
-      <div />
-      <div />
-    </span>
+    <div className="brand-logo">
+      <div className="logo-icon">
+        <div className="icon-grid">
+          <div /><div />
+          <div /><div />
+        </div>
+      </div>
+      <strong>UIbrage</strong>
+    </div>
   )
 }
 
-export default function AppHeader() {
+export default function AppHeader({ onSearch }) {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onSearch && onSearch(searchTerm)
+    }
+  }
+
   return (
-    <header className="market-nav">
-      <Link to="/marketplace" className="market-nav__brand market-nav__brand-link">
-        <BrandTile />
-        <strong>UIbrage</strong>
-      </Link>
+    <header className="site-header">
+      <div className="header-inner">
+        <Link to="/marketplace" className="logo-link">
+          <BrandTile />
+        </Link>
 
-      <nav className="market-nav__links" aria-label="Primary">
-        <Link to="/marketplace">Marketplace</Link>
-        <Link to="/library">My Library</Link>
-        <Link to="/community">Community</Link>
-      </nav>
+        <nav className="header-nav">
+          <Link to="/marketplace">Browse Assets</Link>
+          <Link to="/marketplace">Categories</Link>
+          <Link to="/admin/upload-asset">Upload Asset</Link>
+          <Link to="/community">Community</Link>
+        </nav>
 
-      <div className="market-nav__actions">
-        <label className="market-search" aria-label="Search game assets">
-          <span>⌕</span>
-          <input type="search" placeholder="Search game assets..." />
-        </label>
-        <Link to="/auth/login" className="market-link-button">Login</Link>
-        <Link to="/auth/register" className="market-primary-button">Register</Link>
+        <div className="header-search">
+          <div className="search-input-wrapper">
+            <span className="search-icon">⌕</span>
+            <input 
+              type="text" 
+              placeholder="Search game assets..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+        </div>
+
+        <div className="header-auth">
+          <Link to="/auth/login" className="login-link">Login</Link>
+          <Link to="/auth/register" className="register-button">Register</Link>
+        </div>
       </div>
     </header>
   )

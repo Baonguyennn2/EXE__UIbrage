@@ -27,7 +27,7 @@ export default function AppRoutes() {
 
       <Route path="/marketplace" element={<HomepagePage variant="v1" />} />
       <Route path="/marketplace/discover" element={<HomepagePage variant="v2" />} />
-      <Route path="/marketplace/assets/ultimate-fantasy-ui-pack" element={<DetailPage />} />
+      <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       <Route path="/marketplace/checkout" element={<CheckoutPage />} />
       <Route path="/marketplace/order-success" element={<OrderConfirmPage />} />
 
