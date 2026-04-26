@@ -35,14 +35,25 @@ export default function AppRoutes() {
       <Route path="/auth/login/success" element={<LoginPage variant="v2" />} />
       <Route path="/auth/register" element={<RegisterPage />} />
 
-      <Route path="/dashboard" element={<Navigate to="/dashboard/overview" replace />} />
-      <Route path="/dashboard/overview" element={<AdminDashboardPage variant="overview" />} />
-      <Route path="/dashboard/sales" element={<AdminDashboardPage variant="sales" />} />
-      <Route path="/dashboard/users" element={<AdminDashboardPage variant="users" />} />
-      <Route path="/dashboard/moderation" element={<AdminDashboardPage variant="moderation" />} />
-      <Route path="/dashboard/reports" element={<AdminDashboardPage variant="reports" />} />
-      <Route path="/dashboard/assets/upload" element={<UploadAssetPage variant="create" />} />
-      <Route path="/dashboard/assets/upload/review" element={<UploadAssetPage variant="review" />} />
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage variant="overview" />} />
+      <Route path="/admin/sales" element={<AdminDashboardPage variant="sales" />} />
+      <Route path="/admin/creators" element={<AdminDashboardPage variant="users" />} />
+      <Route path="/admin/asset-approval" element={<AdminDashboardPage variant="moderation" />} />
+      <Route path="/admin/reports" element={<AdminDashboardPage variant="reports" />} />
+      <Route path="/admin/my-assets" element={<MyLibraryPage />} />
+      <Route path="/admin/upload-asset" element={<UploadAssetPage variant="create" />} />
+      <Route path="/admin/upload-asset/review" element={<UploadAssetPage variant="review" />} />
+
+      <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/dashboard/overview" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/dashboard/sales" element={<Navigate to="/admin/sales" replace />} />
+      <Route path="/dashboard/users" element={<Navigate to="/admin/creators" replace />} />
+      <Route path="/dashboard/moderation" element={<Navigate to="/admin/asset-approval" replace />} />
+      <Route path="/dashboard/reports" element={<Navigate to="/admin/reports" replace />} />
+      <Route path="/dashboard/assets" element={<Navigate to="/admin/my-assets" replace />} />
+      <Route path="/dashboard/assets/upload" element={<Navigate to="/admin/upload-asset" replace />} />
+      <Route path="/dashboard/assets/upload/review" element={<Navigate to="/admin/upload-asset/review" replace />} />
 
       <Route path="/library" element={<MyLibraryPage />} />
       <Route path="/community" element={<CommunityPage />} />

@@ -23,8 +23,6 @@ export default function AppHeader() {
         <Link to="/marketplace">Marketplace</Link>
         <Link to="/library">My Library</Link>
         <Link to="/community">Community</Link>
-        <Link to="/dashboard/overview">Dashboard</Link>
-        <Link to="/dashboard/assets/upload">Upload Asset</Link>
       </nav>
 
       <div className="market-nav__actions">

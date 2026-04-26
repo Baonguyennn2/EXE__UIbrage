@@ -245,7 +245,7 @@ export default function HomepagePage({ variant = 'v1' }) {
               <div>
                 <h4>Help</h4>
                 <Link to="/routes">Contact Support</Link>
-                <Link to="/dashboard/assets/upload">Sell your assets</Link>
+                <Link to="/community">Sell your assets</Link>
                 <Link to="/routes">Privacy Policy</Link>
                 <Link to="/routes">Terms of Service</Link>
               </div>

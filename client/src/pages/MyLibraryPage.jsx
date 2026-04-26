@@ -1,78 +1,102 @@
-import AppHeader from '../components/AppHeader.jsx'
+import { Link } from 'react-router-dom'
 
-const myUploads = [
-  { title: 'Ultimate Fantasy RPG UI', author: 'MythicStudios', tag: 'UI Kit' },
-  { title: 'Neon Sci-Fi HUD Pack', author: 'CyberTech', tag: 'HUD' },
-  { title: 'Retro Pixel Art Menu', author: '8BitMaster', tag: 'Menu' },
-  { title: 'Mobile Casual Game UI', author: 'SoftPixels', tag: 'UI Kit' },
-]
-
-const purchases = [
-  { title: 'CyberNeon HUD Pack', author: 'FutureVisions', price: '$29.99', date: 'OCT 24, 2026' },
-  { title: 'Ancient RPG Inventory Pro', author: 'MythicForge', price: '$45.00', date: 'OCT 12, 2025' },
-  { title: 'Retro 8-Bit UI Essentials', author: 'PixelPerfect', price: '$15.00', date: 'AUG 14, 2024' },
+const myAssets = [
+  { title: 'Epic Fantasy Pack V2', category: 'RPG, Fantasy', status: 'Published', price: '$24.00', downloads: '1,240' },
+  { title: 'Cyber HUD Assets', category: 'Sci-Fi, Tech', status: 'Reviewing', price: '$29.00', downloads: '0' },
+  { title: 'Pixel Art Essentials', category: 'Pixel Art, Retro', status: 'Draft', price: '$15.00', downloads: '0' },
+  { title: 'Survival UI Kit', category: 'Survival, Realistic', status: 'Published', price: '$19.99', downloads: '542' },
 ]
 
 export default function MyLibraryPage() {
   return (
-    <main className="market-home">
-      <AppHeader />
+    <main className="admin-shell">
+      <header className="admin-topbar">
+        <div className="admin-brand">
+          <span className="admin-brand__tile" />
+          <strong>UIbrage</strong>
+        </div>
+        <div className="admin-user">
+          <span>🔔</span>
+          <div>
+            <strong>Alex Rivera</strong>
+            <small>Admin</small>
+          </div>
+        </div>
+      </header>
 
-      <section className="library-layout">
-        <aside className="library-sidebar">
-          <button type="button" className="library-sidebar__item library-sidebar__item--active">
-            My Library
-          </button>
-          <button type="button" className="library-sidebar__item">Recommended Assets</button>
-          <button type="button" className="library-sidebar__item">On Sale</button>
+      <section className="admin-layout">
+        <aside className="admin-sidebar">
+          <h4>Main Menu</h4>
+          <Link to="/admin/dashboard">Dashboard</Link>
+          <Link to="/admin/my-assets" className="active">My Assets</Link>
+          <Link to="/admin/upload-asset">Upload Asset</Link>
+          <Link to="/admin/creators">Creators</Link>
+          <Link to="/admin/asset-approval">Asset Approval</Link>
+          <Link to="/community">Messages</Link>
+          <div className="admin-sidebar__bottom">
+            <button type="button">Settings</button>
+            <button type="button" className="danger">Logout</button>
+          </div>
         </aside>
 
-        <section className="library-content">
-          <header className="library-head">
-            <h1>My Library</h1>
-            <p>Filter by: Recent</p>
+        <section className="admin-content admin-library-content">
+          <header className="adminx-header">
+            <h1>My Assets</h1>
+            <Link to="/admin/upload-asset" className="btn-solid">+ Upload New Asset</Link>
           </header>
 
-          <section className="library-block">
-            <h2>My Uploads</h2>
-            <div className="library-grid library-grid--uploads">
-              {myUploads.map((item, index) => (
-                <article key={item.title} className="library-card">
-                  <div className={`library-card__thumb library-card__thumb--${index}`}>
-                    <span>{item.tag}</span>
-                  </div>
-                  <div className="library-card__body">
-                    <h3>{item.title}</h3>
-                    <p>by {item.author}</p>
-                    <button type="button" className="btn-solid">Edit</button>
-                    <button type="button" className="library-btn-muted">Restore</button>
-                  </div>
-                </article>
-              ))}
-            </div>
+          <section className="adminx-chip-row">
+            <span className="active">All Categories</span>
+            <span>RPG</span>
+            <span>Sci-Fi</span>
+            <span>Pixel Art</span>
+            <span>Fantasy</span>
           </section>
 
-          <section className="library-block">
-            <h2>My Purchases</h2>
-            <div className="library-grid library-grid--purchases">
-              {purchases.map((item, index) => (
-                <article key={item.title} className="library-purchase">
-                  <div className={`library-purchase__thumb library-purchase__thumb--${index}`} />
-                  <div className="library-purchase__body">
-                    <h3>{item.title}</h3>
-                    <p>by {item.author}</p>
-                    <div className="library-purchase__meta">
-                      <strong>{item.price}</strong>
-                      <span>{item.date}</span>
-                    </div>
-                    <div className="library-purchase__actions">
-                      <button type="button" className="btn-solid">Download</button>
-                      <button type="button" className="library-btn-muted">View Asset</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+          <section className="surface-card adminx-my-assets">
+            <header>
+              <span>Asset Preview</span>
+              <span>Title & Category</span>
+              <span>Status</span>
+              <span>Price</span>
+              <span>Downloads</span>
+              <span>Actions</span>
+            </header>
+            {myAssets.map((asset, index) => (
+              <div key={asset.title} className="adminx-my-assets__row">
+                <div className={`adminx-thumb adminx-thumb--${index}`} />
+                <div>
+                  <strong>{asset.title}</strong>
+                  <small>{asset.category}</small>
+                </div>
+                <span className={`state state--${asset.status.toLowerCase()}`}>{asset.status}</span>
+                <span>{asset.price}</span>
+                <span>{asset.downloads}</span>
+                <span className="admin-table__actions">Edit View Delete</span>
+              </div>
+            ))}
+            <footer>
+              <small>Showing 4 of 12 assets</small>
+              <div>
+                <button type="button" className="library-btn-muted">Previous</button>
+                <button type="button" className="library-btn-muted">Next</button>
+              </div>
+            </footer>
+          </section>
+
+          <section className="adminx-summary-cards">
+            <article className="surface-card">
+              <p>Monthly Revenue</p>
+              <strong>$2,450.00</strong>
+            </article>
+            <article className="surface-card">
+              <p>Total Downloads</p>
+              <strong>18.2k</strong>
+            </article>
+            <article className="surface-card">
+              <p>Avg. Rating</p>
+              <strong>4.8</strong>
+            </article>
           </section>
         </section>
       </section>
