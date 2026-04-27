@@ -1,9 +1,81 @@
+const axios = require('axios');
 const AWS = require('aws-sdk');
+const jwt = require('jsonwebtoken');
 const { User } = require('../models/mysql');
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.COGNITO_REGION
 });
+
+exports.googleLogin = async (req, res) => {
+  // Strip protocol if it was accidentally included in .env
+  let domain = process.env.COGNITO_DOMAIN || '';
+  domain = domain.replace('https://', '').replace('http://', '');
+  
+  const clientId = process.env.COGNITO_CLIENT_ID;
+  const redirectUri = process.env.COGNITO_REDIRECT_URI;
+
+  if (!domain || !clientId || !redirectUri) {
+    return res.status(500).json({ 
+      error: 'Cognito configuration missing in .env (COGNITO_DOMAIN, COGNITO_CLIENT_ID, or COGNITO_REDIRECT_URI)' 
+    });
+  }
+  
+  const authUrl = `https://${domain}/oauth2/authorize?identity_provider=Google&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&client_id=${clientId}&scope=email%20openid%20profile`;
+  
+  res.redirect(authUrl);
+};
+
+exports.googleCallback = async (req, res) => {
+  const { code } = req.query;
+  const domain = process.env.COGNITO_DOMAIN;
+  const clientId = process.env.COGNITO_CLIENT_ID;
+  const redirectUri = process.env.COGNITO_REDIRECT_URI;
+  const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+
+  if (!code) {
+    return res.redirect(`${clientOrigin}/auth/login?error=no_code`);
+  }
+
+  try {
+    // 1. Exchange the authorization code for Cognito Tokens
+    const tokenResponse = await axios.post(`https://${domain}/oauth2/token`, 
+      new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        code: code,
+        redirect_uri: redirectUri
+      }), 
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    const { id_token, access_token } = tokenResponse.data;
+
+    // 2. Decode ID Token to get User Info
+    const decoded = jwt.decode(id_token);
+    const { email, name, sub, "preferred_username": username } = decoded;
+
+    // 3. Sync with local MySQL database
+    // We use findOrCreate or similar to ensure the user exists
+    const [user] = await User.findOrCreate({
+      where: { email },
+      defaults: {
+        id: sub,
+        email,
+        fullName: name || email.split('@')[0],
+        username: username || email.split('@')[0],
+        role: 'customer'
+      }
+    });
+
+    // 4. Redirect to frontend with token and user info
+    // We stringify the user to pass it easily, or the frontend can fetch it later
+    res.redirect(`${clientOrigin}/auth/login/success?token=${id_token}&user=${encodeURIComponent(JSON.stringify(user))}`);
+  } catch (error) {
+    console.error('Google Callback Error:', error.response?.data || error.message);
+    res.redirect(`${clientOrigin}/auth/login?error=google_auth_failed`);
+  }
+};
 
 exports.register = async (req, res) => {
   const { email, password, fullName, username } = req.body;
@@ -20,23 +92,74 @@ exports.register = async (req, res) => {
       ]
     };
 
-    const cognitoUser = await cognito.signUp(params).promise();
-
-    // Create user in MySQL as well
-    const newUser = await User.create({
-      id: cognitoUser.UserSub,
-      email,
-      username: username || email.split('@')[0],
-      fullName,
-      role: 'customer'
-    });
+    // Only sign up in Cognito. DO NOT save to MySQL yet.
+    await cognito.signUp(params).promise();
 
     res.status(201).json({
-      message: 'User registered successfully. Please check your email for verification.',
-      user: newUser
+      message: 'User registered successfully. Please check your email for verification.'
     });
   } catch (error) {
     console.error('Registration Error:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.confirmSignUp = async (req, res) => {
+  const { email, code } = req.body;
+  try {
+    const params = {
+      ClientId: process.env.COGNITO_CLIENT_ID,
+      ConfirmationCode: code,
+      Username: email
+    };
+    await cognito.confirmSignUp(params).promise();
+
+    // After successful confirmation, we need to get user attributes from Cognito 
+    // to save them into our local MySQL DB.
+    const adminParams = {
+      UserPoolId: process.env.COGNITO_USER_POOL_ID,
+      Username: email
+    };
+    const cognitoUser = await cognito.adminGetUser(adminParams).promise();
+    
+    const attributes = {};
+    cognitoUser.UserAttributes.forEach(attr => {
+      attributes[attr.Name] = attr.Value;
+    });
+
+    // Save to MySQL now that they are verified
+    // Note: Cognito attributes usually come back as 'sub', 'email', 'name', etc.
+    const sub = cognitoUser.UserAttributes.find(a => a.Name === 'sub')?.Value;
+
+    const newUser = await User.create({
+      id: sub || email, 
+      email: attributes.email,
+      username: attributes.preferred_username || email.split('@')[0],
+      fullName: attributes.name || attributes.given_name || email.split('@')[0],
+      role: 'customer'
+    });
+
+    res.json({ 
+      message: 'Email verified and account created successfully.',
+      user: newUser 
+    });
+  } catch (error) {
+    console.error('Verification Error:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.resendConfirmationCode = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const params = {
+      ClientId: process.env.COGNITO_CLIENT_ID,
+      Username: email
+    };
+    await cognito.resendConfirmationCode(params).promise();
+    res.json({ message: 'A new verification code has been sent to your email.' });
+  } catch (error) {
+    console.error('Resend Code Error:', error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -69,3 +192,36 @@ exports.login = async (req, res) => {
     res.status(401).json({ error: 'Invalid email or password' });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const params = {
+      ClientId: process.env.COGNITO_CLIENT_ID,
+      Username: email
+    };
+    await cognito.forgotPassword(params).promise();
+    res.json({ message: 'Password reset code sent to your email.' });
+  } catch (error) {
+    console.error('Forgot Password Error:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.confirmForgotPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  try {
+    const params = {
+      ClientId: process.env.COGNITO_CLIENT_ID,
+      ConfirmationCode: code,
+      Password: newPassword,
+      Username: email
+    };
+    await cognito.confirmForgotPassword(params).promise();
+    res.json({ message: 'Password reset successful. You can now login with your new password.' });
+  } catch (error) {
+    console.error('Reset Password Error:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+

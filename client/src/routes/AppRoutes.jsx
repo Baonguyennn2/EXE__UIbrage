@@ -11,6 +11,9 @@ import UploadAssetPage from '../pages/UploadAssetPage.jsx'
 import MyLibraryPage from '../pages/MyLibraryPage.jsx'
 import CommunityPage from '../pages/CommunityPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
+import VerifyEmailPage from '../pages/VerifyEmailPage.jsx'
+import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx'
+import ResetPasswordPage from '../pages/ResetPasswordPage.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
 function LegacyFrameRoute() {
@@ -34,6 +37,9 @@ export default function AppRoutes() {
       <Route path="/auth/login" element={<LoginPage variant="v1" />} />
       <Route path="/auth/login/success" element={<LoginPage variant="v2" />} />
       <Route path="/auth/register" element={<RegisterPage />} />
+      <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
       <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/dashboard" element={<AdminDashboardPage variant="overview" />} />

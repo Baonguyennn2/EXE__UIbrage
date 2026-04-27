@@ -1,39 +1,41 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { authService } from '../services/api'
-
-function AppGlyph() {
-  return (
-    <span className="login-card__glyph" aria-hidden="true">
-      <i /><i /><i /><i />
-    </span>
-  )
-}
-
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 20 20" role="presentation" aria-hidden="true">
-      <path d="M3.5 5.5h13a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z" />
-      <path d="m4 7 6 4 6-4" />
-    </svg>
-  )
-}
-
-function LockIcon() {
-  return (
-    <svg viewBox="0 0 20 20" role="presentation" aria-hidden="true">
-      <path d="M6.5 9V7.8a3.5 3.5 0 1 1 7 0V9" />
-      <rect x="5" y="9" width="10" height="7" rx="1.2" />
-    </svg>
-  )
-}
+import Toast from '../components/Toast.jsx'
+import { FaFacebookF } from 'react-icons/fa'
+import { FcGoogle } from 'react-icons/fc'
+import { MdOutlineEmail } from 'react-icons/md'
+import { RiLock2Line } from 'react-icons/ri'
 
 export default function LoginPage({ variant = 'v1' }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [notification, setNotification] = useState(null)
   const navigate = useNavigate()
-  const showToast = variant === 'v2'
+  const location = useLocation()
+  const isCompact = variant === 'v2'
+
+  useEffect(() => {
+    // Check if there is a token in the URL (from Google Login callback)
+    const params = new URLSearchParams(location.search)
+    const token = params.get('token')
+    const userData = params.get('user')
+    
+    if (token) {
+      localStorage.setItem('token', token)
+      if (userData) {
+        localStorage.setItem('user', decodeURIComponent(userData))
+      }
+      setNotification({ type: 'success', message: 'Logged in with Google!' })
+      setTimeout(() => navigate('/marketplace'), 1500)
+    }
+
+    const error = params.get('error')
+    if (error) {
+      setNotification({ type: 'error', message: 'Google authentication failed.' })
+    }
+  }, [location, navigate])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -45,98 +47,116 @@ export default function LoginPage({ variant = 'v1' }) {
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
       
-      alert('Logged in successfully!')
-      navigate('/marketplace')
+      setNotification({ type: 'success', message: 'Logged in successfully!' })
+      setTimeout(() => navigate('/marketplace'), 1500)
     } catch (error) {
       console.error('Login Error:', error)
-      alert(error.response?.data?.error || 'Login failed. Please check your credentials.')
+      setNotification({ type: 'error', message: error.response?.data?.error || 'Login failed.' })
     } finally {
       setLoading(false)
     }
   }
 
+  const handleGoogleLogin = () => {
+    setNotification({ type: 'info', message: 'Redirecting to Google...' })
+    // Placeholder for Google OAuth redirect
+    window.location.href = 'http://localhost:5000/api/auth/google'
+  }
+
+  const handleFacebookLogin = () => {
+    setNotification({ type: 'info', message: 'Facebook login is coming soon.' })
+  }
+
   return (
-    <main className="login-page">
-      {showToast ? (
-        <aside className="login-toast" aria-live="polite">
-          <strong>Success</strong>
-          <span>Account created successfully</span>
-        </aside>
-      ) : null}
-
-      <section className="login-page__brand">
-        <span className="login-page__brand-icon">
-          <AppGlyph />
-        </span>
-        <strong>UIbrage</strong>
-      </section>
-
-      <section className="login-card" aria-labelledby="login-title">
-        <header className="login-card__header">
-          <h1 id="login-title">Log in to your UIbrage account</h1>
-          <p>Welcome back! Please enter your details.</p>
+    <main className="auth-figma">
+      <div className="auth-figma__canvas">
+        <header className="auth-figma__brand">
+          <div className="auth-figma__brand-tile">▦</div>
+          <strong>UIbrage</strong>
         </header>
 
-        <form className="login-card__form" onSubmit={handleSubmit}>
-          <label className="login-card__field">
-            <span>Username or Email</span>
-            <div className="login-card__input">
-              <MailIcon />
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </div>
-          </label>
+        {notification && (
+          <div className="toast-container">
+            <Toast
+              type={notification.type}
+              message={notification.message}
+              onClose={() => setNotification(null)}
+            />
+          </div>
+        )}
 
-          <label className="login-card__field">
-            <div className="login-card__field-head">
-              <span>Password</span>
-              <a href="#forgot-password">Forgot password?</a>
-            </div>
-            <div className="login-card__input">
-              <LockIcon />
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
-          </label>
+        <section className="auth-figma__card">
+          <header>
+            <h1>Log in to your UIbrage account</h1>
+            <p>Welcome back! Please enter your details.</p>
+          </header>
 
-          <button type="submit" className="login-card__submit">
-            Log in
-          </button>
-        </form>
+          <form className="auth-figma__form" onSubmit={handleSubmit}>
+            <label>
+              Username or Email
+              <div className="auth-figma__input-wrap">
+                <span><MdOutlineEmail /></span>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </label>
 
-        <div className="login-card__divider">
-          <span>Or log in with another service</span>
-        </div>
+            <label>
+              <div className="auth-figma__label-row">
+                <span>Password</span>
+                <Link to="/auth/forgot-password">Forgot password?</Link>
+              </div>
+              <div className="auth-figma__input-wrap">
+                <span><RiLock2Line /></span>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </label>
 
-        <div className="login-card__socials">
-          <button type="button">ⓕ Facebook</button>
-          <button type="button">Ⓖ Google</button>
-        </div>
+            <button type="submit" className="auth-figma__submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Log in'}
+            </button>
+          </form>
 
-        <p className="login-card__signup">
-          Don&apos;t have an account? <Link to="/auth/register">Create account</Link>
-        </p>
-      </section>
+          <div className="auth-figma__divider">
+            <span>Or log in with another service</span>
+          </div>
 
-      <footer className="login-page__footer">
-        <Link to="/marketplace">Marketplace</Link>
-        <Link to="/community">Community</Link>
-        <Link to="/library">My Library</Link>
-        <Link to="/routes">All routes</Link>
-        <a href="#terms">Terms of Service</a>
-      </footer>
+          <div className="auth-figma__socials">
+            <button type="button" className="auth-figma__social-btn" onClick={handleFacebookLogin}>
+              <FaFacebookF color="#1877F2" />
+              Facebook
+            </button>
+            <button type="button" className="auth-figma__social-btn" onClick={handleGoogleLogin}>
+              <FcGoogle />
+              Google
+            </button>
+          </div>
+
+          <footer className="auth-figma__footer">
+            Don&apos;t have an account? <Link to="/auth/register">Create account</Link>
+          </footer>
+        </section>
+
+        <nav className="auth-figma__meta-links">
+          <a href="#">About</a>
+          <a href="#">FAQ</a>
+          <a href="#">Blog</a>
+          <a href="#">Contact</a>
+          <a href="#">Terms of Service</a>
+        </nav>
+      </div>
     </main>
   )
 }
+
