@@ -56,7 +56,9 @@ exports.googleCallback = async (req, res) => {
     const { email, name, sub, "preferred_username": username } = decoded;
 
     // 3. Sync with local MySQL database
-    // We use findOrCreate or similar to ensure the user exists
+    const groups = decoded['cognito:groups'] || [];
+    const role = groups.includes('admin') ? 'admin' : 'customer';
+
     const [user] = await User.findOrCreate({
       where: { email },
       defaults: {
@@ -64,9 +66,15 @@ exports.googleCallback = async (req, res) => {
         email,
         fullName: name || email.split('@')[0],
         username: username || email.split('@')[0],
-        role: 'customer'
+        role: role
       }
     });
+
+    // Update role if user already exists but role changed
+    if (user.role !== role) {
+      user.role = role;
+      await user.save();
+    }
 
     // 4. Redirect to frontend with token and user info
     // We stringify the user to pass it easily, or the frontend can fetch it later
@@ -178,18 +186,31 @@ exports.login = async (req, res) => {
     };
 
     const response = await cognito.initiateAuth(params).promise();
+    const idToken = response.AuthenticationResult.IdToken;
+    const decoded = jwt.decode(idToken);
     
-    // Fetch user details from MySQL
-    const user = await User.findOne({ where: { email } });
+    // Determine role from Cognito Groups
+    const groups = decoded['cognito:groups'] || [];
+    const role = groups.includes('admin') ? 'admin' : 'customer';
+
+    // Fetch user from MySQL and update role if it changed
+    let user = await User.findOne({ where: { email } });
+    if (user && user.role !== role) {
+      user.role = role;
+      await user.save();
+    }
 
     res.json({
-      token: response.AuthenticationResult.IdToken,
+      token: idToken,
       refreshToken: response.AuthenticationResult.RefreshToken,
       user
     });
   } catch (error) {
-    console.error('Login Error:', error);
-    res.status(401).json({ error: 'Invalid email or password' });
+    console.error('Login Error Detailed:', error);
+    res.status(401).json({ 
+      error: error.message || 'Authentication failed',
+      code: error.code 
+    });
   }
 };
 

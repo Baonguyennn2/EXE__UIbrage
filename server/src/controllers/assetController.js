@@ -50,7 +50,49 @@ const getAssetById = async (req, res) => {
   }
 };
 
+const createAsset = async (req, res) => {
+  try {
+    const { title, description, price, category, engine, licenseType, isFree, tags } = req.body;
+    const files = req.files;
+
+    if (!files || !files.coverImage || !files.assetFile) {
+      return res.status(400).json({ error: 'Missing required files (Cover Image and Asset ZIP)' });
+    }
+
+    const newAsset = await Asset.create({
+      title,
+      description,
+      price: isFree === 'true' ? 0 : parseFloat(price),
+      category,
+      engine,
+      licenseType,
+      isFree: isFree === 'true',
+      tags,
+      coverImageUrl: files.coverImage[0].path,
+      fileUrl: files.assetFile[0].path,
+      authorId: req.user.id, // Set by auth middleware
+      status: 'pending' // Default status for review
+    });
+
+    // Handle screenshots
+    if (files.screenshots) {
+      const mediaEntries = files.screenshots.map(file => ({
+        assetId: newAsset.id,
+        url: file.path,
+        type: 'image'
+      }));
+      await AssetMedia.bulkCreate(mediaEntries);
+    }
+
+    res.status(201).json(newAsset);
+  } catch (error) {
+    console.error('Create Asset Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllAssets,
   getAssetById,
+  createAsset
 };

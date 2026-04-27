@@ -14,6 +14,8 @@ import NotFoundPage from '../pages/NotFoundPage.jsx'
 import VerifyEmailPage from '../pages/VerifyEmailPage.jsx'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '../pages/ResetPasswordPage.jsx'
+import ProfileEditPage from '../pages/ProfileEditPage.jsx'
+import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
 function LegacyFrameRoute() {
@@ -31,9 +33,25 @@ export default function AppRoutes() {
       <Route path="/marketplace" element={<HomepagePage variant="v1" />} />
       <Route path="/marketplace/discover" element={<HomepagePage variant="v2" />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
-      <Route path="/marketplace/checkout" element={<CheckoutPage />} />
-      <Route path="/marketplace/order-success" element={<OrderConfirmPage />} />
+      
+      {/* Customer Protected Routes */}
+      <Route path="/marketplace/checkout" element={
+        <ProtectedRoute><CheckoutPage /></ProtectedRoute>
+      } />
+      <Route path="/marketplace/order-success" element={
+        <ProtectedRoute><OrderConfirmPage /></ProtectedRoute>
+      } />
+      <Route path="/library" element={
+        <ProtectedRoute><MyLibraryPage /></ProtectedRoute>
+      } />
+      <Route path="/profile/edit" element={
+        <ProtectedRoute><ProfileEditPage /></ProtectedRoute>
+      } />
+      <Route path="/assets/upload" element={
+        <ProtectedRoute><UploadAssetPage variant="create" /></ProtectedRoute>
+      } />
 
+      {/* Auth Routes */}
       <Route path="/auth/login" element={<LoginPage variant="v1" />} />
       <Route path="/auth/login/success" element={<LoginPage variant="v2" />} />
       <Route path="/auth/register" element={<RegisterPage />} />
@@ -41,37 +59,37 @@ export default function AppRoutes() {
       <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
-      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/dashboard" element={<AdminDashboardPage variant="overview" />} />
-      <Route path="/admin/sales" element={<AdminDashboardPage variant="sales" />} />
-      <Route path="/admin/creators" element={<AdminDashboardPage variant="users" />} />
-      <Route path="/admin/asset-approval" element={<AdminDashboardPage variant="moderation" />} />
-      <Route path="/admin/reports" element={<AdminDashboardPage variant="reports" />} />
-      <Route path="/admin/my-assets" element={<MyLibraryPage />} />
-      <Route path="/admin/upload-asset" element={<UploadAssetPage variant="create" />} />
-      <Route path="/admin/upload-asset/review" element={<UploadAssetPage variant="review" />} />
+      {/* Admin Protected Routes */}
+      <Route path="/admin" element={
+        <ProtectedRoute allowedRoles={['admin']}><Navigate to="/admin/dashboard" replace /></ProtectedRoute>
+      } />
+      <Route path="/admin/dashboard" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="overview" /></ProtectedRoute>
+      } />
+      <Route path="/admin/sales" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="sales" /></ProtectedRoute>
+      } />
+      <Route path="/admin/creators" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="users" /></ProtectedRoute>
+      } />
+      <Route path="/admin/asset-approval" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="moderation" /></ProtectedRoute>
+      } />
+      <Route path="/admin/reports" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="reports" /></ProtectedRoute>
+      } />
+      <Route path="/admin/my-assets" element={
+        <ProtectedRoute allowedRoles={['admin']}><MyLibraryPage /></ProtectedRoute>
+      } />
+      <Route path="/admin/upload-asset" element={
+        <ProtectedRoute allowedRoles={['admin']}><UploadAssetPage variant="create" /></ProtectedRoute>
+      } />
 
-      <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/dashboard/overview" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/dashboard/sales" element={<Navigate to="/admin/sales" replace />} />
-      <Route path="/dashboard/users" element={<Navigate to="/admin/creators" replace />} />
-      <Route path="/dashboard/moderation" element={<Navigate to="/admin/asset-approval" replace />} />
-      <Route path="/dashboard/reports" element={<Navigate to="/admin/reports" replace />} />
-      <Route path="/dashboard/assets" element={<Navigate to="/admin/my-assets" replace />} />
-      <Route path="/dashboard/assets/upload" element={<Navigate to="/admin/upload-asset" replace />} />
-      <Route path="/dashboard/assets/upload/review" element={<Navigate to="/admin/upload-asset/review" replace />} />
-
-      <Route path="/library" element={<MyLibraryPage />} />
       <Route path="/community" element={<CommunityPage />} />
       <Route path="/routes" element={<RouteIndexPage />} />
 
       <Route path="/login" element={<Navigate to="/auth/login" replace />} />
       <Route path="/register" element={<Navigate to="/auth/register" replace />} />
-      <Route path="/checkout" element={<Navigate to="/marketplace/checkout" replace />} />
-
-      <Route path="/page-1" element={<Navigate to="/marketplace" replace />} />
-      <Route path="/page-1/:slug" element={<LegacyFrameRoute />} />
-
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

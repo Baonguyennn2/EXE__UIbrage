@@ -18,6 +18,9 @@ api.interceptors.request.use((config) => {
 export const assetService = {
   getAll: (params) => api.get('/assets', { params }),
   getById: (id) => api.get(`/assets/${id}`),
+  add: (data) => api.post('/assets', data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 export const commentService = {

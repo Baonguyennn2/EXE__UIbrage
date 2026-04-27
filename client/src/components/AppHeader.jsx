@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { RiUser3Line, RiLogoutBoxRLine, RiBookletLine, RiUploadCloud2Line } from 'react-icons/ri'
+import { 
+  RiUser3Line, 
+  RiLogoutBoxRLine, 
+  RiBookletLine, 
+  RiUploadCloud2Line, 
+  RiArrowDownSLine, 
+  RiSettings4Line,
+  RiLayout4Line
+} from 'react-icons/ri'
 
 function BrandTile() {
   return (
@@ -19,7 +27,21 @@ function BrandTile() {
 export default function AppHeader({ onSearch }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [user, setUser] = useState(null)
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const navigate = useNavigate()
+  
+  const categoryRef = useRef(null)
+  const userMenuRef = useRef(null)
+
+  const categories = [
+    { name: 'Fantasy', slug: 'fantasy' },
+    { name: 'Sci-Fi', slug: 'sci-fi' },
+    { name: 'Pixel Art', slug: 'pixel-art' },
+    { name: 'Minimalist', slug: 'minimalist' },
+    { name: 'RPG', slug: 'rpg' },
+    { name: 'Strategy', slug: 'strategy' }
+  ]
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -31,6 +53,19 @@ export default function AppHeader({ onSearch }) {
         console.error('Error parsing user', e)
       }
     }
+
+    // Handle clicking outside to close menus
+    const handleClickOutside = (event) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setShowCategoryMenu(false)
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleKeyDown = (e) => {
@@ -55,9 +90,33 @@ export default function AppHeader({ onSearch }) {
 
         <nav className="header-nav">
           <Link to="/marketplace">Browse Assets</Link>
-          <Link to="/marketplace">Categories</Link>
+          
+          <div 
+            className="dropdown-trigger"
+            ref={categoryRef}
+            onMouseEnter={() => setShowCategoryMenu(true)}
+            onMouseLeave={() => setShowCategoryMenu(false)}
+          >
+            <button className="nav-dropdown-btn">
+              Categories <RiArrowDownSLine />
+            </button>
+            {showCategoryMenu && (
+              <div className="header-dropdown header-dropdown--categories">
+                {categories.map(cat => (
+                  <Link key={cat.slug} to={`/marketplace?category=${cat.name}`} onClick={() => setShowCategoryMenu(false)}>
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Link to="/community">Community</Link>
-          {user && <Link to="/admin/upload-asset">Upload Asset</Link>}
+          {user && (
+            <Link to={user.role === 'admin' ? '/admin/upload-asset' : '/assets/upload'}>
+              Upload Asset
+            </Link>
+          )}
         </nav>
 
         <div className="header-search">
@@ -75,24 +134,44 @@ export default function AppHeader({ onSearch }) {
 
         <div className="header-auth">
           {user ? (
-            <div className="header-user-menu">
-              <Link to="/library" title="My Library" className="header-icon-link">
-                <RiBookletLine size={20} />
-              </Link>
-              {user.role === 'admin' && (
-                <Link to="/admin/dashboard" title="Admin Panel" className="header-icon-link">
-                  <RiUploadCloud2Line size={20} />
-                </Link>
-              )}
-              <div className="user-profile-summary">
+            <div 
+              className="header-user-wrapper" 
+              ref={userMenuRef}
+              onMouseEnter={() => setShowUserMenu(true)}
+              onMouseLeave={() => setShowUserMenu(false)}
+            >
+              <div className="user-profile-summary" onClick={() => setShowUserMenu(!showUserMenu)}>
                 <div className="avatar-circle">
                   {user.username?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <span className="user-name">{user.username}</span>
+                <RiArrowDownSLine size={16} color="#64748b" />
               </div>
-              <button onClick={handleLogout} className="logout-btn" title="Logout">
-                <RiLogoutBoxRLine size={20} />
-              </button>
+
+              {showUserMenu && (
+                <div className="header-dropdown header-dropdown--user">
+                  <div className="dropdown-header">
+                    <strong>{user.username}</strong>
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="dropdown-divider" />
+                  <Link to="/library" onClick={() => setShowUserMenu(false)}>
+                    <RiBookletLine /> My Library
+                  </Link>
+                  <Link to="/profile/edit" onClick={() => setShowUserMenu(false)}>
+                    <RiSettings4Line /> Edit Profile
+                  </Link>
+                  {user.role === 'admin' && (
+                    <Link to="/admin/dashboard" onClick={() => setShowUserMenu(false)}>
+                      <RiLayout4Line /> Admin Panel
+                    </Link>
+                  )}
+                  <div className="dropdown-divider" />
+                  <button onClick={handleLogout} className="dropdown-logout">
+                    <RiLogoutBoxRLine /> Logout
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <>
