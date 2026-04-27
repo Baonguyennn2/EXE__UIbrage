@@ -36,19 +36,19 @@ export default function AppRoutes() {
       
       {/* Customer Protected Routes */}
       <Route path="/marketplace/checkout" element={
-        <ProtectedRoute><CheckoutPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer']}><CheckoutPage /></ProtectedRoute>
       } />
       <Route path="/marketplace/order-success" element={
-        <ProtectedRoute><OrderConfirmPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer']}><OrderConfirmPage /></ProtectedRoute>
       } />
       <Route path="/library" element={
-        <ProtectedRoute><MyLibraryPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer']}><MyLibraryPage /></ProtectedRoute>
       } />
       <Route path="/profile/edit" element={
-        <ProtectedRoute><ProfileEditPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer']}><ProfileEditPage /></ProtectedRoute>
       } />
       <Route path="/assets/upload" element={
-        <ProtectedRoute><UploadAssetPage variant="create" /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer']}><UploadAssetPage variant="create" /></ProtectedRoute>
       } />
 
       {/* Auth Routes */}

@@ -25,10 +25,17 @@ export default function LoginPage({ variant = 'v1' }) {
     if (token) {
       localStorage.setItem('token', token)
       if (userData) {
-        localStorage.setItem('user', decodeURIComponent(userData))
+        const user = JSON.parse(decodeURIComponent(userData))
+        localStorage.setItem('user', JSON.stringify(user))
+        
+        setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
+        
+        const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
+        setTimeout(() => navigate(redirectPath), 1500)
+      } else {
+        setNotification({ type: 'success', message: 'Logged in!' })
+        setTimeout(() => navigate('/marketplace'), 1500)
       }
-      setNotification({ type: 'success', message: 'Logged in with Google!' })
-      setTimeout(() => navigate('/marketplace'), 1500)
     }
 
     const error = params.get('error')
@@ -47,8 +54,10 @@ export default function LoginPage({ variant = 'v1' }) {
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
       
-      setNotification({ type: 'success', message: 'Logged in successfully!' })
-      setTimeout(() => navigate('/marketplace'), 1500)
+      setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
+      
+      const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
+      setTimeout(() => navigate(redirectPath), 1500)
     } catch (error) {
       console.error('Login Error:', error)
       setNotification({ type: 'error', message: error.response?.data?.error || 'Login failed.' })
