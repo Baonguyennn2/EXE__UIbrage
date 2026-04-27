@@ -14,7 +14,6 @@ export default function LoginPage({ variant = 'v1' }) {
   const [notification, setNotification] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const isCompact = variant === 'v2'
 
   useEffect(() => {
     // Check if there is a token in the URL (from Google Login callback)
@@ -25,13 +24,17 @@ export default function LoginPage({ variant = 'v1' }) {
     if (token) {
       localStorage.setItem('token', token)
       if (userData) {
-        const user = JSON.parse(decodeURIComponent(userData))
-        localStorage.setItem('user', JSON.stringify(user))
-        
-        setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
-        
-        const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
-        setTimeout(() => navigate(redirectPath), 1500)
+        try {
+          const user = JSON.parse(decodeURIComponent(userData))
+          localStorage.setItem('user', JSON.stringify(user))
+          
+          setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
+          
+          const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
+          setTimeout(() => navigate(redirectPath), 1500)
+        } catch (e) {
+          console.error('Error parsing user data', e)
+        }
       } else {
         setNotification({ type: 'success', message: 'Logged in!' })
         setTimeout(() => navigate('/marketplace'), 1500)
@@ -68,7 +71,6 @@ export default function LoginPage({ variant = 'v1' }) {
 
   const handleGoogleLogin = () => {
     setNotification({ type: 'info', message: 'Redirecting to Google...' })
-    // Placeholder for Google OAuth redirect
     window.location.href = 'http://localhost:5000/api/auth/google'
   }
 
@@ -168,4 +170,3 @@ export default function LoginPage({ variant = 'v1' }) {
     </main>
   )
 }
-

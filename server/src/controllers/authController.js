@@ -1,7 +1,16 @@
 const axios = require('axios');
 const AWS = require('aws-sdk');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { User } = require('../models/mysql');
+
+function calculateSecretHash(username, clientId, clientSecret) {
+  if (!clientSecret) return undefined;
+  return crypto
+    .createHmac('SHA256', clientSecret)
+    .update(username + clientId)
+    .digest('base64');
+}
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.COGNITO_REGION
@@ -96,8 +105,10 @@ exports.register = async (req, res) => {
       UserAttributes: [
         { Name: 'email', Value: email },
         { Name: 'name', Value: fullName },
-        { Name: 'preferred_username', Value: username || email.split('@')[0] }
-      ]
+        { Name: 'preferred_username', Value: username || email.split('@')[0] },
+        { Name: 'picture', Value: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || email)}&background=random` }
+      ],
+      SecretHash: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
     };
 
     // Only sign up in Cognito. DO NOT save to MySQL yet.
@@ -118,7 +129,8 @@ exports.confirmSignUp = async (req, res) => {
     const params = {
       ClientId: process.env.COGNITO_CLIENT_ID,
       ConfirmationCode: code,
-      Username: email
+      Username: email,
+      SecretHash: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
     };
     await cognito.confirmSignUp(params).promise();
 
@@ -144,6 +156,7 @@ exports.confirmSignUp = async (req, res) => {
       email: attributes.email,
       username: attributes.preferred_username || email.split('@')[0],
       fullName: attributes.name || attributes.given_name || email.split('@')[0],
+      avatarUrl: attributes.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(attributes.name || email)}&background=random`,
       role: 'customer'
     });
 
@@ -162,7 +175,8 @@ exports.resendConfirmationCode = async (req, res) => {
   try {
     const params = {
       ClientId: process.env.COGNITO_CLIENT_ID,
-      Username: email
+      Username: email,
+      SecretHash: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
     };
     await cognito.resendConfirmationCode(params).promise();
     res.json({ message: 'A new verification code has been sent to your email.' });
@@ -181,7 +195,8 @@ exports.login = async (req, res) => {
       ClientId: process.env.COGNITO_CLIENT_ID,
       AuthParameters: {
         USERNAME: email,
-        PASSWORD: password
+        PASSWORD: password,
+        SECRET_HASH: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
       }
     };
 
@@ -219,7 +234,8 @@ exports.forgotPassword = async (req, res) => {
   try {
     const params = {
       ClientId: process.env.COGNITO_CLIENT_ID,
-      Username: email
+      Username: email,
+      SecretHash: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
     };
     await cognito.forgotPassword(params).promise();
     res.json({ message: 'Password reset code sent to your email.' });
@@ -236,7 +252,8 @@ exports.confirmForgotPassword = async (req, res) => {
       ClientId: process.env.COGNITO_CLIENT_ID,
       ConfirmationCode: code,
       Password: newPassword,
-      Username: email
+      Username: email,
+      SecretHash: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID, process.env.COGNITO_CLIENT_SECRET)
     };
     await cognito.confirmForgotPassword(params).promise();
     res.json({ message: 'Password reset successful. You can now login with your new password.' });
@@ -245,4 +262,3 @@ exports.confirmForgotPassword = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-

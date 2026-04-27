@@ -12,7 +12,7 @@ const startServer = async () => {
     console.log('MySQL connected successfully');
 
     // Sync MySQL models (In production, use migrations)
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log('MySQL models synchronized');
 
     // Connect to MongoDB
