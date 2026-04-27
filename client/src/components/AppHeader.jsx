@@ -9,6 +9,7 @@ import {
   RiSettings4Line,
   RiLayout4Line
 } from 'react-icons/ri'
+import { metadataService } from '../services/api'
 
 function BrandTile() {
   return (
@@ -29,19 +30,11 @@ export default function AppHeader({ onSearch }) {
   const [user, setUser] = useState(null)
   const [showCategoryMenu, setShowCategoryMenu] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [categories, setCategories] = useState([])
   const navigate = useNavigate()
   
   const categoryRef = useRef(null)
   const userMenuRef = useRef(null)
-
-  const categories = [
-    { name: 'Fantasy', slug: 'fantasy' },
-    { name: 'Sci-Fi', slug: 'sci-fi' },
-    { name: 'Pixel Art', slug: 'pixel-art' },
-    { name: 'Minimalist', slug: 'minimalist' },
-    { name: 'RPG', slug: 'rpg' },
-    { name: 'Strategy', slug: 'strategy' }
-  ]
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -53,6 +46,9 @@ export default function AppHeader({ onSearch }) {
         console.error('Error parsing user', e)
       }
     }
+
+    // Load categories
+    metadataService.getCategories().then(res => setCategories(res.data))
 
     // Handle clicking outside to close menus
     const handleClickOutside = (event) => {
@@ -103,7 +99,7 @@ export default function AppHeader({ onSearch }) {
             {showCategoryMenu && (
               <div className="header-dropdown header-dropdown--categories">
                 {categories.map(cat => (
-                  <Link key={cat.slug} to={`/marketplace?category=${cat.name}`} onClick={() => setShowCategoryMenu(false)}>
+                  <Link key={cat.id} to={`/marketplace?categoryId=${cat.id}`} onClick={() => setShowCategoryMenu(false)}>
                     {cat.name}
                   </Link>
                 ))}

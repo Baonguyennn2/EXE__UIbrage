@@ -1,12 +1,11 @@
-const { Asset, User, AssetMedia } = require('../models/mysql');
+const { Asset, User, AssetMedia, Category, Tag } = require('../models/mysql');
 const { Op } = require('sequelize');
 
 const getAllAssets = async (req, res) => {
   try {
-    const { category, engine, minPrice, maxPrice, search } = req.query;
+    const { categoryId, engine, minPrice, maxPrice, search, tagId } = req.query;
     const where = { status: 'published' };
 
-    if (category) where.category = category;
     if (engine) where.engine = engine;
     if (minPrice || maxPrice) {
       where.price = {};
@@ -17,11 +16,20 @@ const getAllAssets = async (req, res) => {
       where.title = { [Op.like]: `%${search}%` };
     }
 
+    const include = [
+      { model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] },
+      { model: Category, as: 'categoryData' },
+      { 
+        model: Tag, 
+        as: 'tags',
+        // If categoryId or tagId is provided, filter by it
+        ...( (categoryId || tagId) ? { where: { id: categoryId || tagId } } : {})
+      },
+    ];
+
     const assets = await Asset.findAll({
       where,
-      include: [
-        { model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] },
-      ],
+      include,
       order: [['createdAt', 'DESC']],
     });
 
@@ -37,6 +45,8 @@ const getAssetById = async (req, res) => {
       include: [
         { model: User, as: 'author', attributes: ['id', 'username', 'fullName', 'avatarUrl'] },
         { model: AssetMedia, as: 'media' },
+        { model: Category, as: 'categoryData' },
+        { model: Tag, as: 'tags' },
       ],
     });
 
@@ -52,7 +62,7 @@ const getAssetById = async (req, res) => {
 
 const createAsset = async (req, res) => {
   try {
-    const { title, description, price, category, engine, licenseType, isFree, tags } = req.body;
+    const { title, description, price, categoryId, engine, licenseType, isFree, tagIds } = req.body;
     const files = req.files;
 
     if (!files || !files.coverImage || !files.assetFile) {
@@ -63,16 +73,22 @@ const createAsset = async (req, res) => {
       title,
       description,
       price: isFree === 'true' ? 0 : parseFloat(price),
-      category,
+      categoryId: parseInt(categoryId),
       engine,
       licenseType,
       isFree: isFree === 'true',
-      tags,
       coverImageUrl: files.coverImage[0].path,
       fileUrl: files.assetFile[0].path,
-      authorId: req.user.id, // Set by auth middleware
-      status: 'pending' // Default status for review
+      authorId: req.user.id,
+      status: 'pending'
     });
+
+    // Handle tags (many-to-many)
+    if (tagIds) {
+      // tagIds might be a string if coming from FormData with one value, or an array
+      const tagsArray = Array.isArray(tagIds) ? tagIds : [tagIds];
+      await newAsset.setTags(tagsArray);
+    }
 
     // Handle screenshots
     if (files.screenshots) {

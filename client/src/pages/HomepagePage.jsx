@@ -1,35 +1,56 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
 import { assetService } from '../services/api'
 
-const heroPreviewUrl = 'https://res.cloudinary.com/dz0v7n8m0/image/upload/v1700000000/ui-pack-preview.png' // Placeholder for the fantasy UI pack
+const heroPreviewUrl = 'https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/Screenshot_2024-04-26_234907_v04hvx.png'
 
 export default function HomepagePage() {
+  const location = useLocation()
   const [featuredAssets, setFeaturedAssets] = useState([])
   const [latestAssets, setLatestAssets] = useState([])
-  const [trendingAssets, setTrendingAssets] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({ category: '', engine: '', search: '' })
+  
+  const [filters, setFilters] = useState({ 
+    category: new URLSearchParams(location.search).get('category') || '', 
+    engine: '', 
+    search: '', 
+    priceRange: '' 
+  })
 
-  const fetchAssets = async () => {
+  // Hardcoded categories as requested
+  const uiStyles = ['Fantasy', 'Sci-Fi', 'Pixel Art', 'Minimalist']
+  const gameGenres = ['RPG', 'Platformer', 'Strategy', 'Casual']
+  const engines = ['Unity', 'Unreal Engine', 'Godot']
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    setFilters(prev => ({
+      ...prev,
+      category: params.get('category') || '',
+    }))
+  }, [location.search])
+
+  const fetchData = async () => {
     setLoading(true)
     try {
-      const response = await assetService.getAll(filters)
-      const allAssets = response.data
+      const apiParams = { ...filters }
+      if (filters.priceRange === 'free') apiParams.maxPrice = 0
       
-      setFeaturedAssets(allAssets.filter(a => a.status === 'published').slice(0, 4))
-      setLatestAssets(allAssets.filter(a => a.status === 'published').slice(4, 8))
-      setTrendingAssets(allAssets.filter(a => a.status === 'published').slice(0, 2))
+      const assetsRes = await assetService.getAll(apiParams)
+      const allAssets = assetsRes.data
+      
+      setFeaturedAssets(allAssets.slice(0, 4))
+      setLatestAssets(allAssets.slice(0, 8))
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching assets:', error)
+      console.error('Error fetching data:', error)
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchAssets()
+    fetchData()
   }, [filters])
 
   const handleFilterChange = (key, value) => {
@@ -45,38 +66,57 @@ export default function HomepagePage() {
       <main className="main-layout">
         <aside className="sidebar-filters">
           <div className="filter-group">
-            <h3>FILTERS</h3>
-            <button className="pill-button">✨ Popular Tags</button>
+            <h3 className="filter-label">FILTERS</h3>
+            <button className="popular-tags-btn">
+              <span className="flame-icon">🔥</span> Popular Tags
+            </button>
           </div>
 
           <div className="filter-group">
-            <h3>UI STYLE</h3>
-            <button onClick={() => handleFilterChange('category', 'Fantasy')}>Fantasy</button>
-            <button onClick={() => handleFilterChange('category', 'Sci-Fi')}>Sci-Fi</button>
-            <button onClick={() => handleFilterChange('category', 'Pixel Art')}>Pixel Art</button>
-            <button onClick={() => handleFilterChange('category', 'Minimalist')}>Minimalist</button>
+            <h3 className="filter-label">UI STYLE</h3>
+            {uiStyles.map(style => (
+              <button 
+                key={style}
+                className={`filter-link ${filters.category === style ? 'active' : ''}`}
+                onClick={() => handleFilterChange('category', style)}
+              >
+                {style}
+              </button>
+            ))}
           </div>
 
           <div className="filter-group">
-            <h3>GAME GENRE</h3>
-            <button onClick={() => handleFilterChange('genre', 'RPG')}>RPG</button>
-            <button onClick={() => handleFilterChange('genre', 'Platformer')}>Platformer</button>
-            <button onClick={() => handleFilterChange('genre', 'Strategy')}>Strategy</button>
-            <button onClick={() => handleFilterChange('genre', 'Casual')}>Casual</button>
+            <h3 className="filter-label">GAME GENRE</h3>
+            {gameGenres.map(genre => (
+              <button 
+                key={genre}
+                className={`filter-link ${filters.category === genre ? 'active' : ''}`}
+                onClick={() => handleFilterChange('category', genre)}
+              >
+                {genre}
+              </button>
+            ))}
           </div>
 
           <div className="filter-group">
-            <h3>ENGINE</h3>
-            <button onClick={() => handleFilterChange('engine', 'Unity')}>Unity</button>
-            <button onClick={() => handleFilterChange('engine', 'Unreal Engine')}>Unreal Engine</button>
-            <button onClick={() => handleFilterChange('engine', 'Godot')}>Godot</button>
+            <h3 className="filter-label">ENGINE</h3>
+            <button className={`filter-link ${filters.engine === '' ? 'active' : ''}`} onClick={() => handleFilterChange('engine', '')}>All Engines</button>
+            {engines.map(engine => (
+              <button 
+                key={engine}
+                className={`filter-link ${filters.engine === engine ? 'active' : ''}`}
+                onClick={() => handleFilterChange('engine', engine)}
+              >
+                {engine}
+              </button>
+            ))}
           </div>
 
           <div className="filter-group">
-            <h3>PRICE</h3>
-            <button onClick={() => handleFilterChange('price', 'free')}>Free</button>
-            <button onClick={() => handleFilterChange('price', 'paid')}>Paid</button>
-            <button onClick={() => handleFilterChange('price', 'top-rated')}>Top Rated</button>
+            <h3 className="filter-label">PRICE</h3>
+            <button className={`filter-link ${filters.priceRange === 'free' ? 'active' : ''}`} onClick={() => handleFilterChange('priceRange', 'free')}>Free</button>
+            <button className={`filter-link ${filters.priceRange === 'paid' ? 'active' : ''}`} onClick={() => handleFilterChange('priceRange', 'paid')}>Paid</button>
+            <button className="filter-link">Top Rated</button>
           </div>
         </aside>
 
@@ -96,7 +136,7 @@ export default function HomepagePage() {
               </div>
             </div>
             <div className="hero-banner__image">
-              <img src="https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/Screenshot_2024-04-26_234907_v04hvx.png" alt="Fantasy UI Pack" />
+              <img src={heroPreviewUrl} alt="Fantasy UI Pack" />
             </div>
           </section>
 
@@ -110,25 +150,26 @@ export default function HomepagePage() {
               <Link to="/marketplace" className="view-all">View All</Link>
             </header>
             <div className="asset-grid">
-              {featuredAssets.map((asset) => (
+              {featuredAssets.length > 0 ? featuredAssets.map((asset) => (
                 <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="asset-card">
                   <div className="asset-card__preview" style={{ backgroundImage: `url(${asset.coverImageUrl})` }}>
-                    <span className="asset-card__badge">{asset.category?.toUpperCase()}</span>
+                    <span className="asset-card__badge">{asset.categoryData?.name || 'UI KIT'}</span>
                   </div>
                   <div className="asset-card__body">
                     <div className="asset-card__title-row">
                       <h3>{asset.title}</h3>
-                      <span className="price">${asset.price}</span>
+                      <span className="price">{asset.price === 0 ? 'Free' : `$${asset.price}`}</span>
                     </div>
                     <p className="author">By <span>{asset.author?.username || 'Creator'}</span></p>
-                    <p className="desc">{asset.description?.substring(0, 80)}...</p>
+                    <p className="desc">{asset.description?.substring(0, 60)}...</p>
                     <div className="asset-card__tags">
-                      {asset.engine && <span>{asset.engine.toUpperCase()}</span>}
-                      <span>4K</span>
+                      {asset.engine && <span className="tag-pill">{asset.engine}</span>}
                     </div>
                   </div>
                 </Link>
-              ))}
+              )) : (
+                <div className="no-data-placeholder">No assets found for these filters.</div>
+              )}
             </div>
           </section>
 
@@ -138,10 +179,6 @@ export default function HomepagePage() {
               <div className="section-title">
                 <span className="icon">🕒</span>
                 <h2>Latest Assets</h2>
-              </div>
-              <div className="carousel-nav">
-                <button>‹</button>
-                <button>›</button>
               </div>
             </header>
             <div className="latest-grid">
@@ -157,84 +194,30 @@ export default function HomepagePage() {
               ))}
             </div>
           </section>
-
-          {/* Trending Section */}
-          <section className="section-block">
-            <header className="section-header">
-              <div className="section-title">
-                <span className="icon">📈</span>
-                <h2>Trending This Week</h2>
-              </div>
-            </header>
-            <div className="trending-row">
-              <div className="trend-item">
-                <div className="trend-item__img" style={{ backgroundImage: 'url(https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/cyberpunk_menu_preview.png)' }} />
-                <div className="trend-item__info">
-                  <h4>Cyberpunk Menu Suite</h4>
-                  <p>Fast growing popularity in Sci-Fi category</p>
-                  <div className="trend-item__meta">
-                    <strong>$25</strong>
-                    <span className="hot-badge">HOT ASSET</span>
-                  </div>
-                </div>
-              </div>
-              <div className="trend-item">
-                <div className="trend-item__img" style={{ backgroundImage: 'url(https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/parchment_preview.png)' }} />
-                <div className="trend-item__info">
-                  <h4>Parchment Quest Journals</h4>
-                  <p>Over 500 downloads this week</p>
-                  <strong className="free">FREE</strong>
-                </div>
-              </div>
-            </div>
-          </section>
         </section>
       </main>
 
       <footer className="site-footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <div className="footer-logo">
-              <div className="logo-icon small">
-                <div className="icon-grid">
-                  <div /><div />
-                  <div /><div />
-                </div>
-              </div>
-              <strong>UIbrage</strong>
-            </div>
-            <p>The premier marketplace for high-quality game user interface assets.</p>
+            <div className="footer-logo"><strong>UIbrage</strong></div>
+            <p>The premier marketplace for game UI assets.</p>
           </div>
           <div className="footer-links">
             <div>
               <h4>Explore</h4>
-              <Link to="/">Featured Assets</Link>
-              <Link to="/">New Releases</Link>
-              <Link to="/">Top Rated</Link>
-              <Link to="/">Freebies</Link>
+              <Link to="/">Featured</Link>
+              <Link to="/">New</Link>
             </div>
             <div>
               <h4>Community</h4>
               <Link to="/">Forums</Link>
               <Link to="/">Discord</Link>
-              <Link to="/">Blog</Link>
-              <Link to="/">Events</Link>
-            </div>
-            <div>
-              <h4>Help</h4>
-              <Link to="/">Contact Support</Link>
-              <Link to="/">Sell your assets</Link>
-              <Link to="/">Privacy Policy</Link>
-              <Link to="/">Terms of Service</Link>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <small>© 2026 UIbrage Marketplace. All rights reserved.</small>
-          <div className="footer-socials">
-             <span>🔗</span>
-             <span>🌐</span>
-          </div>
+          <small>© 2026 UIbrage Marketplace.</small>
         </div>
       </footer>
     </div>

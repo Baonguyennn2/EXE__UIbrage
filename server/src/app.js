@@ -7,6 +7,7 @@ const assetRoutes = require('./routes/assetRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
+const metadataRoutes = require('./routes/metadataRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/assets', assetRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', metadataRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

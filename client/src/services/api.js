@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'https://exe-uibrage.onrender.com/api';
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : 'https://exe-uibrage.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -35,6 +37,11 @@ export const adminService = {
   upload: (formData) => api.post('/admin/assets', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+};
+
+export const metadataService = {
+  getCategories: () => api.get('/categories'),
+  getTags: () => api.get('/tags'),
 };
 
 export const authService = {

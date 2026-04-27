@@ -1,253 +1,233 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { assetService } from '../services/api'
+import { assetService, metadataService } from '../services/api'
 import AppHeader from '../components/AppHeader.jsx'
-import { RiUploadCloud2Fill, RiImageAddLine, RiFileZipLine, RiArrowLeftLine } from 'react-icons/ri'
+import { 
+  RiUploadCloud2Fill, RiImageAddLine, RiCheckLine, RiCloseLine,
+  RiPriceTag3Line, RiFileZipLine
+} from 'react-icons/ri'
 
 export default function UploadAssetPage() {
   const navigate = useNavigate()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [allTags, setAllTags] = useState([])
+  const [selectedTags, setSelectedTags] = useState([])
+  const [tagSearch, setTagSearch] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [loading, setLoading] = useState(false)
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    tags: '',
     price: '',
-    engine: 'Unity',
-    category: 'Fantasy',
-    licenseType: 'standard',
-    isFree: false
+    isFree: false,
+    engine: 'Unity'
   })
   const [coverImage, setCoverImage] = useState(null)
   const [assetFile, setAssetFile] = useState(null)
-  const [screenshots, setScreenshots] = useState([])
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    setIsAdmin(user.role === 'admin')
+    // Load both categories and tags to use as hashtags
+    Promise.all([
+      metadataService.getCategories(),
+      metadataService.getTags()
+    ]).then(([catsRes, tagsRes]) => {
+      // Merge categories and tags into a single "Hashtag" pool
+      const merged = [...catsRes.data, ...tagsRes.data]
+      // Remove duplicates by slug if any
+      const unique = Array.from(new Map(merged.map(item => [item.slug, item])).values())
+      setAllTags(unique)
+    })
   }, [])
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleFileChange = (e, setter) => {
-    if (e.target.files) setter(e.target.files[0])
-  }
-
-  const handleScreenshotsChange = (e) => {
-    if (e.target.files) setScreenshots(Array.from(e.target.files))
+  const toggleTag = (tagId) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    )
   }
 
   const handlePublish = async () => {
+    if (!formData.title) return alert('Please enter asset name')
+    if (!coverImage || !assetFile) return alert('Please upload both image and file')
+    
     setLoading(true)
     const data = new FormData()
-    Object.keys(formData).forEach(key => data.append(key, formData[key]))
-    if (coverImage) data.append('coverImage', coverImage)
-    if (assetFile) data.append('assetFile', assetFile)
-    screenshots.forEach(file => data.append('screenshots', file))
+    data.append('title', formData.title)
+    data.append('description', formData.description)
+    data.append('price', formData.isFree ? 0 : (formData.price || 0))
+    data.append('isFree', formData.isFree)
+    data.append('engine', formData.engine)
+    
+    // Send selected tags
+    selectedTags.forEach(id => data.append('tagIds[]', id))
+    
+    // Files
+    data.append('coverImage', coverImage)
+    data.append('assetFile', assetFile)
 
     try {
       await assetService.add(data)
-      alert('Asset uploaded successfully and pending approval!')
-      navigate(isAdmin ? '/admin/dashboard' : '/marketplace')
+      setShowSuccessModal(true)
     } catch (error) {
-      console.error('Error uploading asset:', error)
+      console.error('Upload Error:', error)
       alert('Upload failed: ' + (error.response?.data?.error || error.message))
     } finally {
       setLoading(false)
     }
   }
 
-  const renderForm = () => (
-    <div className="upload-form-wrapper">
-      <header className="upload-header">
-        <div className="upload-header__content">
-          <h1>Upload New Asset</h1>
-          <p>Share your creative game assets with the UIbrage community.</p>
-        </div>
-        {!isAdmin && (
-          <button className="btn-ghost" onClick={() => navigate(-1)}>
-            <RiArrowLeftLine /> Back
-          </button>
-        )}
-      </header>
-
-      <div className="upload-grid">
-        <div className="upload-main-col">
-          <section className="surface-card upload-section">
-            <div className="section-title">
-              <RiImageAddLine />
-              <h3>Media & Files</h3>
-            </div>
-            
-            <div className="file-upload-row">
-              <div className="file-drop-zone">
-                <label>
-                  <span>Cover Image</span>
-                  <input type="file" onChange={(e) => handleFileChange(e, setCoverImage)} accept="image/*" />
-                  <div className="drop-zone-display">
-                    {coverImage ? coverImage.name : 'Select or drop a cover image (16:9 recommended)'}
-                  </div>
-                </label>
-              </div>
-
-              <div className="file-drop-zone">
-                <label>
-                  <span>Asset Package (ZIP)</span>
-                  <input type="file" onChange={(e) => handleFileChange(e, setAssetFile)} accept=".zip,.rar,.7z" />
-                  <div className="drop-zone-display drop-zone-display--blue">
-                    {assetFile ? assetFile.name : 'Select your asset file (ZIP/RAR)'}
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="screenshot-upload">
-              <label>
-                <span>Screenshots (Max 10)</span>
-                <input type="file" multiple onChange={handleScreenshotsChange} accept="image/*" />
-                <div className="screenshot-placeholder">
-                  {screenshots.length > 0 ? `${screenshots.length} files selected` : 'Upload gallery images to show off your asset'}
-                </div>
-              </label>
-            </div>
-          </section>
-
-          <section className="surface-card upload-section">
-            <div className="section-title">
-              <RiUploadCloud2Fill />
-              <h3>General Information</h3>
-            </div>
-            <div className="form-group">
-              <label>Asset Title</label>
-              <input 
-                type="text" 
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="e.g. Fantasy RPG Icons Pack" 
-              />
-            </div>
-            <div className="form-group">
-              <label>Description</label>
-              <textarea 
-                rows={6} 
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe your asset features, content, and instructions..." 
-              />
-            </div>
-          </section>
-        </div>
-
-        <aside className="upload-side-col">
-          <section className="surface-card upload-section">
-            <div className="section-title"><h3>Properties</h3></div>
-            <div className="form-group">
-              <label>Category</label>
-              <select name="category" value={formData.category} onChange={handleInputChange}>
-                <option value="Fantasy">Fantasy</option>
-                <option value="Sci-Fi">Sci-Fi</option>
-                <option value="RPG">RPG</option>
-                <option value="Minimalist">Minimalist</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Engine</label>
-              <select name="engine" value={formData.engine} onChange={handleInputChange}>
-                <option value="Unity">Unity</option>
-                <option value="Unreal">Unreal</option>
-                <option value="Godot">Godot</option>
-              </select>
-            </div>
-          </section>
-
-          <section className="surface-card upload-section">
-            <div className="section-title"><h3>Pricing</h3></div>
-            <div className="form-group">
-              <label>Price (USD)</label>
-              <input 
-                type="number" 
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                disabled={formData.isFree}
-              />
-            </div>
-            <label className="checkbox-row">
-              <input 
-                type="checkbox" 
-                name="isFree"
-                checked={formData.isFree}
-                onChange={handleInputChange}
-              /> Free Asset
-            </label>
-          </section>
-
-          <button 
-            className="btn-solid btn-full-width" 
-            onClick={handlePublish}
-            disabled={loading}
-          >
-            {loading ? 'Uploading...' : 'Publish Asset'}
-          </button>
-        </aside>
-      </div>
-    </div>
-  )
-
-  if (!isAdmin) {
-    return (
-      <div className="customer-upload-layout">
-        <AppHeader />
-        <main className="upload-container">
-          {renderForm()}
-        </main>
-      </div>
-    )
-  }
+  const filteredTags = allTags.filter(t => 
+    t.name.toLowerCase().includes(tagSearch.toLowerCase())
+  ).slice(0, 10) // Show top 10 matches
 
   return (
-    <main className="admin-shell">
-      <header className="admin-topbar">
-        <div className="admin-brand">
-          <span className="admin-brand__tile" />
-          <strong>UIbrage</strong>
-        </div>
-        <div className="admin-user">
-          <div className="avatar-circle">A</div>
-          <div>
-            <strong>Admin Panel</strong>
-            <small>Administrator</small>
+    <div className="upload-page-v3">
+      <AppHeader />
+      
+      <main className="upload-container-v3">
+        <h1 className="upload-title-v3">Upload New Asset</h1>
+        
+        <div className="upload-card-v3">
+          <div className="form-section-v3">
+            <label className="label-v3">ASSET NAME</label>
+            <input 
+              className="input-v3"
+              type="text" 
+              name="title"
+              placeholder="e.g. Cyberpunk Interface Kit v2.0"
+              value={formData.title}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="form-section-v3">
+            <label className="label-v3">DESCRIPTION</label>
+            <textarea 
+              className="textarea-v3"
+              rows={5} 
+              name="description"
+              placeholder="Explain what makes your asset special..."
+              value={formData.description}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="upload-row-v3">
+            <div className="upload-box-v3">
+              <label className="label-v3">PREVIEW IMAGE</label>
+              <div className="drop-zone-v3">
+                <input type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} hidden id="coverInput" />
+                <label htmlFor="coverInput" className="drop-content-v3">
+                  <RiImageAddLine className="icon-v3" />
+                  <p>{coverImage ? coverImage.name : 'Drop cover image here'}</p>
+                  <small>PNG, JPG up to 10MB</small>
+                </label>
+              </div>
+            </div>
+
+            <div className="upload-box-v3">
+              <label className="label-v3">ASSET FILE (ZIP)</label>
+              <div className="drop-zone-v3">
+                <input type="file" accept=".zip,.rar" onChange={(e) => setAssetFile(e.target.files[0])} hidden id="fileInput" />
+                <label htmlFor="fileInput" className="drop-content-v3">
+                  <RiFileZipLine className="icon-v3" />
+                  <p>{assetFile ? assetFile.name : 'Upload source files'}</p>
+                  <small>ZIP, 7Z or RAR</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="upload-row-v3">
+            <div className="pricing-section-v3">
+              <label className="label-v3">PRICING</label>
+              <div className="price-control-v3">
+                <div className="price-input-v3">
+                  <span>$</span>
+                  <input 
+                    type="number" 
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder="0.00"
+                    disabled={formData.isFree}
+                  />
+                </div>
+                <div className="toggle-v3">
+                  <button 
+                    className={!formData.isFree ? 'active' : ''} 
+                    onClick={() => setFormData(p => ({ ...p, isFree: false }))}
+                  >PAID</button>
+                  <button 
+                    className={formData.isFree ? 'active' : ''} 
+                    onClick={() => setFormData(p => ({ ...p, isFree: true }))}
+                  >FREE</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="tags-section-v3">
+              <label className="label-v3">TAGS</label>
+              <div className="tag-input-wrapper-v3">
+                <div className="selected-tags-v3">
+                  {selectedTags.map(id => {
+                    const tag = allTags.find(t => t.id === id)
+                    return tag ? (
+                      <span key={id} className="tag-pill-v3">
+                        {tag.name} <RiCloseLine onClick={() => toggleTag(id)} />
+                      </span>
+                    ) : null
+                  })}
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="Add tag..." 
+                  value={tagSearch}
+                  onChange={(e) => setTagSearch(e.target.value)}
+                />
+                {tagSearch && (
+                  <div className="tag-results-v3">
+                    {filteredTags.map(tag => (
+                      <div key={tag.id} onClick={() => { toggleTag(tag.id); setTagSearch(''); }}>
+                        {tag.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="form-actions-v3">
+            <button className="btn-cancel-v3" onClick={() => navigate(-1)}>Cancel</button>
+            <button 
+              className="btn-publish-v3" 
+              onClick={handlePublish}
+              disabled={loading}
+            >
+              {loading ? 'Publishing...' : 'Publish Asset'}
+            </button>
           </div>
         </div>
-      </header>
+      </main>
 
-      <section className="admin-layout">
-        <aside className="admin-sidebar">
-          <h4>Main Menu</h4>
-          <Link to="/admin/dashboard">Dashboard</Link>
-          <Link to="/admin/my-assets">My Assets</Link>
-          <Link to="/admin/upload-asset" className="active">Upload Asset</Link>
-          <Link to="/admin/creators">Creators</Link>
-          <Link to="/admin/asset-approval">Asset Approval</Link>
-          <div className="admin-sidebar__bottom">
-            <button type="button" onClick={() => navigate('/marketplace')}>Exit Admin</button>
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="success-modal">
+            <div className="success-icon-bg"><RiCheckLine /></div>
+            <h2>Upload Successful!</h2>
+            <p>Your asset is pending approval.</p>
+            <div className="modal-actions">
+              <button className="btn-solid" onClick={() => navigate('/marketplace')}>Go to Marketplace</button>
+              <button className="btn-ghost" onClick={() => setShowSuccessModal(false)}>Upload Another</button>
+            </div>
           </div>
-        </aside>
-
-        <section className="admin-content">
-          {renderForm()}
-        </section>
-      </section>
-    </main>
+        </div>
+      )}
+    </div>
   )
 }
