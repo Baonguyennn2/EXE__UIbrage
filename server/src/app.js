@@ -8,6 +8,8 @@ const commentRoutes = require('./routes/commentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 const metadataRoutes = require('./routes/metadataRoutes');
+const userRoutes = require('./routes/userRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use('/api/assets', assetRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api', metadataRoutes);
 
 // Health check

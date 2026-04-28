@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
+import { userService } from '../services/api'
 import AppHeader from '../components/AppHeader.jsx'
 import Toast from '../components/Toast.jsx'
-import { RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line } from 'react-icons/ri'
+import { RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill } from 'react-icons/ri'
 
 export default function ProfileEditPage() {
   const [user, setUser] = useState(null)
@@ -13,6 +14,8 @@ export default function ProfileEditPage() {
   })
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState(null)
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user') || 'null')
@@ -27,17 +30,39 @@ export default function ProfileEditPage() {
     }
   }, [])
 
+  const handleAvatarChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setAvatarFile(e.target.files[0])
+      setAvatarPreview(URL.createObjectURL(e.target.files[0]))
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    // Placeholder for actual update logic
-    setTimeout(() => {
+    
+    try {
+      const data = new FormData()
+      data.append('fullName', formData.fullName)
+      data.append('bio', formData.bio)
+      // Note: username update might require a different flow in Cognito if supported, so we skip username for now or just pass it if backend handles it
+      
+      if (avatarFile) {
+        data.append('avatar', avatarFile)
+      }
+
+      const res = await userService.updateProfile(data)
+      const updatedUser = res.data
+      
       setNotification({ type: 'success', message: 'Profile updated successfully!' })
+      setUser(updatedUser)
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+    } catch (error) {
+      console.error('Update Error:', error)
+      setNotification({ type: 'error', message: error.response?.data?.message || 'Update failed' })
+    } finally {
       setLoading(false)
-      // Update local storage too
-      const updated = { ...user, ...formData }
-      localStorage.setItem('user', JSON.stringify(updated))
-    }, 1000)
+    }
   }
 
   if (!user) return null
@@ -65,13 +90,22 @@ export default function ProfileEditPage() {
         <section className="surface-card profile-form-card">
           <form onSubmit={handleSubmit} className="profile-form">
             <div className="profile-avatar-section">
-              <div className="avatar-preview">
-                {formData.username?.[0]?.toUpperCase()}
+              <div className="avatar-preview" style={ (avatarPreview || user.avatarUrl) ? { backgroundImage: `url(${avatarPreview || user.avatarUrl})`, backgroundSize: 'cover' } : {} }>
+                {!(avatarPreview || user.avatarUrl) && formData.username?.[0]?.toUpperCase()}
               </div>
               <div className="avatar-info">
                 <h3>Profile Picture</h3>
                 <p>Upload a new avatar to personalize your account.</p>
-                <button type="button" className="btn-ghost small">Change Avatar</button>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  hidden 
+                  id="avatarUpload" 
+                  onChange={handleAvatarChange} 
+                />
+                <label htmlFor="avatarUpload" className="btn-ghost small">
+                  <RiImageEditFill style={{marginRight: 4}}/> Change Avatar
+                </label>
               </div>
             </div>
 

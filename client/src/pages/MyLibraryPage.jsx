@@ -1,15 +1,34 @@
+import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
 import { Link } from 'react-router-dom'
 
-const myAssets = [
-  { id: 1, title: 'Epic Fantasy Pack V2', category: 'RPG, Fantasy', date: 'Oct 24, 2023', price: '$24.00' },
-  { id: 2, title: 'Cyber HUD Assets', category: 'Sci-Fi, Tech', date: 'Oct 20, 2023', price: '$29.00' },
-]
+import { assetService } from '../services/api'
 
-export default function MyLibraryPage() {
+export default function MyLibraryPage({ isAdmin = false }) {
+  const [myAssets, setMyAssets] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchMyAssets = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'))
+        if (user) {
+          const res = await assetService.getAll({ authorId: user.id })
+          setMyAssets(res.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch library', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchMyAssets()
+  }, [])
+
+  if (loading) return <div className="loading-screen">Loading Library...</div>
   return (
-    <main className="market-home">
-      <AppHeader />
+    <main className={isAdmin ? "" : "market-home"}>
+      {!isAdmin && <AppHeader />}
       
       <section className="market-page">
         <header className="market-page__header">
@@ -37,12 +56,12 @@ export default function MyLibraryPage() {
                     <div key={asset.id} className="admin-table__row">
                       <div>
                         <strong>{asset.title}</strong>
-                        <small>{asset.category}</small>
+                        <small>{asset.engine || 'General'}</small>
                       </div>
-                      <span>{asset.date}</span>
-                      <span>{asset.price}</span>
+                      <span>{new Date(asset.createdAt).toLocaleDateString()}</span>
+                      <span>{asset.price === 0 ? 'Free' : `$${asset.price}`}</span>
                       <span className="admin-table__actions">
-                        <button className="btn-ghost" onClick={() => alert('Downloading...')}>Download</button>
+                        <a href={asset.fileUrl} target="_blank" rel="noreferrer" className="btn-ghost" style={{ textDecoration: 'none' }}>Download</a>
                       </span>
                     </div>
                   ))}

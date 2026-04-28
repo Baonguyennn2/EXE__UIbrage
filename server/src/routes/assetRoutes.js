@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const assetController = require('../controllers/assetController');
 const { authenticate } = require('../middleware/auth');
-const { upload } = require('../middleware/cloudinary');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', assetController.getAllAssets);
 router.get('/:id', assetController.getAssetById);

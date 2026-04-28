@@ -208,9 +208,19 @@ exports.login = async (req, res) => {
     const groups = decoded['cognito:groups'] || [];
     const role = groups.includes('admin') ? 'admin' : 'customer';
 
-    // Fetch user from MySQL and update role if it changed
-    let user = await User.findOne({ where: { email } });
-    if (user && user.role !== role) {
+    // Fetch user from MySQL or create if missing, and update role if it changed
+    let [user] = await User.findOrCreate({ 
+      where: { email },
+      defaults: {
+        id: decoded.sub,
+        email,
+        username: email.split('@')[0],
+        fullName: email.split('@')[0],
+        role: role
+      }
+    });
+    
+    if (user.role !== role) {
       user.role = role;
       await user.save();
     }

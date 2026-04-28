@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { assetService, metadataService } from '../services/api'
+import axios from 'axios'
 import AppHeader from '../components/AppHeader.jsx'
 import { 
   RiUploadCloud2Fill, RiImageAddLine, RiCheckLine, RiCloseLine,
   RiPriceTag3Line, RiFileZipLine
 } from 'react-icons/ri'
 
-export default function UploadAssetPage() {
+export default function UploadAssetPage({ isAdmin = false }) {
   const navigate = useNavigate()
   const [allTags, setAllTags] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [tagSearch, setTagSearch] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showTagDropdown, setShowTagDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -32,7 +35,10 @@ export default function UploadAssetPage() {
       metadataService.getTags()
     ]).then(([catsRes, tagsRes]) => {
       // Merge categories and tags into a single "Hashtag" pool
-      const merged = [...catsRes.data, ...tagsRes.data]
+      const merged = [
+        ...catsRes.data.map(c => ({ ...c, uniqueId: `cat-${c.id}` })),
+        ...tagsRes.data.map(t => ({ ...t, uniqueId: `tag-${t.id}` }))
+      ]
       // Remove duplicates by slug if any
       const unique = Array.from(new Map(merged.map(item => [item.slug, item])).values())
       setAllTags(unique)
@@ -70,25 +76,37 @@ export default function UploadAssetPage() {
     data.append('assetFile', assetFile)
 
     try {
-      await assetService.add(data)
+      const token = localStorage.getItem('token')
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/assets`, data, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          setUploadProgress(percentCompleted)
+        }
+      })
       setShowSuccessModal(true)
     } catch (error) {
       console.error('Upload Error:', error)
       alert('Upload failed: ' + (error.response?.data?.error || error.message))
     } finally {
       setLoading(false)
+      setUploadProgress(0)
     }
   }
 
+  const cleanSearch = tagSearch.replace(/^#/, '').toLowerCase()
   const filteredTags = allTags.filter(t => 
-    t.name.toLowerCase().includes(tagSearch.toLowerCase())
-  ).slice(0, 10) // Show top 10 matches
+    t.name.toLowerCase().includes(cleanSearch) && !selectedTags.includes(t.id)
+  ).slice(0, 15) // Show top 15 matches
 
   return (
-    <div className="upload-page-v3">
-      <AppHeader />
+    <div className={isAdmin ? "" : "upload-page-v3"}>
+      {!isAdmin && <AppHeader />}
       
-      <main className="upload-container-v3">
+      <main className={isAdmin ? "" : "upload-container-v3"}>
         <h1 className="upload-title-v3">Upload New Asset</h1>
         
         <div className="upload-card-v3">
@@ -123,7 +141,7 @@ export default function UploadAssetPage() {
                 <input type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} hidden id="coverInput" />
                 <label htmlFor="coverInput" className="drop-content-v3">
                   <RiImageAddLine className="icon-v3" />
-                  <p>{coverImage ? coverImage.name : 'Drop cover image here'}</p>
+                  <p className="truncate-text">{coverImage ? (coverImage.name.length > 25 ? coverImage.name.substring(0, 22) + '...' : coverImage.name) : 'Drop cover image here'}</p>
                   <small>PNG, JPG up to 10MB</small>
                 </label>
               </div>
@@ -135,7 +153,7 @@ export default function UploadAssetPage() {
                 <input type="file" accept=".zip,.rar" onChange={(e) => setAssetFile(e.target.files[0])} hidden id="fileInput" />
                 <label htmlFor="fileInput" className="drop-content-v3">
                   <RiFileZipLine className="icon-v3" />
-                  <p>{assetFile ? assetFile.name : 'Upload source files'}</p>
+                  <p className="truncate-text">{assetFile ? (assetFile.name.length > 25 ? assetFile.name.substring(0, 22) + '...' : assetFile.name) : 'Upload source files'}</p>
                   <small>ZIP, 7Z or RAR</small>
                 </label>
               </div>
@@ -159,12 +177,14 @@ export default function UploadAssetPage() {
                 </div>
                 <div className="toggle-v3">
                   <button 
+                    type="button"
                     className={!formData.isFree ? 'active' : ''} 
                     onClick={() => setFormData(p => ({ ...p, isFree: false }))}
                   >PAID</button>
                   <button 
+                    type="button"
                     className={formData.isFree ? 'active' : ''} 
-                    onClick={() => setFormData(p => ({ ...p, isFree: true }))}
+                    onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))}
                   >FREE</button>
                 </div>
               </div>
@@ -177,7 +197,7 @@ export default function UploadAssetPage() {
                   {selectedTags.map(id => {
                     const tag = allTags.find(t => t.id === id)
                     return tag ? (
-                      <span key={id} className="tag-pill-v3">
+                      <span key={tag.uniqueId} className="tag-pill-v3">
                         {tag.name} <RiCloseLine onClick={() => toggleTag(id)} />
                       </span>
                     ) : null
@@ -185,14 +205,16 @@ export default function UploadAssetPage() {
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Add tag..." 
+                  placeholder="Add tag... (e.g. #fantasy)" 
                   value={tagSearch}
                   onChange={(e) => setTagSearch(e.target.value)}
+                  onFocus={() => setShowTagDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
                 />
-                {tagSearch && (
+                {showTagDropdown && filteredTags.length > 0 && (
                   <div className="tag-results-v3">
                     {filteredTags.map(tag => (
-                      <div key={tag.id} onClick={() => { toggleTag(tag.id); setTagSearch(''); }}>
+                      <div key={tag.uniqueId} onClick={() => { toggleTag(tag.id); setTagSearch(''); setShowTagDropdown(false); }}>
                         {tag.name}
                       </div>
                     ))}
@@ -201,6 +223,15 @@ export default function UploadAssetPage() {
               </div>
             </div>
           </div>
+
+          {loading && (
+            <div className="upload-progress-container-v3">
+              <div className="progress-bar-v3">
+                <div className="progress-fill-v3" style={{ width: `${uploadProgress}%` }}></div>
+              </div>
+              <span>{uploadProgress}% Uploading...</span>
+            </div>
+          )}
 
           <div className="form-actions-v3">
             <button className="btn-cancel-v3" onClick={() => navigate(-1)}>Cancel</button>

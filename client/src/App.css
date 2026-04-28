@@ -5863,3 +5863,150 @@
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
 }
+/* --- Upload Progress --- */
+.upload-progress-container-v3 {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.progress-bar-v3 {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-fill-v3 {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #4f46e5);
+  transition: width 0.3s ease;
+}
+
+/* --- Homepage Hero --- */
+.homepage-hero-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.home-hero-content {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 2rem;
+  padding: 4rem 2rem;
+  margin-bottom: 4rem;
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-hero-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 60%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.home-hero-text {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-text h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(to bottom, #fff 40%, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-hero-text p {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.home-search-bar {
+  display: flex;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.home-search-bar input {
+  flex: 1;
+  border: 0;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  outline: none;
+  border-radius: 1rem;
+}
+
+.home-search-bar button {
+  background: #7c3aed;
+  color: white;
+  border: 0;
+  padding: 0 2rem;
+  border-radius: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.home-search-bar button:hover {
+  background: #6d28d9;
+}
+
+.home-quick-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.home-quick-tags button {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #cbd5e1;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.home-quick-tags button:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #7c3aed;
+}
+
+/* --- Marketplace Header --- */
+.marketplace-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1.5rem;
+}
+
+.marketplace-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.marketplace-header p {
+  color: #64748b;
+}

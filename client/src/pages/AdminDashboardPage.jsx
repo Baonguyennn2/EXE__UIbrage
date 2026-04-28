@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { adminService } from '../services/api'
+import { useNavigate } from 'react-router-dom'
+import MyLibraryPage from './MyLibraryPage.jsx'
+import UploadAssetPage from './UploadAssetPage.jsx'
 
 const viewContent = {
   users: { title: 'Creators Management', filter: 'Newest first', action: 'Invite Creator' },
@@ -64,6 +67,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const [underperforming, setUnderperforming] = useState([])
   const [topCreators, setTopCreators] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/auth/login')
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,6 +122,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const activeKey = variant === 'moderation' ? 'approval' : variant === 'users' ? 'creators' : 'dashboard'
   const isOverview = variant === 'overview'
   const isApproval = variant === 'moderation'
+  const isLibrary = variant === 'library'
+  const isUpload = variant === 'upload'
+  const isCreators = variant === 'users'
 
   if (loading) return <div>Loading...</div>
 
@@ -370,22 +383,24 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       <section className="admin-layout">
         <aside className="admin-sidebar">
           <h4>Main Menu</h4>
-          <Link to="/admin/dashboard" className={activeKey === 'dashboard' ? 'active' : ''}>Dashboard</Link>
-          <Link to="/admin/my-assets">My Assets</Link>
-          <Link to="/admin/upload-asset">Upload Asset</Link>
-          <Link to="/admin/creators" className={activeKey === 'creators' ? 'active' : ''}>Creators</Link>
-          <Link to="/admin/asset-approval" className={activeKey === 'approval' ? 'active' : ''}>Asset Approval</Link>
+          <Link to="/admin/dashboard" className={variant === 'overview' ? 'active' : ''}>Dashboard</Link>
+          <Link to="/admin/my-assets" className={variant === 'library' ? 'active' : ''}>My Assets</Link>
+          <Link to="/admin/upload-asset" className={variant === 'upload' ? 'active' : ''}>Upload Asset</Link>
+          <Link to="/admin/creators" className={variant === 'users' ? 'active' : ''}>Creators</Link>
+          <Link to="/admin/asset-approval" className={variant === 'moderation' ? 'active' : ''}>Asset Approval</Link>
           <Link to="/community">Messages</Link>
           <div className="admin-sidebar__bottom">
             <button type="button">Settings</button>
-            <button type="button" className="danger">Logout</button>
+            <button type="button" className="danger" onClick={handleLogout}>Logout</button>
           </div>
         </aside>
 
         <div className="admin-content">
           {isOverview && renderOverview()}
-          {!isOverview && !isApproval && renderCreators()}
+          {isCreators && renderCreators()}
           {isApproval && renderApproval()}
+          {isLibrary && <MyLibraryPage isAdmin={true} />}
+          {isUpload && <UploadAssetPage isAdmin={true} />}
         </div>
       </section>
     </main>

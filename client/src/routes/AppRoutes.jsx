@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import LoginPage from '../pages/LoginPage.jsx'
 import RouteIndexPage from '../pages/RouteIndexPage.jsx'
 import HomepagePage from '../pages/HomepagePage.jsx'
+import MarketplacePage from '../pages/MarketplacePage.jsx'
 import RegisterPage from '../pages/RegisterPage.jsx'
 import DetailPage from '../pages/DetailPage.jsx'
 import CheckoutPage from '../pages/CheckoutPage.jsx'
@@ -28,10 +29,8 @@ function LegacyFrameRoute() {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/marketplace" replace />} />
-
-      <Route path="/marketplace" element={<HomepagePage variant="v1" />} />
-      <Route path="/marketplace/discover" element={<HomepagePage variant="v2" />} />
+      <Route path="/" element={<HomepagePage />} />
+      <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       
       {/* Customer Protected Routes */}
@@ -79,10 +78,10 @@ export default function AppRoutes() {
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="reports" /></ProtectedRoute>
       } />
       <Route path="/admin/my-assets" element={
-        <ProtectedRoute allowedRoles={['admin']}><MyLibraryPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="library" /></ProtectedRoute>
       } />
       <Route path="/admin/upload-asset" element={
-        <ProtectedRoute allowedRoles={['admin']}><UploadAssetPage variant="create" /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="upload" /></ProtectedRoute>
       } />
 
       <Route path="/community" element={<CommunityPage />} />

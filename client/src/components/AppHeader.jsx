@@ -66,7 +66,11 @@ export default function AppHeader({ onSearch }) {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      onSearch && onSearch(searchTerm)
+      if (onSearch) {
+        onSearch(searchTerm)
+      } else {
+        navigate(`/marketplace?search=${encodeURIComponent(searchTerm)}`)
+      }
     }
   }
 

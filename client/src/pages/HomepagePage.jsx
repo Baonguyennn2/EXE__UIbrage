@@ -1,45 +1,29 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
-import { assetService } from '../services/api'
+import { assetService, metadataService } from '../services/api'
+import { useNavigate } from 'react-router-dom'
 
-const heroPreviewUrl = 'https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/Screenshot_2024-04-26_234907_v04hvx.png'
+// Fallback preview
+const fallbackHeroUrl = 'https://res.cloudinary.com/dz0v7n8m0/image/upload/v1714152579/Screenshot_2024-04-26_234907_v04hvx.png'
 
 export default function HomepagePage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [featuredAssets, setFeaturedAssets] = useState([])
   const [latestAssets, setLatestAssets] = useState([])
   const [loading, setLoading] = useState(true)
   
-  const [filters, setFilters] = useState({ 
-    category: new URLSearchParams(location.search).get('category') || '', 
-    engine: '', 
-    search: '', 
-    priceRange: '' 
-  })
-
-  // Hardcoded categories as requested
   const uiStyles = ['Fantasy', 'Sci-Fi', 'Pixel Art', 'Minimalist']
   const gameGenres = ['RPG', 'Platformer', 'Strategy', 'Casual']
   const engines = ['Unity', 'Unreal Engine', 'Godot']
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    setFilters(prev => ({
-      ...prev,
-      category: params.get('category') || '',
-    }))
-  }, [location.search])
-
+  // Homepage fetches global featured/latest
   const fetchData = async () => {
     setLoading(true)
     try {
-      const apiParams = { ...filters }
-      if (filters.priceRange === 'free') apiParams.maxPrice = 0
-      
-      const assetsRes = await assetService.getAll(apiParams)
+      const assetsRes = await assetService.getAll()
       const allAssets = assetsRes.data
-      
       setFeaturedAssets(allAssets.slice(0, 4))
       setLatestAssets(allAssets.slice(0, 8))
       setLoading(false)
@@ -51,94 +35,53 @@ export default function HomepagePage() {
 
   useEffect(() => {
     fetchData()
-  }, [filters])
+  }, [])
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-  }
+
 
   if (loading) return <div className="loading-screen">Loading Marketplace...</div>
 
   return (
     <div className="homepage-container">
-      <AppHeader onSearch={(val) => handleFilterChange('search', val)} />
+      <AppHeader onSearch={(val) => navigate(`/marketplace?search=${encodeURIComponent(val)}`)} />
 
-      <main className="main-layout">
-        <aside className="sidebar-filters">
-          <div className="filter-group">
-            <h3 className="filter-label">FILTERS</h3>
-            <button className="popular-tags-btn">
-              <span className="flame-icon">🔥</span> Popular Tags
-            </button>
+      <main className="homepage-hero-layout">
+        <section className="home-hero-content">
+          <div className="home-hero-text">
+             <h1>Unleash Your Game Design Potential</h1>
+             <p>Access thousands of high-quality UI assets, kits, and icons to speed up your development process.</p>
+             <div className="home-search-bar">
+                <input type="text" placeholder="Search for assets (e.g. Fantasy RPG)..." onKeyDown={(e) => e.key === 'Enter' && navigate(`/marketplace?search=${encodeURIComponent(e.target.value)}`)} />
+                <button onClick={() => navigate('/marketplace')}>Browse Marketplace</button>
+             </div>
+             <div className="home-quick-tags">
+                <span>Popular:</span>
+                {uiStyles.slice(0, 3).map(s => <button key={s} onClick={() => navigate(`/marketplace?search=${s}`)}>{s}</button>)}
+             </div>
           </div>
-
-          <div className="filter-group">
-            <h3 className="filter-label">UI STYLE</h3>
-            {uiStyles.map(style => (
-              <button 
-                key={style}
-                className={`filter-link ${filters.category === style ? 'active' : ''}`}
-                onClick={() => handleFilterChange('category', style)}
-              >
-                {style}
-              </button>
-            ))}
-          </div>
-
-          <div className="filter-group">
-            <h3 className="filter-label">GAME GENRE</h3>
-            {gameGenres.map(genre => (
-              <button 
-                key={genre}
-                className={`filter-link ${filters.category === genre ? 'active' : ''}`}
-                onClick={() => handleFilterChange('category', genre)}
-              >
-                {genre}
-              </button>
-            ))}
-          </div>
-
-          <div className="filter-group">
-            <h3 className="filter-label">ENGINE</h3>
-            <button className={`filter-link ${filters.engine === '' ? 'active' : ''}`} onClick={() => handleFilterChange('engine', '')}>All Engines</button>
-            {engines.map(engine => (
-              <button 
-                key={engine}
-                className={`filter-link ${filters.engine === engine ? 'active' : ''}`}
-                onClick={() => handleFilterChange('engine', engine)}
-              >
-                {engine}
-              </button>
-            ))}
-          </div>
-
-          <div className="filter-group">
-            <h3 className="filter-label">PRICE</h3>
-            <button className={`filter-link ${filters.priceRange === 'free' ? 'active' : ''}`} onClick={() => handleFilterChange('priceRange', 'free')}>Free</button>
-            <button className={`filter-link ${filters.priceRange === 'paid' ? 'active' : ''}`} onClick={() => handleFilterChange('priceRange', 'paid')}>Paid</button>
-            <button className="filter-link">Top Rated</button>
-          </div>
-        </aside>
+        </section>
 
         <section className="content-area">
           {/* Hero Section */}
-          <section className="hero-banner">
-            <div className="hero-banner__content">
-              <span className="featured-label">FEATURED ASSET</span>
-              <h1>Ultimate Fantasy UI Pack</h1>
-              <p>Professional 4K game interface assets for high-end RPGs and Adventure games. Vector-based and fully customizable.</p>
-              <div className="hero-banner__footer">
-                <div className="price-info">
-                  <small>PRICE</small>
-                  <strong>$29.99</strong>
+          {featuredAssets.length > 0 && (
+            <section className="hero-banner">
+              <div className="hero-banner__content">
+                <span className="featured-label">FEATURED ASSET</span>
+                <h1>{featuredAssets[0].title}</h1>
+                <p>{featuredAssets[0].description}</p>
+                <div className="hero-banner__footer">
+                  <div className="price-info">
+                    <small>PRICE</small>
+                    <strong>{featuredAssets[0].price === 0 ? 'Free' : `$${featuredAssets[0].price}`}</strong>
+                  </div>
+                  <Link to={`/marketplace/assets/${featuredAssets[0].id}`} className="btn-get-pack">Get Asset Pack</Link>
                 </div>
-                <button className="btn-get-pack">Get Asset Pack</button>
               </div>
-            </div>
-            <div className="hero-banner__image">
-              <img src={heroPreviewUrl} alt="Fantasy UI Pack" />
-            </div>
-          </section>
+              <div className="hero-banner__image">
+                <img src={featuredAssets[0].coverImageUrl || fallbackHeroUrl} alt={featuredAssets[0].title} />
+              </div>
+            </section>
+          )}
 
           {/* Featured Section */}
           <section className="section-block">

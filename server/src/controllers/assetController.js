@@ -1,11 +1,17 @@
 const { Asset, User, AssetMedia, Category, Tag } = require('../models/mysql');
 const { Op } = require('sequelize');
+const { r2 } = require('../middleware/cloudflareR2');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { cloudinary } = require('../middleware/cloudinary');
+const crypto = require('crypto');
 
 const getAllAssets = async (req, res) => {
   try {
-    const { categoryId, engine, minPrice, maxPrice, search, tagId } = req.query;
-    const where = { status: 'published' };
-
+    const { categoryId, engine, minPrice, maxPrice, search, tagId, authorId } = req.query;
+    
+    // If authorId is provided, we likely want all their assets (even pending) for their library
+    // Otherwise, only show published assets
+    const where = authorId ? { authorId } : { status: 'published' };
     if (engine) where.engine = engine;
     if (minPrice || maxPrice) {
       where.price = {};
@@ -69,32 +75,69 @@ const createAsset = async (req, res) => {
       return res.status(400).json({ error: 'Missing required files (Cover Image and Asset ZIP)' });
     }
 
+    const productId = crypto.randomUUID();
+    const userId = req.user.id;
+
+    // 1. Upload ZIP to R2
+    const assetFile = files.assetFile[0];
+    const r2Key = `uibrage/${userId}/${productId}/assets/${Date.now()}-${assetFile.originalname}`;
+    
+    await r2.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME || 'uibrage',
+      Key: r2Key,
+      Body: assetFile.buffer,
+      ContentType: assetFile.mimetype
+    }));
+
+    const fileUrl = `${process.env.R2_PUBLIC_URL}/${r2Key}`;
+
+    // 2. Upload Cover Image to Cloudinary
+    const uploadToCloudinary = (buffer, folder) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder, resource_type: 'auto' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          }
+        );
+        stream.end(buffer);
+      });
+    };
+
+    const coverImageUrl = await uploadToCloudinary(files.coverImage[0].buffer, `uibrage/${userId}/${productId}/covers`);
+
+    // 3. Create Asset record
     const newAsset = await Asset.create({
+      id: productId,
       title,
       description,
       price: isFree === 'true' ? 0 : parseFloat(price),
-      categoryId: parseInt(categoryId),
+      categoryId: categoryId && categoryId !== 'undefined' ? parseInt(categoryId) : null,
       engine,
       licenseType,
       isFree: isFree === 'true',
-      coverImageUrl: files.coverImage[0].path,
-      fileUrl: files.assetFile[0].path,
-      authorId: req.user.id,
-      status: 'pending'
+      coverImageUrl,
+      fileUrl,
+      authorId: userId,
+      status: 'published' // Auto-publish for now as requested or set to pending if moderation is needed
     });
 
-    // Handle tags (many-to-many)
+    // 4. Handle Tags
     if (tagIds) {
-      // tagIds might be a string if coming from FormData with one value, or an array
       const tagsArray = Array.isArray(tagIds) ? tagIds : [tagIds];
       await newAsset.setTags(tagsArray);
     }
 
-    // Handle screenshots
+    // 5. Handle Screenshots (to Cloudinary)
     if (files.screenshots) {
-      const mediaEntries = files.screenshots.map(file => ({
+      const screenshotUrls = await Promise.all(
+        files.screenshots.map(file => uploadToCloudinary(file.buffer, `uibrage/${userId}/${productId}/screenshots`))
+      );
+      
+      const mediaEntries = screenshotUrls.map(url => ({
         assetId: newAsset.id,
-        url: file.path,
+        url,
         type: 'image'
       }));
       await AssetMedia.bulkCreate(mediaEntries);
@@ -103,7 +146,11 @@ const createAsset = async (req, res) => {
     res.status(201).json(newAsset);
   } catch (error) {
     console.error('Create Asset Error:', error);
-    res.status(500).json({ error: error.message });
+    // Be more specific about the error
+    const errorMessage = error.name === 'UnexpectedResponse' 
+      ? `Storage Error (R2/S3): ${error.message} - Check bucket name and permissions.` 
+      : error.message;
+    res.status(500).json({ error: errorMessage, details: error });
   }
 };
 

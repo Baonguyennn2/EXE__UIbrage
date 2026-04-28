@@ -20,6 +20,7 @@ const addComment = async (req, res) => {
       userName,
       content,
       rating,
+      imageUrl: req.file ? req.file.path : null,
     });
 
     await newComment.save();

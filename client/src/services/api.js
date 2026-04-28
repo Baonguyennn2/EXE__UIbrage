@@ -53,4 +53,10 @@ export const authService = {
   resetPassword: (email, code, newPassword) => api.post('/auth/reset-password', { email, code, newPassword }),
 };
 
+export const userService = {
+  updateProfile: (formData) => api.put('/users/profile', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+};
+
 export default api;
