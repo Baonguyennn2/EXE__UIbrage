@@ -79,25 +79,32 @@ const createAsset = async (req, res) => {
     const userId = req.user.id;
 
     // 1. Upload ZIP to R2
+    console.log('--- STARTING R2 UPLOAD ---');
     const assetFile = files.assetFile[0];
     const r2Key = `uibrage/${userId}/${productId}/assets/${Date.now()}-${assetFile.originalname}`;
     
     await r2.send(new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME || 'uibrage',
+      Bucket: process.env.R2_BUCKET_NAME || 'uibrag',
       Key: r2Key,
       Body: assetFile.buffer,
       ContentType: assetFile.mimetype
     }));
+    console.log('--- R2 UPLOAD SUCCESS ---');
 
     const fileUrl = `${process.env.R2_PUBLIC_URL}/${r2Key}`;
 
     // 2. Upload Cover Image to Cloudinary
+    console.log('--- STARTING CLOUDINARY UPLOAD ---');
+    console.log('Cloud Name:', cloudinary.config().cloud_name);
     const uploadToCloudinary = (buffer, folder) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder, resource_type: 'auto' },
           (error, result) => {
-            if (error) reject(error);
+            if (error) {
+              console.error('Cloudinary Error Detail:', error);
+              reject(error);
+            }
             else resolve(result.secure_url);
           }
         );
@@ -105,7 +112,8 @@ const createAsset = async (req, res) => {
       });
     };
 
-    const coverImageUrl = await uploadToCloudinary(files.coverImage[0].buffer, `uibrage/${userId}/${productId}/covers`);
+    const coverImageUrl = await uploadToCloudinary(files.coverImage[0].buffer, `uibrage_covers`);
+    console.log('--- CLOUDINARY UPLOAD SUCCESS ---');
 
     // 3. Create Asset record
     const newAsset = await Asset.create({
@@ -145,10 +153,14 @@ const createAsset = async (req, res) => {
 
     res.status(201).json(newAsset);
   } catch (error) {
-    console.error('Create Asset Error:', error);
-    // Be more specific about the error
-    const errorMessage = error.name === 'UnexpectedResponse' 
-      ? `Storage Error (R2/S3): ${error.message} - Check bucket name and permissions.` 
+    console.error('--- UPLOAD FAILED ---');
+    console.error('Error Name:', error.name);
+    console.error('Error Code:', error.code || error.$metadata?.httpStatusCode);
+    console.error('Full Error:', JSON.stringify(error, null, 2));
+    
+    const bucket = process.env.R2_BUCKET_NAME || 'uibrag';
+    const errorMessage = error.name === 'UnexpectedResponse' || error.code === 'AccessDenied' || error.$metadata?.httpStatusCode === 403
+      ? `Storage Error (R2/S3): ${error.message}. Bucket: "${bucket}". Please verify your R2 Token has "Edit" permissions and Account ID is correct.` 
       : error.message;
     res.status(500).json({ error: errorMessage, details: error });
   }

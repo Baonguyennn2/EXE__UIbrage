@@ -26,6 +26,10 @@ Asset.belongsTo(Category, { as: 'categoryData', foreignKey: 'categoryId' });
 Asset.belongsToMany(Tag, { through: 'AssetTags', as: 'tags' });
 Tag.belongsToMany(Asset, { through: 'AssetTags' });
 
+// Wishlist Relations (Many-to-Many)
+User.belongsToMany(Asset, { through: 'Wishlists', as: 'wishlist' });
+Asset.belongsToMany(User, { through: 'Wishlists', as: 'wishlistedBy' });
+
 module.exports = {
   User,
   Asset,

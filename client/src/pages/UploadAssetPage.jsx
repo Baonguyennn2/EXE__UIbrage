@@ -123,15 +123,18 @@ export default function UploadAssetPage({ isAdmin = false }) {
           </div>
 
           <div className="form-section-v3">
-            <label className="label-v3">DESCRIPTION</label>
+            <label className="label-v3">DESCRIPTION (MARKDOWN SUPPORTED)</label>
             <textarea 
               className="textarea-v3"
-              rows={5} 
+              rows={8} 
               name="description"
-              placeholder="Explain what makes your asset special..."
+              placeholder="Explain what makes your asset special... You can use **bold**, *italic*, # Headers, or [links](url)"
               value={formData.description}
               onChange={handleInputChange}
             />
+            <small style={{ color: '#64748b', marginTop: '0.5rem', display: 'block' }}>
+              Pro tip: Use Markdown to create rich descriptions like the ones you see in top-tier assets!
+            </small>
           </div>
 
           <div className="upload-row-v3">

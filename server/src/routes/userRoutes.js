@@ -5,5 +5,7 @@ const { authenticate } = require('../middleware/auth');
 const { upload } = require('../middleware/cloudinary');
 
 router.put('/profile', authenticate, upload.single('avatar'), userController.updateProfile);
+router.get('/wishlist', authenticate, userController.getWishlist);
+router.post('/wishlist/toggle', authenticate, userController.toggleWishlist);
 
 module.exports = router;

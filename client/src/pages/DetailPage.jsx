@@ -1,24 +1,45 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
-import { assetService, commentService } from '../services/api'
+import { assetService, commentService, userService } from '../services/api'
+import { 
+  RiStarFill, 
+  RiShoppingBag3Line, 
+  RiHeartLine, 
+  RiHeartFill,
+  RiLayout4Line,
+  RiDatabaseLine,
+  RiFileCopyLine
+} from 'react-icons/ri'
 
 export default function DetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [asset, setAsset] = useState(null)
   const [comments, setComments] = useState([])
+  const [recommended, setRecommended] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [wishlistLoading, setWishlistLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [assetRes, commentsRes] = await Promise.all([
+        const [assetRes, commentsRes, recRes] = await Promise.all([
           assetService.getById(id),
-          commentService.getByAsset(id)
+          commentService.getByAsset(id),
+          assetService.getAll({ limit: 3 })
         ])
         setAsset(assetRes.data)
         setComments(commentsRes.data)
+        setRecommended(recRes.data.filter(a => a.id !== id))
         setLoading(false)
+
+        const token = localStorage.getItem('token')
+        if (token) {
+          const wishlistRes = await userService.getWishlist()
+          setIsWishlisted(wishlistRes.data.some(item => item.id === id))
+        }
       } catch (error) {
         console.error('Error fetching details:', error)
         setLoading(false)
@@ -26,6 +47,24 @@ export default function DetailPage() {
     }
     fetchData()
   }, [id])
+
+  const handleToggleWishlist = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/auth/login')
+      return
+    }
+
+    setWishlistLoading(true)
+    try {
+      const res = await userService.toggleWishlist(id)
+      setIsWishlisted(res.data.isWishlisted)
+    } catch (error) {
+      console.error('Error toggling wishlist:', error)
+    } finally {
+      setWishlistLoading(false)
+    }
+  }
 
   const [newComment, setNewComment] = useState('')
   const [rating, setRating] = useState(5)
@@ -58,96 +97,139 @@ export default function DetailPage() {
   return (
     <main className="market-home">
       <AppHeader />
-      <section className="market-page">
-        <div className="market-page__header">
-          <p className="eyebrow">Asset detail</p>
-          <h1>{asset.title}</h1>
-          <p>{asset.description}</p>
-        </div>
-
-        <section className="market-page__content market-page__content--detail">
-          <article className="surface-card">
-            <div className="detail-gallery">
-              <div className="detail-gallery__hero">
-                <img src={asset.coverImageUrl} alt={asset.title} style={{ width: '100%', borderRadius: '8px' }} />
-              </div>
-              <div className="detail-gallery__list">
-                {asset.media?.map((m) => (
-                  <div key={m.id} className="gallery-thumb">
-                    <img src={m.url} alt="screenshot" style={{ width: '100px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
-                  </div>
-                ))}
+      
+      <div className="detail-v2-container">
+        <section className="detail-v2-main">
+          <header className="detail-v2-header">
+            <div className="header-meta-row">
+              <span className="eyebrow">CREATED BY <Link to="#" className="author-link">{asset.author?.fullName || asset.author?.username}</Link></span>
+              <div className="rating-summary">
+                <span><RiStarFill /></span>
+                <strong>4.9</strong>
+                <small>({comments.length} reviews)</small>
               </div>
             </div>
-            
-            <div className="comments-section" style={{ marginTop: '3rem' }}>
-              <h3>Community Reviews ({comments.length})</h3>
-              
-              <form onSubmit={handleAddComment} className="comment-form" style={{ marginBottom: '2rem' }}>
-                <textarea 
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Write your review..."
-                  required
-                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd' }}
-                />
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                  <span>Rating:</span>
-                  <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
-                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
-                  </select>
-                  <button type="submit" className="btn-solid" disabled={submitting}>
-                    {submitting ? 'Posting...' : 'Post Review'}
-                  </button>
-                </div>
-              </form>
+            <h1>{asset.title}</h1>
+          </header>
 
-              <div className="comments-list">
-                {comments.length === 0 ? <p>No reviews yet. Be the first!</p> : comments.map((c) => (
-                  <div key={c._id || c.id} className="comment-item" style={{ borderBottom: '1px solid #eee', padding: '1.5rem 0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <strong>{c.userName}</strong>
-                      <span className="rating-badge">{'⭐'.repeat(c.rating || 5)}</span>
-                    </div>
-                    <p style={{ margin: '0.5rem 0' }}>{c.content}</p>
-                    <small style={{ color: '#888' }}>{new Date(c.createdAt).toLocaleDateString()}</small>
-                  </div>
-                ))}
-              </div>
+          <div className="detail-gallery-v2">
+             <img src={asset.coverImageUrl} alt={asset.title} className="detail-hero-img" style={{ width: '100%', borderRadius: '1rem', objectFit: 'cover', maxHeight: '500px' }} />
+          </div>
+
+          <article className="detail-v2-card">
+            <h3>About this Asset</h3>
+            <div className="about-asset-section markdown-content">
+              {asset.description ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {asset.description}
+                </ReactMarkdown>
+              ) : (
+                <p>No description provided for this asset.</p>
+              )}
             </div>
           </article>
 
-          <aside className="surface-card detail-summary">
-            <div className="price-tag">
-              <h2>${asset.price}</h2>
-              {asset.isFree && <span className="free-badge">FREE</span>}
+          <section className="detail-v2-card">
+            <h3>User Reviews ({comments.length})</h3>
+            <form onSubmit={handleAddComment} className="comment-form-v2">
+              <textarea 
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write your review..."
+                className="review-textarea"
+                required
+                style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginBottom: '1rem' }}
+              />
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                <div className="rating-select">
+                  <span>Rating: </span>
+                  <select value={rating} onChange={(e) => setRating(Number(e.target.value))} style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
+                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                </div>
+                <button type="submit" className="btn-solid" disabled={submitting}>
+                  {submitting ? 'Posting...' : 'Post Review'}
+                </button>
+              </div>
+            </form>
+
+            <div className="comments-list" style={{ marginTop: '2rem' }}>
+              {comments.map((c) => (
+                <div key={c._id || c.id} className="comment-item-v2" style={{ borderTop: '1px solid #f1f5f9', padding: '1.5rem 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <strong>{c.userName}</strong>
+                    <span style={{ color: '#f59e0b' }}>{'★'.repeat(c.rating || 5)}</span>
+                  </div>
+                  <p>{c.content}</p>
+                </div>
+              ))}
             </div>
-            <p>By {asset.author?.fullName || asset.author?.username} • Updated {new Date(asset.updatedAt).toLocaleDateString()}</p>
-            <ul className="spec-list">
-              <li><strong>License:</strong> {asset.licenseType}</li>
-              <li><strong>Engine:</strong> {asset.engine}</li>
-              <li><strong>Category:</strong> {asset.category}</li>
-              <li><strong>File:</strong> {asset.fileUrl ? 'Available for download' : 'Preview only'}</li>
-            </ul>
-            <div className="cta-row">
-              <button 
-                type="button" 
-                className="btn-solid"
-                onClick={() => alert('Added to cart! This feature is coming soon.')}
-              >
-                Add to cart
-              </button>
-              <button 
-                type="button" 
-                className="btn-ghost"
-                onClick={() => alert('Saved to library!')}
-              >
-                Save to library
-              </button>
-            </div>
-          </aside>
+          </section>
         </section>
-      </section>
+
+        <aside className="sidebar-v2-stack">
+          <section className="detail-v2-card price-card">
+            <div className="price-display">
+              <span>Price</span>
+              <strong>${asset.price}</strong>
+            </div>
+            <button className="btn-purchase" onClick={() => navigate('/marketplace/checkout', { state: { asset } })}>
+              <RiShoppingBag3Line /> Purchase Now
+            </button>
+            <button 
+              className={`btn-wishlist ${isWishlisted ? 'active' : ''}`}
+              onClick={handleToggleWishlist}
+              disabled={wishlistLoading}
+            >
+              {isWishlisted ? <><RiHeartFill color="#ef4444" /> Saved to Wishlist</> : <><RiHeartLine /> Add to Wishlist</>}
+            </button>
+
+            <div className="spec-list-v2" style={{ marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                <span style={{ color: '#64748b' }}>Supported Engines</span>
+                <strong>{asset.engine || 'Unity, Unreal'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                <span style={{ color: '#64748b' }}>File Formats</span>
+                <strong>PSD, PNG, SVG</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                <span style={{ color: '#64748b' }}>License</span>
+                <Link to="#" style={{ color: '#6366f1', textDecoration: 'underline' }}>{asset.licenseType || 'Standard Commercial'}</Link>
+              </div>
+            </div>
+          </section>
+
+          <section className="detail-v2-card author-card-v2">
+             <div className="author-header">
+                <div className="author-avatar-big">
+                  {asset.author?.avatarUrl ? <img src={asset.author.avatarUrl} style={{ width: '100%', height: '100%', borderRadius: 'inherit' }} /> : (asset.author?.fullName?.[0] || asset.author?.username?.[0] || 'U')}
+                </div>
+                <div className="author-info-text">
+                  <h4>{asset.author?.fullName || asset.author?.username}</h4>
+                  <span>12 Assets • 4.5k Followers</span>
+                </div>
+             </div>
+             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>Premium game assets for indie developers. Specialized in RPG and RTS interface design.</p>
+             <button className="btn-follow">Follow</button>
+          </section>
+
+          <div className="recommended-section">
+            <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', color: '#64748b', marginBottom: '1rem' }}>You may also like</h4>
+            <div className="recommended-list">
+              {recommended.map(item => (
+                <Link key={item.id} to={`/marketplace/assets/${item.id}`} className="recommended-item">
+                  <img src={item.coverImageUrl} className="rec-thumb" alt={item.title} />
+                  <div className="rec-info">
+                    <h5>{item.title}</h5>
+                    <span>${item.price}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
   )
 }

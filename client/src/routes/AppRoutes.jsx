@@ -16,6 +16,7 @@ import VerifyEmailPage from '../pages/VerifyEmailPage.jsx'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '../pages/ResetPasswordPage.jsx'
 import ProfileEditPage from '../pages/ProfileEditPage.jsx'
+import WishlistPage from '../pages/WishlistPage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
@@ -34,6 +35,9 @@ export default function AppRoutes() {
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       
       {/* Customer Protected Routes */}
+      <Route path="/wishlist" element={
+        <ProtectedRoute allowedRoles={['customer']}><WishlistPage /></ProtectedRoute>
+      } />
       <Route path="/marketplace/checkout" element={
         <ProtectedRoute allowedRoles={['customer']}><CheckoutPage /></ProtectedRoute>
       } />

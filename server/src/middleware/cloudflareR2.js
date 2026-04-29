@@ -4,7 +4,7 @@ const multerS3 = require('multer-s3');
 require('dotenv').config();
 
 const r2 = new S3Client({
-  region: 'auto',
+  region: 'us-east-1',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID || '',

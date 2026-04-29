@@ -10,12 +10,31 @@ const api = axios.create({
 
 // Add interceptor to include token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// Add interceptor to handle 401 errors (expired token)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear user data and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // We can't use useNavigate here as it's not a React component,
+      // so we use window.location.href
+      if (!window.location.pathname.includes('/auth/login')) {
+        window.location.href = '/auth/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const assetService = {
   getAll: (params) => api.get('/assets', { params }),
@@ -56,7 +75,9 @@ export const authService = {
 export const userService = {
   updateProfile: (formData) => api.put('/users/profile', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
-  })
+  }),
+  getWishlist: () => api.get('/users/wishlist'),
+  toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
 };
 
 export default api;

@@ -57,6 +57,8 @@ export default function ProfileEditPage() {
       setNotification({ type: 'success', message: 'Profile updated successfully!' })
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
+      // Notify other components (like Header) to update
+      window.dispatchEvent(new Event('authChange'))
     } catch (error) {
       console.error('Update Error:', error)
       setNotification({ type: 'error', message: error.response?.data?.message || 'Update failed' })

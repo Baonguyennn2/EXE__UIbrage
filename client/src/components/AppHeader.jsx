@@ -36,19 +36,27 @@ export default function AppHeader({ onSearch }) {
   const categoryRef = useRef(null)
   const userMenuRef = useRef(null)
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    const token = localStorage.getItem('token')
-    if (savedUser && token) {
-      try {
-        setUser(JSON.parse(savedUser))
-      } catch (e) {
-        console.error('Error parsing user', e)
+    const loadUser = () => {
+      const savedUser = localStorage.getItem('user')
+      const token = localStorage.getItem('token')
+      if (savedUser && token) {
+        try {
+          setUser(JSON.parse(savedUser))
+        } catch (e) {
+          console.error('Error parsing user', e)
+        }
+      } else {
+        setUser(null)
       }
     }
 
+    loadUser()
+
     // Load categories
     metadataService.getCategories().then(res => setCategories(res.data))
+
+    // Listen for auth changes from other pages
+    window.addEventListener('authChange', loadUser)
 
     // Handle clicking outside to close menus
     const handleClickOutside = (event) => {
@@ -61,7 +69,10 @@ export default function AppHeader({ onSearch }) {
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('authChange', loadUser)
+    }
   }, [])
 
   const handleKeyDown = (e) => {
@@ -142,7 +153,11 @@ export default function AppHeader({ onSearch }) {
             >
               <div className="user-profile-summary" onClick={() => setShowUserMenu(!showUserMenu)}>
                 <div className="avatar-circle">
-                  {user.username?.[0]?.toUpperCase() || 'U'}
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    user.username?.[0]?.toUpperCase() || 'U'
+                  )}
                 </div>
                 <span className="user-name">{user.username}</span>
                 <RiArrowDownSLine size={16} color="#64748b" />
@@ -155,6 +170,9 @@ export default function AppHeader({ onSearch }) {
                     <span>{user.email}</span>
                   </div>
                   <div className="dropdown-divider" />
+                  <Link to="/wishlist" onClick={() => setShowUserMenu(false)}>
+                    <RiBookletLine /> Wishlist
+                  </Link>
                   <Link to="/library" onClick={() => setShowUserMenu(false)}>
                     <RiBookletLine /> My Library
                   </Link>
@@ -170,6 +188,7 @@ export default function AppHeader({ onSearch }) {
                   <button onClick={handleLogout} className="dropdown-logout">
                     <RiLogoutBoxRLine /> Logout
                   </button>
+                  <div className="dropdown-safe-bridge"></div>
                 </div>
               )}
             </div>
