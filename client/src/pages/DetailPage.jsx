@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
 import { assetService, commentService, userService } from '../services/api'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { 
   RiStarFill, 
   RiShoppingBag3Line, 

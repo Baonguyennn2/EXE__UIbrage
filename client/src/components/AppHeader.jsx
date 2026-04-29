@@ -151,7 +151,7 @@ export default function AppHeader({ onSearch }) {
               onMouseEnter={() => setShowUserMenu(true)}
               onMouseLeave={() => setShowUserMenu(false)}
             >
-              <div className="user-profile-summary" onClick={() => setShowUserMenu(!showUserMenu)}>
+              <Link to={`/profile/${user.username}`} className="user-profile-summary">
                 <div className="avatar-circle">
                   {user.avatarUrl ? (
                     <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
@@ -160,8 +160,8 @@ export default function AppHeader({ onSearch }) {
                   )}
                 </div>
                 <span className="user-name">{user.username}</span>
-                <RiArrowDownSLine size={16} color="#64748b" />
-              </div>
+                <RiArrowDownSLine size={16} color="#64748b" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowUserMenu(!showUserMenu); }} />
+              </Link>
 
               {showUserMenu && (
                 <div className="header-dropdown header-dropdown--user">
@@ -170,6 +170,9 @@ export default function AppHeader({ onSearch }) {
                     <span>{user.email}</span>
                   </div>
                   <div className="dropdown-divider" />
+                  <Link to={`/profile/${user.username}`} onClick={() => setShowUserMenu(false)}>
+                    <RiUser3Line /> View Profile
+                  </Link>
                   <Link to="/wishlist" onClick={() => setShowUserMenu(false)}>
                     <RiBookletLine /> Wishlist
                   </Link>

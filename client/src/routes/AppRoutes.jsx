@@ -17,6 +17,7 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '../pages/ResetPasswordPage.jsx'
 import ProfileEditPage from '../pages/ProfileEditPage.jsx'
 import WishlistPage from '../pages/WishlistPage.jsx'
+import UserProfilePage from '../pages/UserProfilePage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
@@ -33,6 +34,7 @@ export default function AppRoutes() {
       <Route path="/" element={<HomepagePage />} />
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
+      <Route path="/profile/:username" element={<UserProfilePage />} />
       
       {/* Customer Protected Routes */}
       <Route path="/wishlist" element={

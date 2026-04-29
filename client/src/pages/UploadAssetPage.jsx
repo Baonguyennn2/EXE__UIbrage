@@ -5,7 +5,8 @@ import axios from 'axios'
 import AppHeader from '../components/AppHeader.jsx'
 import { 
   RiUploadCloud2Fill, RiImageAddLine, RiCheckLine, RiCloseLine,
-  RiPriceTag3Line, RiFileZipLine
+  RiPriceTag3Line, RiFileZipLine,
+  RiBold, RiItalic, RiH1, RiH2, RiH3, RiDoubleQuotesL, RiLink, RiListUnordered, RiListOrdered, RiCodeLine
 } from 'react-icons/ri'
 
 export default function UploadAssetPage({ isAdmin = false }) {
@@ -27,6 +28,24 @@ export default function UploadAssetPage({ isAdmin = false }) {
   })
   const [coverImage, setCoverImage] = useState(null)
   const [assetFile, setAssetFile] = useState(null)
+
+  const insertMarkdown = (before, after) => {
+    const textarea = document.getElementById('descriptionArea')
+    if (!textarea) return
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const text = textarea.value
+    const selectedText = text.substring(start, end)
+    const newText = text.substring(0, start) + before + selectedText + after + text.substring(end)
+    
+    setFormData(prev => ({ ...prev, description: newText }))
+    
+    // Reset focus and selection
+    setTimeout(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length)
+    }, 0)
+  }
 
   useEffect(() => {
     // Load both categories and tags to use as hashtags
@@ -124,16 +143,33 @@ export default function UploadAssetPage({ isAdmin = false }) {
 
           <div className="form-section-v3">
             <label className="label-v3">DESCRIPTION (MARKDOWN SUPPORTED)</label>
+            
+            <div className="markdown-toolbar">
+              <button type="button" className="toolbar-btn" title="Bold" onClick={() => insertMarkdown('**', '**')}><RiBold /></button>
+              <button type="button" className="toolbar-btn" title="Italic" onClick={() => insertMarkdown('_', '_')}><RiItalic /></button>
+              <button type="button" className="toolbar-btn" title="H1" onClick={() => insertMarkdown('# ', '')}><RiH1 /></button>
+              <button type="button" className="toolbar-btn" title="H2" onClick={() => insertMarkdown('## ', '')}><RiH2 /></button>
+              <button type="button" className="toolbar-btn" title="H3" onClick={() => insertMarkdown('### ', '')}><RiH3 /></button>
+              <div style={{ width: 1, height: 20, background: '#e2e8f0', margin: '0 4px' }} />
+              <button type="button" className="toolbar-btn" title="Quote" onClick={() => insertMarkdown('> ', '')}><RiDoubleQuotesL /></button>
+              <button type="button" className="toolbar-btn" title="Code" onClick={() => insertMarkdown('```\n', '\n```')}><RiCodeLine /></button>
+              <button type="button" className="toolbar-btn" title="Link" onClick={() => insertMarkdown('[', '](url)')}><RiLink /></button>
+              <button type="button" className="toolbar-btn" title="Unordered List" onClick={() => insertMarkdown('- ', '')}><RiListUnordered /></button>
+              <button type="button" className="toolbar-btn" title="Ordered List" onClick={() => insertMarkdown('1. ', '')}><RiListOrdered /></button>
+            </div>
+
             <textarea 
+              id="descriptionArea"
               className="textarea-v3"
-              rows={8} 
+              rows={12} 
               name="description"
-              placeholder="Explain what makes your asset special... You can use **bold**, *italic*, # Headers, or [links](url)"
+              placeholder="Explain what makes your asset special..."
               value={formData.description}
               onChange={handleInputChange}
+              style={{ borderRadius: '0 0 0.75rem 0.75rem' }}
             />
             <small style={{ color: '#64748b', marginTop: '0.5rem', display: 'block' }}>
-              Pro tip: Use Markdown to create rich descriptions like the ones you see in top-tier assets!
+              You can also type Markdown directly. Everything will be rendered beautifully on the detail page.
             </small>
           </div>
 
