@@ -35,7 +35,7 @@ export default function AppHeader({ onSearch }) {
   
   const categoryRef = useRef(null)
   const userMenuRef = useRef(null)
-
+  useEffect(() => {
     const loadUser = () => {
       const savedUser = localStorage.getItem('user')
       const token = localStorage.getItem('token')
