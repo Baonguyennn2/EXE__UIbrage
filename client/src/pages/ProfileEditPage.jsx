@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react'
 import { userService } from '../services/api'
 import AppHeader from '../components/AppHeader.jsx'
 import Toast from '../components/Toast.jsx'
-import { RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill } from 'react-icons/ri'
+import { 
+  RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill,
+  RiMapPin2Fill, RiGlobalFill, RiBriefcaseFill, RiFacebookBoxFill, 
+  RiTwitterFill, RiGithubFill 
+} from 'react-icons/ri'
 
 export default function ProfileEditPage() {
   const [user, setUser] = useState(null)
@@ -10,7 +14,13 @@ export default function ProfileEditPage() {
     fullName: '',
     username: '',
     email: '',
-    bio: ''
+    bio: '',
+    jobTitle: '',
+    location: '',
+    website: '',
+    facebookUrl: '',
+    twitterUrl: '',
+    githubUrl: ''
   })
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
@@ -25,7 +35,13 @@ export default function ProfileEditPage() {
         fullName: savedUser.fullName || '',
         username: savedUser.username || '',
         email: savedUser.email || '',
-        bio: savedUser.bio || ''
+        bio: savedUser.bio || '',
+        jobTitle: savedUser.jobTitle || '',
+        location: savedUser.location || '',
+        website: savedUser.website || '',
+        facebookUrl: savedUser.facebookUrl || '',
+        twitterUrl: savedUser.twitterUrl || '',
+        githubUrl: savedUser.githubUrl || ''
       })
     }
   }, [])
@@ -43,9 +59,11 @@ export default function ProfileEditPage() {
     
     try {
       const data = new FormData()
-      data.append('fullName', formData.fullName)
-      data.append('bio', formData.bio)
-      // Note: username update might require a different flow in Cognito if supported, so we skip username for now or just pass it if backend handles it
+      Object.keys(formData).forEach(key => {
+        if (key !== 'email' && key !== 'username') { // Email/Username usually not editable directly if linked to auth
+           data.append(key, formData[key])
+        }
+      })
       
       if (avatarFile) {
         data.append('avatar', avatarFile)
@@ -57,7 +75,6 @@ export default function ProfileEditPage() {
       setNotification({ type: 'success', message: 'Profile updated successfully!' })
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
-      // Notify other components (like Header) to update
       window.dispatchEvent(new Event('authChange'))
     } catch (error) {
       console.error('Update Error:', error)
@@ -70,7 +87,7 @@ export default function ProfileEditPage() {
   if (!user) return null
 
   return (
-    <main className="profile-edit-canvas">
+    <main className="profile-edit-canvas" style={{ background: '#f8fafc', minHeight: '100vh' }}>
       <AppHeader />
       
       {notification && (
@@ -83,86 +100,112 @@ export default function ProfileEditPage() {
         </div>
       )}
 
-      <div className="profile-edit-content">
-        <header className="profile-edit-header">
-          <h1>Account Settings</h1>
-          <p>Update your personal information and profile details.</p>
+      <div className="profile-edit-content" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+        <header className="profile-edit-header" style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '2rem', color: '#1e293b' }}>Edit Profile</h1>
+          <p style={{ color: '#64748b' }}>Complete your profile to build trust in the community.</p>
         </header>
 
-        <section className="surface-card profile-form-card">
-          <form onSubmit={handleSubmit} className="profile-form">
-            <div className="profile-avatar-section">
-              <div className="avatar-preview" style={ (avatarPreview || user.avatarUrl) ? { backgroundImage: `url(${avatarPreview || user.avatarUrl})`, backgroundSize: 'cover' } : {} }>
+        <form onSubmit={handleSubmit} className="profile-form">
+          <section className="surface-card" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Basic Information</h3>
+            <div className="profile-avatar-section" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '2rem' }}>
+              <div 
+                className="avatar-preview" 
+                style={{ 
+                  width: '100px', 
+                  height: '100px', 
+                  borderRadius: '50%', 
+                  background: '#e2e8f0',
+                  backgroundImage: (avatarPreview || user.avatarUrl) ? `url(${avatarPreview || user.avatarUrl})` : 'none',
+                  backgroundSize: 'cover',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  fontWeight: 700,
+                  color: '#4f46e5'
+                }}
+              >
                 {!(avatarPreview || user.avatarUrl) && formData.username?.[0]?.toUpperCase()}
               </div>
               <div className="avatar-info">
-                <h3>Profile Picture</h3>
-                <p>Upload a new avatar to personalize your account.</p>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  hidden 
-                  id="avatarUpload" 
-                  onChange={handleAvatarChange} 
-                />
-                <label htmlFor="avatarUpload" className="btn-ghost small">
-                  <RiImageEditFill style={{marginRight: 4}}/> Change Avatar
+                <input type="file" accept="image/*" hidden id="avatarUpload" onChange={handleAvatarChange} />
+                <label htmlFor="avatarUpload" className="btn-ghost" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', cursor: 'pointer' }}>
+                  <RiImageEditFill /> Change Photo
                 </label>
               </div>
             </div>
 
-            <div className="form-grid">
-              <label>
-                Full Name
-                <div className="input-with-icon">
+            <div className="form-grid-v2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div className="field-group">
+                <label>Full Name</label>
+                <div className="input-v3">
                   <RiUser3Fill />
-                  <input 
-                    type="text" 
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                  />
+                  <input type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
                 </div>
-              </label>
-
-              <label>
-                Username
-                <div className="input-with-icon">
-                  <RiShieldUserFill />
-                  <input 
-                    type="text" 
-                    value={formData.username}
-                    onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  />
+              </div>
+              <div className="field-group">
+                <label>Job Title</label>
+                <div className="input-v3">
+                  <RiBriefcaseFill />
+                  <input type="text" value={formData.jobTitle} placeholder="e.g. UI Designer" onChange={e => setFormData({...formData, jobTitle: e.target.value})} />
                 </div>
-              </label>
-
-              <label className="full-width">
-                Email Address
-                <div className="input-with-icon disabled">
-                  <RiMailFill />
-                  <input type="email" value={formData.email} disabled />
-                </div>
-                <small>Email cannot be changed as it is linked to your AWS account.</small>
-              </label>
-
-              <label className="full-width">
-                Bio
-                <textarea 
-                  rows={4} 
-                  value={formData.bio}
-                  placeholder="Tell us about yourself..."
-                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                />
-              </label>
+              </div>
+              <div className="field-group" style={{ gridColumn: 'span 2' }}>
+                <label>Bio</label>
+                <textarea rows={4} value={formData.bio} style={{ width: '100%', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }} placeholder="Tell the community about yourself..." onChange={e => setFormData({...formData, bio: e.target.value})} />
+              </div>
             </div>
+          </section>
 
-            <div className="profile-form-actions">
-              <button type="submit" className="btn-solid" disabled={loading}>
-                <RiSave3Line /> {loading ? 'Saving...' : 'Save Changes'}
-              </button>
+          <section className="surface-card" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>Social & Contact</h3>
+            <div className="form-grid-v2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div className="field-group">
+                <label>Location</label>
+                <div className="input-v3">
+                  <RiMapPin2Fill />
+                  <input type="text" value={formData.location} placeholder="City, Country" onChange={e => setFormData({...formData, location: e.target.value})} />
+                </div>
+              </div>
+              <div className="field-group">
+                <label>Website</label>
+                <div className="input-v3">
+                  <RiGlobalFill />
+                  <input type="text" value={formData.website} placeholder="https://yourportfolio.com" onChange={e => setFormData({...formData, website: e.target.value})} />
+                </div>
+              </div>
+              <div className="field-group">
+                <label>Facebook URL</label>
+                <div className="input-v3">
+                  <RiFacebookBoxFill />
+                  <input type="text" value={formData.facebookUrl} onChange={e => setFormData({...formData, facebookUrl: e.target.value})} />
+                </div>
+              </div>
+              <div className="field-group">
+                <label>Twitter URL</label>
+                <div className="input-v3">
+                  <RiTwitterFill />
+                  <input type="text" value={formData.twitterUrl} onChange={e => setFormData({...formData, twitterUrl: e.target.value})} />
+                </div>
+              </div>
+              <div className="field-group">
+                <label>Github URL</label>
+                <div className="input-v3">
+                  <RiGithubFill />
+                  <input type="text" value={formData.githubUrl} onChange={e => setFormData({...formData, githubUrl: e.target.value})} />
+                </div>
+              </div>
             </div>
-          </form>
-        </section>
+          </section>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+            <button type="submit" className="btn-solid" style={{ padding: '0.8rem 2.5rem' }} disabled={loading}>
+              <RiSave3Line /> {loading ? 'Saving...' : 'Save All Changes'}
+            </button>
+          </div>
+        </form>
       </div>
     </main>
   )

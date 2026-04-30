@@ -5,9 +5,18 @@ const updateProfile = async (req, res) => {
   try {
     const { id } = req.user;
     const updateData = {};
-    if (req.body.fullName) updateData.fullName = req.body.fullName;
-    if (req.body.bio) updateData.bio = req.body.bio;
-    if (req.file) updateData.avatarUrl = req.file.path;
+    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl'];
+    
+    fields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    if (req.file) {
+      updateData.avatarUrl = req.file.path; // Cloudinary URL from multer-storage-cloudinary
+    }
+
     await User.update(updateData, { where: { id } });
     const updatedUser = await User.findByPk(id, { attributes: { exclude: ['passwordHash'] } });
     res.json(updatedUser);
@@ -51,8 +60,44 @@ const toggleWishlist = async (req, res) => {
   }
 };
 
+const { Order } = require('../models/mysql');
+
+const getEarnings = async (req, res) => {
+  try {
+    const assets = await Asset.findAll({
+      where: { authorId: req.user.id },
+      include: [{
+        model: Order,
+        where: { status: 'completed' },
+        required: false
+      }]
+    });
+
+    let totalEarnings = 0;
+    const salesBreakdown = assets.map(asset => {
+      const assetSales = asset.Orders || [];
+      const assetRevenue = assetSales.reduce((sum, order) => sum + parseFloat(order.amount), 0);
+      totalEarnings += assetRevenue;
+      return {
+        id: asset.id,
+        title: asset.title,
+        salesCount: assetSales.length,
+        revenue: assetRevenue
+      };
+    });
+
+    res.json({
+      totalEarnings,
+      salesBreakdown
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getWishlist,
-  toggleWishlist
+  toggleWishlist,
+  getEarnings
 };

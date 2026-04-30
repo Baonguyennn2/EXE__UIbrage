@@ -166,8 +166,109 @@ const createAsset = async (req, res) => {
   }
 };
 
+const updateAsset = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, price, categoryId, engine, licenseType, isFree, tagIds } = req.body;
+    
+    const asset = await Asset.findByPk(id);
+    if (!asset) return res.status(404).json({ message: 'Asset not found' });
+    if (asset.authorId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const updateData = {
+      title,
+      description,
+      price: isFree === 'true' ? 0 : parseFloat(price),
+      categoryId: categoryId && categoryId !== 'undefined' ? parseInt(categoryId) : null,
+      engine,
+      licenseType,
+      isFree: isFree === 'true'
+    };
+
+    await asset.update(updateData);
+
+    if (tagIds) {
+      const tagsArray = Array.isArray(tagIds) ? tagIds : [tagIds];
+      await asset.setTags(tagsArray);
+    }
+
+    res.json(asset);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteAsset = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const asset = await Asset.findByPk(id, {
+      include: [{ model: AssetMedia, as: 'media' }]
+    });
+
+    if (!asset) return res.status(404).json({ message: 'Asset not found' });
+    if (asset.authorId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    // 1. Delete from R2
+    if (asset.fileUrl) {
+      try {
+        const url = new URL(asset.fileUrl);
+        const key = url.pathname.substring(1); // Remove leading slash
+        const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+        await r2.send(new DeleteObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME || 'uibrag',
+          Key: key
+        }));
+      } catch (e) {
+        console.error('Error deleting from R2:', e);
+      }
+    }
+
+    // 2. Delete Cover from Cloudinary
+    if (asset.coverImageUrl) {
+      try {
+        // Extract public_id from URL
+        const parts = asset.coverImageUrl.split('/');
+        const fileName = parts[parts.length - 1].split('.')[0];
+        const folder = parts[parts.length - 2];
+        const publicId = `${folder}/${fileName}`;
+        await cloudinary.uploader.destroy(publicId);
+      } catch (e) {
+        console.error('Error deleting cover from Cloudinary:', e);
+      }
+    }
+
+    // 3. Delete Screenshots from Cloudinary
+    if (asset.media && asset.media.length > 0) {
+      for (const m of asset.media) {
+        try {
+          const parts = m.url.split('/');
+          const fileName = parts[parts.length - 1].split('.')[0];
+          // Screenshots might be nested deeper, better to use regex or store public_id
+          // For now, assume same folder structure as covers or similar
+          const folder = parts.slice(parts.indexOf('uibrage'), -1).join('/');
+          const publicId = `${folder}/${fileName}`;
+          await cloudinary.uploader.destroy(publicId);
+        } catch (e) {
+          console.error('Error deleting screenshot:', e);
+        }
+      }
+    }
+
+    await asset.destroy();
+    res.json({ message: 'Asset deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllAssets,
   getAssetById,
-  createAsset
+  createAsset,
+  updateAsset,
+  deleteAsset
 };

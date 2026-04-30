@@ -14,4 +14,7 @@ router.post('/', authenticate, upload.fields([
   { name: 'screenshots', maxCount: 10 }
 ]), assetController.createAsset);
 
+router.put('/:id', authenticate, assetController.updateAsset);
+router.delete('/:id', authenticate, assetController.deleteAsset);
+
 module.exports = router;

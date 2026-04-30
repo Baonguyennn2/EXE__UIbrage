@@ -80,4 +80,16 @@ export const userService = {
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
 };
 
+export const postService = {
+  getAll: (params) => api.get('/posts', { params }),
+  getById: (id) => api.get(`/posts/${id}`),
+  create: (formData) => api.post('/posts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  uploadImage: (formData) => api.post('/posts/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  addComment: (postId, data) => api.post(`/posts/${postId}/comments`, data),
+};
+
 export default api;

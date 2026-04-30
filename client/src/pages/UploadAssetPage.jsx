@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { assetService, metadataService } from '../services/api'
 import axios from 'axios'
 import AppHeader from '../components/AppHeader.jsx'
 import { 
   RiUploadCloud2Fill, RiImageAddLine, RiCheckLine, RiCloseLine,
   RiPriceTag3Line, RiFileZipLine,
-  RiBold, RiItalic, RiH1, RiH2, RiH3, RiDoubleQuotesL, RiLink, RiListUnordered, RiListOrdered, RiCodeLine
+  RiBold, RiItalic, RiH1, RiH2, RiH3, RiDoubleQuotesL, RiLink, RiListUnordered, RiListOrdered, RiCodeLine,
+  RiSave3Line
 } from 'react-icons/ri'
 
-export default function UploadAssetPage({ isAdmin = false }) {
+export default function UploadAssetPage({ isAdmin = false, variant = 'create' }) {
   const navigate = useNavigate()
+  const { id } = useParams()
   const [allTags, setAllTags] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [tagSearch, setTagSearch] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showTagDropdown, setShowTagDropdown] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(variant === 'edit')
   const [uploadProgress, setUploadProgress] = useState(0)
   
   const [formData, setFormData] = useState({
@@ -28,6 +31,7 @@ export default function UploadAssetPage({ isAdmin = false }) {
   })
   const [coverImage, setCoverImage] = useState(null)
   const [assetFile, setAssetFile] = useState(null)
+  const [existingAsset, setExistingAsset] = useState(null)
 
   const insertMarkdown = (before, after) => {
     const textarea = document.getElementById('descriptionArea')
@@ -40,7 +44,6 @@ export default function UploadAssetPage({ isAdmin = false }) {
     
     setFormData(prev => ({ ...prev, description: newText }))
     
-    // Reset focus and selection
     setTimeout(() => {
       textarea.focus()
       textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length)
@@ -48,21 +51,39 @@ export default function UploadAssetPage({ isAdmin = false }) {
   }
 
   useEffect(() => {
-    // Load both categories and tags to use as hashtags
     Promise.all([
       metadataService.getCategories(),
       metadataService.getTags()
     ]).then(([catsRes, tagsRes]) => {
-      // Merge categories and tags into a single "Hashtag" pool
       const merged = [
         ...catsRes.data.map(c => ({ ...c, uniqueId: `cat-${c.id}` })),
         ...tagsRes.data.map(t => ({ ...t, uniqueId: `tag-${t.id}` }))
       ]
-      // Remove duplicates by slug if any
       const unique = Array.from(new Map(merged.map(item => [item.slug, item])).values())
       setAllTags(unique)
     })
-  }, [])
+
+    if (variant === 'edit' && id) {
+      assetService.getById(id).then(res => {
+        const asset = res.data
+        setExistingAsset(asset)
+        setFormData({
+          title: asset.title,
+          description: asset.description,
+          price: asset.price,
+          isFree: asset.isFree,
+          engine: asset.engine || 'Unity'
+        })
+        if (asset.tags) {
+           setSelectedTags(asset.tags.map(t => t.id))
+        }
+        setFetching(false)
+      }).catch(err => {
+        console.error('Error fetching asset', err)
+        setFetching(false)
+      })
+    }
+  }, [variant, id])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -77,9 +98,10 @@ export default function UploadAssetPage({ isAdmin = false }) {
 
   const handlePublish = async () => {
     if (!formData.title) return alert('Please enter asset name')
-    if (!coverImage || !assetFile) return alert('Please upload both image and file')
+    if (variant === 'create' && (!coverImage || !assetFile)) return alert('Please upload both image and file')
     
     setLoading(true)
+    
     const data = new FormData()
     data.append('title', formData.title)
     data.append('description', formData.description)
@@ -87,46 +109,59 @@ export default function UploadAssetPage({ isAdmin = false }) {
     data.append('isFree', formData.isFree)
     data.append('engine', formData.engine)
     
-    // Send selected tags
     selectedTags.forEach(id => data.append('tagIds[]', id))
     
-    // Files
-    data.append('coverImage', coverImage)
-    data.append('assetFile', assetFile)
+    if (coverImage) data.append('coverImage', coverImage)
+    if (assetFile) data.append('assetFile', assetFile)
 
     try {
       const token = localStorage.getItem('token')
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/assets`, data, {
-        headers: { 
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(percentCompleted)
-        }
-      })
-      setShowSuccessModal(true)
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      
+      if (variant === 'edit') {
+        await axios.put(`${apiUrl}/assets/${id}`, data, {
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        alert('Asset updated successfully!')
+        navigate('/assets/manage')
+      } else {
+        await axios.post(`${apiUrl}/assets`, data, {
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setUploadProgress(percentCompleted)
+          }
+        })
+        setShowSuccessModal(true)
+      }
     } catch (error) {
-      console.error('Upload Error:', error)
-      alert('Upload failed: ' + (error.response?.data?.error || error.message))
+      console.error('Upload/Update Error:', error)
+      alert('Operation failed: ' + (error.response?.data?.error || error.message))
     } finally {
       setLoading(false)
       setUploadProgress(0)
     }
   }
 
+  if (fetching) return <div className="loading-screen">Loading asset data...</div>
+
   const cleanSearch = tagSearch.replace(/^#/, '').toLowerCase()
   const filteredTags = allTags.filter(t => 
     t.name.toLowerCase().includes(cleanSearch) && !selectedTags.includes(t.id)
-  ).slice(0, 15) // Show top 15 matches
+  ).slice(0, 15)
 
   return (
     <div className={isAdmin ? "" : "upload-page-v3"}>
       {!isAdmin && <AppHeader />}
       
       <main className={isAdmin ? "" : "upload-container-v3"}>
-        <h1 className="upload-title-v3">Upload New Asset</h1>
+        <h1 className="upload-title-v3">{variant === 'edit' ? 'Edit Asset' : 'Upload New Asset'}</h1>
         
         <div className="upload-card-v3">
           <div className="form-section-v3">
@@ -168,32 +203,27 @@ export default function UploadAssetPage({ isAdmin = false }) {
               onChange={handleInputChange}
               style={{ borderRadius: '0 0 0.75rem 0.75rem' }}
             />
-            <small style={{ color: '#64748b', marginTop: '0.5rem', display: 'block' }}>
-              You can also type Markdown directly. Everything will be rendered beautifully on the detail page.
-            </small>
           </div>
 
           <div className="upload-row-v3">
             <div className="upload-box-v3">
-              <label className="label-v3">PREVIEW IMAGE</label>
+              <label className="label-v3">PREVIEW IMAGE {variant === 'edit' && '(LEAVE BLANK TO KEEP CURRENT)'}</label>
               <div className="drop-zone-v3">
                 <input type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} hidden id="coverInput" />
                 <label htmlFor="coverInput" className="drop-content-v3">
                   <RiImageAddLine className="icon-v3" />
-                  <p className="truncate-text">{coverImage ? (coverImage.name.length > 25 ? coverImage.name.substring(0, 22) + '...' : coverImage.name) : 'Drop cover image here'}</p>
-                  <small>PNG, JPG up to 10MB</small>
+                  <p className="truncate-text">{coverImage ? coverImage.name : (variant === 'edit' ? 'Keep current image' : 'Drop cover image here')}</p>
                 </label>
               </div>
             </div>
 
             <div className="upload-box-v3">
-              <label className="label-v3">ASSET FILE (ZIP)</label>
+              <label className="label-v3">ASSET FILE (ZIP) {variant === 'edit' && '(LEAVE BLANK TO KEEP CURRENT)'}</label>
               <div className="drop-zone-v3">
                 <input type="file" accept=".zip,.rar" onChange={(e) => setAssetFile(e.target.files[0])} hidden id="fileInput" />
                 <label htmlFor="fileInput" className="drop-content-v3">
                   <RiFileZipLine className="icon-v3" />
-                  <p className="truncate-text">{assetFile ? (assetFile.name.length > 25 ? assetFile.name.substring(0, 22) + '...' : assetFile.name) : 'Upload source files'}</p>
-                  <small>ZIP, 7Z or RAR</small>
+                  <p className="truncate-text">{assetFile ? assetFile.name : (variant === 'edit' ? 'Keep current ZIP' : 'Upload source files')}</p>
                 </label>
               </div>
             </div>
@@ -215,16 +245,8 @@ export default function UploadAssetPage({ isAdmin = false }) {
                   />
                 </div>
                 <div className="toggle-v3">
-                  <button 
-                    type="button"
-                    className={!formData.isFree ? 'active' : ''} 
-                    onClick={() => setFormData(p => ({ ...p, isFree: false }))}
-                  >PAID</button>
-                  <button 
-                    type="button"
-                    className={formData.isFree ? 'active' : ''} 
-                    onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))}
-                  >FREE</button>
+                  <button type="button" className={!formData.isFree ? 'active' : ''} onClick={() => setFormData(p => ({ ...p, isFree: false }))}>PAID</button>
+                  <button type="button" className={formData.isFree ? 'active' : ''} onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))}>FREE</button>
                 </div>
               </div>
             </div>
@@ -244,7 +266,7 @@ export default function UploadAssetPage({ isAdmin = false }) {
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Add tag... (e.g. #fantasy)" 
+                  placeholder="Add tag..." 
                   value={tagSearch}
                   onChange={(e) => setTagSearch(e.target.value)}
                   onFocus={() => setShowTagDropdown(true)}
@@ -263,7 +285,7 @@ export default function UploadAssetPage({ isAdmin = false }) {
             </div>
           </div>
 
-          {loading && (
+          {loading && variant === 'create' && (
             <div className="upload-progress-container-v3">
               <div className="progress-bar-v3">
                 <div className="progress-fill-v3" style={{ width: `${uploadProgress}%` }}></div>
@@ -279,7 +301,7 @@ export default function UploadAssetPage({ isAdmin = false }) {
               onClick={handlePublish}
               disabled={loading}
             >
-              {loading ? 'Publishing...' : 'Publish Asset'}
+              {loading ? (variant === 'edit' ? 'Saving...' : 'Publishing...') : (variant === 'edit' ? 'Save Changes' : 'Publish Asset')}
             </button>
           </div>
         </div>
@@ -290,7 +312,7 @@ export default function UploadAssetPage({ isAdmin = false }) {
           <div className="success-modal">
             <div className="success-icon-bg"><RiCheckLine /></div>
             <h2>Upload Successful!</h2>
-            <p>Your asset is pending approval.</p>
+            <p>Your asset has been published successfully.</p>
             <div className="modal-actions">
               <button className="btn-solid" onClick={() => navigate('/marketplace')}>Go to Marketplace</button>
               <button className="btn-ghost" onClick={() => setShowSuccessModal(false)}>Upload Another</button>

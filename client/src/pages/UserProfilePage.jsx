@@ -96,17 +96,24 @@ export default function UserProfilePage() {
           <aside className="profile-v2-sidebar">
             <section className="detail-v2-card intro-card">
               <h3>Intro</h3>
-              <p style={{ marginBottom: '1.5rem', color: '#475569' }}>{profileUser.bio || 'Premium game assets creator. Focused on high-quality 2D/3D UI kits.'}</p>
+              <p style={{ marginBottom: '1.5rem', color: '#475569' }}>{profileUser.bio || 'This creator hasn\'t added a bio yet.'}</p>
               
-              <div className="intro-item"><RiBriefcaseLine /> Professional Artist</div>
-              <div className="intro-item"><RiMapPin2Line /> Ho Chi Minh City, Vietnam</div>
-              <div className="intro-item"><RiGlobalLine /> <a href="#" style={{ color: '#6366f1' }}>uibrage.com/{profileUser.username}</a></div>
-              <div className="intro-item"><RiCalendarLine /> Joined March 2024</div>
+              {profileUser.jobTitle && <div className="intro-item"><RiBriefcaseLine /> {profileUser.jobTitle}</div>}
+              {profileUser.location && <div className="intro-item"><RiMapPin2Line /> {profileUser.location}</div>}
+              {profileUser.website && (
+                <div className="intro-item">
+                  <RiGlobalLine /> 
+                  <a href={profileUser.website.startsWith('http') ? profileUser.website : `https://${profileUser.website}`} target="_blank" rel="noopener noreferrer" style={{ color: '#6366f1' }}>
+                    {profileUser.website.replace(/^https?:\/\//, '')}
+                  </a>
+                </div>
+              )}
+              <div className="intro-item"><RiCalendarLine /> Joined {new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
               
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', fontSize: '1.5rem', color: '#64748b' }}>
-                <RiFacebookBoxFill style={{ cursor: 'pointer' }} />
-                <RiTwitterFill style={{ cursor: 'pointer' }} />
-                <RiGithubFill style={{ cursor: 'pointer' }} />
+                {profileUser.facebookUrl && <a href={profileUser.facebookUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}><RiFacebookBoxFill /></a>}
+                {profileUser.twitterUrl && <a href={profileUser.twitterUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}><RiTwitterFill /></a>}
+                {profileUser.githubUrl && <a href={profileUser.githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}><RiGithubFill /></a>}
               </div>
             </section>
 

@@ -4,6 +4,8 @@ const AssetMedia = require('./AssetMedia');
 const Order = require('./Order');
 const Category = require('./Category');
 const Tag = require('./Tag');
+const Post = require('./Post');
+const PostComment = require('./PostComment');
 
 // Relations
 User.hasMany(Asset, { foreignKey: 'authorId' });
@@ -30,11 +32,16 @@ Tag.belongsToMany(Asset, { through: 'AssetTags' });
 User.belongsToMany(Asset, { through: 'Wishlists', as: 'wishlist' });
 Asset.belongsToMany(User, { through: 'Wishlists', as: 'wishlistedBy' });
 
+// Community Relations
+User.hasMany(Post, { foreignKey: 'authorId' });
+Post.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
+
 module.exports = {
   User,
   Asset,
   AssetMedia,
   Order,
   Category,
-  Tag
+  Tag,
+  Post
 };

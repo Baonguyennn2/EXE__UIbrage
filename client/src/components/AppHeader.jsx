@@ -7,7 +7,8 @@ import {
   RiUploadCloud2Line, 
   RiArrowDownSLine, 
   RiSettings4Line,
-  RiLayout4Line
+  RiLayout4Line,
+  RiMoneyDollarCircleLine
 } from 'react-icons/ri'
 import { metadataService } from '../services/api'
 
@@ -95,7 +96,7 @@ export default function AppHeader({ onSearch }) {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link to="/marketplace" className="logo-link">
+        <Link to="/" className="logo-link">
           <BrandTile />
         </Link>
 
@@ -175,6 +176,12 @@ export default function AppHeader({ onSearch }) {
                   </Link>
                   <Link to="/wishlist" onClick={() => setShowUserMenu(false)}>
                     <RiBookletLine /> Wishlist
+                  </Link>
+                  <Link to="/assets/manage" onClick={() => setShowUserMenu(false)}>
+                    <RiBookletLine /> Manage My Assets
+                  </Link>
+                  <Link to="/earnings" onClick={() => setShowUserMenu(false)}>
+                    <RiMoneyDollarCircleLine /> Revenue Dashboard
                   </Link>
                   <Link to="/library" onClick={() => setShowUserMenu(false)}>
                     <RiBookletLine /> My Library

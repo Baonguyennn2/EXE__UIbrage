@@ -11,6 +11,8 @@ import AdminDashboardPage from '../pages/AdminDashboardPage.jsx'
 import UploadAssetPage from '../pages/UploadAssetPage.jsx'
 import MyLibraryPage from '../pages/MyLibraryPage.jsx'
 import CommunityPage from '../pages/CommunityPage.jsx'
+import PostDetailPage from '../pages/PostDetailPage.jsx'
+import CreatePostPage from '../pages/CreatePostPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 import VerifyEmailPage from '../pages/VerifyEmailPage.jsx'
 import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx'
@@ -18,6 +20,8 @@ import ResetPasswordPage from '../pages/ResetPasswordPage.jsx'
 import ProfileEditPage from '../pages/ProfileEditPage.jsx'
 import WishlistPage from '../pages/WishlistPage.jsx'
 import UserProfilePage from '../pages/UserProfilePage.jsx'
+import ManageAssetsPage from '../pages/ManageAssetsPage.jsx'
+import EarningsPage from '../pages/EarningsPage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
@@ -50,10 +54,19 @@ export default function AppRoutes() {
         <ProtectedRoute allowedRoles={['customer']}><MyLibraryPage /></ProtectedRoute>
       } />
       <Route path="/profile/edit" element={
-        <ProtectedRoute allowedRoles={['customer']}><ProfileEditPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><ProfileEditPage /></ProtectedRoute>
       } />
       <Route path="/assets/upload" element={
-        <ProtectedRoute allowedRoles={['customer']}><UploadAssetPage variant="create" /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><UploadAssetPage variant="create" /></ProtectedRoute>
+      } />
+      <Route path="/assets/manage" element={
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><ManageAssetsPage /></ProtectedRoute>
+      } />
+      <Route path="/assets/edit/:id" element={
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><UploadAssetPage variant="edit" /></ProtectedRoute>
+      } />
+      <Route path="/earnings" element={
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><EarningsPage /></ProtectedRoute>
       } />
 
       {/* Auth Routes */}
@@ -91,6 +104,11 @@ export default function AppRoutes() {
       } />
 
       <Route path="/community" element={<CommunityPage />} />
+      <Route path="/community/create" element={
+        <ProtectedRoute allowedRoles={['customer', 'admin']}><CreatePostPage /></ProtectedRoute>
+      } />
+      <Route path="/community/posts/:id" element={<PostDetailPage />} />
+      
       <Route path="/routes" element={<RouteIndexPage />} />
 
       <Route path="/login" element={<Navigate to="/auth/login" replace />} />

@@ -29,6 +29,27 @@ const User = sequelize.define('User', {
   avatarUrl: {
     type: DataTypes.STRING,
   },
+  bio: {
+    type: DataTypes.TEXT,
+  },
+  jobTitle: {
+    type: DataTypes.STRING,
+  },
+  location: {
+    type: DataTypes.STRING,
+  },
+  website: {
+    type: DataTypes.STRING,
+  },
+  facebookUrl: {
+    type: DataTypes.STRING,
+  },
+  twitterUrl: {
+    type: DataTypes.STRING,
+  },
+  githubUrl: {
+    type: DataTypes.STRING,
+  },
 }, {
   timestamps: true,
 });

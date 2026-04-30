@@ -4,6 +4,7 @@ import AppHeader from '../components/AppHeader.jsx'
 import { assetService, commentService, userService } from '../services/api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import StarRating from '../components/StarRating.jsx'
 import { 
   RiStarFill, 
   RiShoppingBag3Line, 
@@ -71,6 +72,7 @@ export default function DetailPage() {
   const [newComment, setNewComment] = useState('')
   const [rating, setRating] = useState(5)
   const [submitting, setSubmitting] = useState(false)
+  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('user') || 'null'))
 
   const handleAddComment = async (e) => {
     e.preventDefault()
@@ -104,9 +106,9 @@ export default function DetailPage() {
         <section className="detail-v2-main">
           <header className="detail-v2-header">
             <div className="header-meta-row">
-              <span className="eyebrow">CREATED BY <Link to="#" className="author-link">{asset.author?.fullName || asset.author?.username}</Link></span>
+              <span className="eyebrow">CREATED BY <Link to={`/profile/${asset.author?.username}`} className="author-link">{asset.author?.fullName || asset.author?.username}</Link></span>
               <div className="rating-summary">
-                <span><RiStarFill /></span>
+                <StarRating rating={4.9} interactive={false} size={16} />
                 <strong>4.9</strong>
                 <small>({comments.length} reviews)</small>
               </div>
@@ -142,12 +144,10 @@ export default function DetailPage() {
                 required
                 style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginBottom: '1rem' }}
               />
-              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                <div className="rating-select">
-                  <span>Rating: </span>
-                  <select value={rating} onChange={(e) => setRating(Number(e.target.value))} style={{ padding: '0.5rem', borderRadius: '0.5rem' }}>
-                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
-                  </select>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="rating-select-v2" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontWeight: 600 }}>Your Rating: </span>
+                  <StarRating rating={rating} setRating={setRating} />
                 </div>
                 <button type="submit" className="btn-solid" disabled={submitting}>
                   {submitting ? 'Posting...' : 'Post Review'}
@@ -160,7 +160,7 @@ export default function DetailPage() {
                 <div key={c._id || c.id} className="comment-item-v2" style={{ borderTop: '1px solid #f1f5f9', padding: '1.5rem 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <strong>{c.userName}</strong>
-                    <span style={{ color: '#f59e0b' }}>{'★'.repeat(c.rating || 5)}</span>
+                    <StarRating rating={c.rating || 5} interactive={false} size={14} />
                   </div>
                   <p>{c.content}</p>
                 </div>
@@ -173,7 +173,7 @@ export default function DetailPage() {
           <section className="detail-v2-card price-card">
             <div className="price-display">
               <span>Price</span>
-              <strong>${asset.price}</strong>
+              <strong>{asset.price === 0 ? 'FREE' : `$${asset.price}`}</strong>
             </div>
             <button className="btn-purchase" onClick={() => navigate('/marketplace/checkout', { state: { asset } })}>
               <RiShoppingBag3Line /> Purchase Now
@@ -213,7 +213,9 @@ export default function DetailPage() {
                 </div>
              </div>
              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>Premium game assets for indie developers. Specialized in RPG and RTS interface design.</p>
-             <button className="btn-follow">Follow</button>
+             {currentUser?.id !== asset.authorId && (
+               <button className="btn-follow">Follow</button>
+             )}
           </section>
 
           <div className="recommended-section">
