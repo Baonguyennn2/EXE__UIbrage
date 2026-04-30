@@ -53,6 +53,10 @@ const User = sequelize.define('User', {
   coverImageUrl: {
     type: DataTypes.STRING,
   },
+  coverPosition: {
+    type: DataTypes.INTEGER,
+    defaultValue: 50,
+  },
   profileFrame: {
     type: DataTypes.STRING, // 'none', 'sakura', 'pixel', 'modern_vn'
     defaultValue: 'none',

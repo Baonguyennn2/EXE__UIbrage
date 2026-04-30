@@ -5,7 +5,7 @@ const updateProfile = async (req, res) => {
   try {
     const { id } = req.user;
     const updateData = {};
-    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl', 'profileFrame'];
+    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl', 'profileFrame', 'coverPosition'];
     
     fields.forEach(field => {
       if (req.body[field] !== undefined) {
