@@ -7,11 +7,16 @@ const crypto = require('crypto');
 
 const getAllAssets = async (req, res) => {
   try {
-    const { categoryId, engine, minPrice, maxPrice, search, tagId, authorId } = req.query;
+    const { categoryId, engine, minPrice, maxPrice, search, tagId, authorId, isAdmin } = req.query;
     
-    // If authorId is provided, we likely want all their assets (even pending) for their library
-    // Otherwise, only show published assets
-    const where = authorId ? { authorId } : { status: 'published' };
+    let where = {};
+    if (authorId) {
+      where.authorId = authorId;
+    } else if (isAdmin === 'true') {
+      // Admin view all: no status filter
+    } else {
+      where.status = 'published';
+    }
     if (engine) where.engine = engine;
     if (minPrice || maxPrice) {
       where.price = {};

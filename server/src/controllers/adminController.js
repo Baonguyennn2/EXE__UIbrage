@@ -5,23 +5,26 @@ const Notification = require('../models/mongodb/Notification');
 const getAdminStats = async (req, res) => {
   try {
     const totalAssets = await Asset.count();
-    const totalCreators = await User.count({ where: { role: 'creator' } });
+    const totalCreators = await User.count({ where: { role: { [Op.ne]: 'admin' } } });
     const pendingAssetsCount = await Asset.count({ where: { status: 'pending' } });
     
-    // Total Downloads (sum of all assets)
+    // Total Downloads
     const totalDownloads = await Asset.sum('downloads') || 0;
 
-    // Total Sales (count of completed orders)
+    // Total Sales
     const totalSales = await Order.count({ where: { status: 'completed' } });
 
-    // Revenue (sum of amount for completed orders)
+    // Revenue
     const revenue = await Order.sum('amount', { where: { status: 'completed' } }) || 0;
 
     // Last 5 orders
     const recentOrders = await Order.findAll({
       limit: 5,
       order: [['createdAt', 'DESC']],
-      include: [{ model: User, attributes: ['username'] }, { model: Asset, attributes: ['title'] }]
+      include: [
+        { model: User, attributes: ['username', 'fullName'] }, 
+        { model: Asset, attributes: ['title', 'coverImageUrl'] }
+      ]
     });
 
     res.json({

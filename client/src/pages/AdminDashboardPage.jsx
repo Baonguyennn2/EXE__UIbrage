@@ -67,11 +67,11 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         adminService.getPending(),
         notificationService.getAll(),
         messageService.getConversations(),
-        assetService.getAll({}), // ALL assets
-        assetService.getAll({ authorId: user.id }) // My assets
+        assetService.getAll({ isAdmin: 'true' }), // All assets (admin view)
+        assetService.getAll({ authorId: user.id }) // Admin's own assets
       ])
       
-      console.log('Admin Stats:', statsRes.data)
+      console.log('Admin Dashboard Stats:', statsRes.data)
       setStats({
         totalAssets: statsRes.data.totalAssets || 0,
         totalDownloads: statsRes.data.totalDownloads || 0,
@@ -189,20 +189,19 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   </tr>
                </thead>
                <tbody>
-                  {allUserAssets.filter(a => a.downloads > 0).slice(0, 5).map(a => (
+                  {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (b.downloads||0) - (a.downloads||0)).slice(0, 5).map(a => (
                     <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                        <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                           <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
                           <div>
                             <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
-                            <small style={{ color: '#94a3b8' }}>{a.category}</small>
+                            <small style={{ color: '#94a3b8' }}>{a.category || 'General'}</small>
                           </div>
                        </td>
                        <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.downloads || 0}</td>
                        <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: '#4f46e5' }}>${a.revenue || 0}</td>
                     </tr>
-                  ))}
-                  {allUserAssets.length === 0 && <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
+                  )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
                </tbody>
             </table>
          </article>
@@ -221,7 +220,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   </tr>
                </thead>
                <tbody>
-                  {allUserAssets.filter(a => (a.downloads || 0) < 5).slice(0, 5).map(a => (
+                  {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (a.downloads||0) - (b.downloads||0)).slice(0, 5).map(a => (
                     <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                        <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                           <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
@@ -233,8 +232,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                        <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
                        <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#94a3b8' }}>0.2%</td>
                     </tr>
-                  ))}
-                  {allUserAssets.length === 0 && <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
+                  )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
                </tbody>
             </table>
          </article>
@@ -256,7 +254,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                </tr>
             </thead>
             <tbody>
-               {creators.length > 0 ? creators.slice(0, 5).map((c, i) => (
+               {creators.length > 0 ? creators.sort((a,b) => (b.revenue||0) - (a.revenue||0)).slice(0, 5).map((c, i) => (
                   <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                      <td style={{ padding: '1rem 2rem' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: i===0 ? '#fef3c7' : '#f1f5f9', color: i===0 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>{i+1}</div>
@@ -272,7 +270,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                      <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
                      <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 800 }}>${(c.revenue || 0).toLocaleString()}</td>
                   </tr>
-               )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No creators found with role &apos;creator&apos;.</td></tr>}
+               )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
             </tbody>
          </table>
       </section>
@@ -376,10 +374,10 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 <td style={{ padding: '1.25rem 2rem' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <img src={a.coverImageUrl} style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                      <div><strong>{a.title}</strong><div style={{ fontSize: '0.8rem', color: '#64748b' }}>{a.category}</div></div>
+                      <div><strong>{a.title}</strong><div style={{ fontSize: '0.8rem', color: '#64748b' }}>{a.category || 'General'}</div></div>
                    </div>
                 </td>
-                <td style={{ padding: '1.25rem 2rem' }}>{a.author?.username}</td>
+                <td style={{ padding: '1.25rem 2rem' }}>{a.author?.username || 'Unknown'}</td>
                 <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>
                    <span className={`status-badge ${a.status}`} style={{ padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 700, background: a.status === 'published' ? '#dcfce7' : '#fef9c3', color: a.status === 'published' ? '#15803d' : '#a16207' }}>{a.status?.toUpperCase()}</span>
                 </td>
@@ -482,8 +480,8 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
           </div>
         </aside>
 
-        <div className="admin-page-content" style={{ padding: '2.5rem', overflowY: 'auto' }}>
-           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="admin-page-content" style={{ padding: '2.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+           <div style={{ width: '100%', maxWidth: '1200px' }}>
               {variant === 'overview' && renderOverview()}
               {variant === 'users' && renderCreators()}
               {variant === 'moderation' && renderApproval()}
