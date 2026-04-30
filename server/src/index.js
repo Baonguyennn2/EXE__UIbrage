@@ -13,7 +13,7 @@ const startServer = async () => {
     console.log('MySQL connected successfully');
 
     // Sync MySQL models (In production, use migrations)
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log('MySQL models synchronized');
 
     // Seed initial data
