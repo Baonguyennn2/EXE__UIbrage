@@ -76,8 +76,10 @@ export const userService = {
   updateProfile: (formData) => api.put('/users/profile', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  getProfile: (username) => api.get(`/users/profile/${username}`),
   getWishlist: () => api.get('/users/wishlist'),
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
+  getEarnings: () => api.get('/users/earnings'),
 };
 
 export const postService = {

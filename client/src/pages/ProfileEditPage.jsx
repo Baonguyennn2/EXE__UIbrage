@@ -5,15 +5,8 @@ import Toast from '../components/Toast.jsx'
 import { 
   RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill,
   RiMapPin2Fill, RiGlobalFill, RiBriefcaseFill, RiFacebookBoxFill, 
-  RiTwitterFill, RiGithubFill, RiLayoutTopLine, RiMagicLine
+  RiTwitterFill, RiGithubFill, RiLayoutTopLine
 } from 'react-icons/ri'
-
-const FRAMES = [
-  { id: 'none', name: 'Original', class: '' },
-  { id: 'sakura', name: 'Sakura Petals', class: 'frame-sakura' },
-  { id: 'pixel', name: 'Pixel Knight', class: 'frame-pixel' },
-  { id: 'modern_vn', name: 'Modern VN', class: 'frame-modern-vn' }
-]
 
 export default function ProfileEditPage() {
   const [user, setUser] = useState(null)
@@ -27,8 +20,7 @@ export default function ProfileEditPage() {
     website: '',
     facebookUrl: '',
     twitterUrl: '',
-    githubUrl: '',
-    profileFrame: 'none'
+    githubUrl: ''
   })
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
@@ -51,8 +43,7 @@ export default function ProfileEditPage() {
         website: savedUser.website || '',
         facebookUrl: savedUser.facebookUrl || '',
         twitterUrl: savedUser.twitterUrl || '',
-        githubUrl: savedUser.githubUrl || '',
-        profileFrame: savedUser.profileFrame || 'none'
+        githubUrl: savedUser.githubUrl || ''
       })
     }
   }, [])
@@ -96,8 +87,6 @@ export default function ProfileEditPage() {
 
   if (!user) return null
 
-  const selectedFrameClass = FRAMES.find(f => f.id === formData.profileFrame)?.class || ''
-
   return (
     <main className="profile-edit-canvas">
       <AppHeader />
@@ -134,7 +123,6 @@ export default function ProfileEditPage() {
             
             <div style={{ padding: '0 2rem 2rem', marginTop: '-50px', position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '2rem' }}>
               <div className="avatar-frame-container">
-                <div className={`profile-frame-overlay ${selectedFrameClass}`}></div>
                 <div className="profile-avatar-wrap-v3" style={{ 
                   width: '120px', 
                   height: '120px', 
@@ -162,43 +150,6 @@ export default function ProfileEditPage() {
                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{formData.fullName || formData.username}</h2>
                 <p style={{ margin: 0, color: '#64748b' }}>@{formData.username}</p>
               </div>
-            </div>
-          </section>
-
-          {/* Frame Selection */}
-          <section className="surface-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <RiMagicLine color="#6366f1" /> Profile Decoration
-            </h3>
-            <div className="frame-selection-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-              {FRAMES.map(frame => (
-                <div 
-                  key={frame.id} 
-                  className={`frame-option ${formData.profileFrame === frame.id ? 'active' : ''}`}
-                  onClick={() => setFormData({...formData, profileFrame: frame.id})}
-                  style={{ 
-                    border: formData.profileFrame === frame.id ? '2px solid #6366f1' : '2px solid #e2e8f0',
-                    borderRadius: '1rem',
-                    padding: '1rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    background: formData.profileFrame === frame.id ? '#eff6ff' : '#fff',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <div className={`preview-circle ${frame.class}`} style={{ 
-                    width: '60px', 
-                    height: '60px', 
-                    borderRadius: '50%', 
-                    margin: '0 auto 0.5rem', 
-                    background: frame.id === 'none' ? '#f1f5f9' : `url(/assets/frames/${frame.id === 'modern_vn' ? 'vietnam' : frame.id}.png) center/120% no-repeat`,
-                    backgroundColor: '#1e293b',
-                    mixBlendMode: frame.id === 'none' ? 'normal' : 'screen',
-                    position: 'relative' 
-                  }}></div>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{frame.name}</span>
-                </div>
-              ))}
             </div>
           </section>
 

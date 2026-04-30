@@ -13,12 +13,6 @@ import {
   RiGithubFill
 } from 'react-icons/ri'
 
-const FRAMES = [
-  { id: 'sakura', class: 'frame-sakura' },
-  { id: 'pixel', class: 'frame-pixel' },
-  { id: 'modern_vn', class: 'frame-modern-vn' }
-]
-
 export default function UserProfilePage() {
   const { username } = useParams()
   const [profileUser, setProfileUser] = useState(null)
@@ -30,11 +24,9 @@ export default function UserProfilePage() {
     const fetchProfile = async () => {
       try {
         setLoading(true)
-        // Fetch real user profile from API
         const userRes = await userService.getProfile(username)
         setProfileUser(userRes.data)
         
-        // Fetch assets by this user
         const assetsRes = await assetService.getAll({ username })
         setAssets(assetsRes.data)
         
@@ -49,8 +41,6 @@ export default function UserProfilePage() {
 
   if (loading) return <div className="loading-screen">Loading Profile...</div>
   if (!profileUser) return <div className="error-screen">User not found</div>
-
-  const frameClass = FRAMES.find(f => f.id === profileUser.profileFrame)?.class || ''
 
   return (
     <main className="market-home">
@@ -69,17 +59,14 @@ export default function UserProfilePage() {
           </div>
           
           <div className="profile-v2-info-bar">
-            <div className="avatar-frame-container" style={{ marginTop: '-80px', background: 'transparent' }}>
-              <div className={`profile-frame-overlay ${frameClass}`}></div>
-              <div className="profile-v2-avatar-wrap" style={{ borderRadius: '50%', overflow: 'hidden', background: 'transparent' }}>
-                {profileUser.avatarUrl ? (
-                  <img src={profileUser.avatarUrl} className="profile-v2-avatar" alt={profileUser.username} style={{ width: '140px', height: '140px', objectFit: 'cover' }} />
-                ) : (
-                  <div className="profile-v2-avatar" style={{ width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', fontWeight: 800, color: '#4f46e5', background: '#fff' }}>
-                    {profileUser.username[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
+            <div className="profile-v2-avatar-wrap" style={{ marginTop: '-80px', borderRadius: '50%', overflow: 'hidden', background: '#fff', padding: '4px' }}>
+              {profileUser.avatarUrl ? (
+                <img src={profileUser.avatarUrl} className="profile-v2-avatar" alt={profileUser.username} style={{ width: '140px', height: '140px', objectFit: 'cover', borderRadius: '50%' }} />
+              ) : (
+                <div className="profile-v2-avatar" style={{ width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', fontWeight: 800, color: '#4f46e5', background: '#e2e8f0', borderRadius: '50%' }}>
+                  {profileUser.username[0].toUpperCase()}
+                </div>
+              )}
             </div>
             
             <div className="profile-v2-text">
