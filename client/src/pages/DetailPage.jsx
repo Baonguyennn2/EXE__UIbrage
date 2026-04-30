@@ -14,6 +14,7 @@ import {
   RiDatabaseLine,
   RiFileCopyLine
 } from 'react-icons/ri'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function DetailPage() {
   const { id } = useParams()
@@ -95,7 +96,7 @@ export default function DetailPage() {
     }
   }
 
-  if (loading) return <div className="loading-screen">Loading Asset Details...</div>
+  if (loading) return <LoadingScreen message="Fetching Asset Details..." />
   if (!asset) return <div className="error-screen">Asset not found</div>
 
   return (

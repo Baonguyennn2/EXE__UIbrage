@@ -1,9 +1,10 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
 import { assetService, metadataService } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import { RiFlashlightLine, RiTimeLine, RiFilter3Line } from 'react-icons/ri'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function HomepagePage() {
   const navigate = useNavigate()
@@ -40,7 +41,7 @@ export default function HomepagePage() {
     return () => controller.abort()
   }, [])
 
-  if (loading) return <div className="loading-screen">Loading Marketplace...</div>
+  if (loading) return <LoadingScreen message="Loading Marketplace..." />
 
   const heroAsset = featuredAssets[0]
 

@@ -9,8 +9,9 @@ import {
   RiShieldCheckFill, RiMessage3Fill, RiNotification3Line, RiLogoutBoxRLine,
   RiSettings4Line, RiEyeLine, RiProhibitedLine, RiDeleteBin6Line, RiCheckLine,
   RiCloseLine, RiSendPlane2Fill, RiMore2Fill, RiStackFill, RiLockLine, RiArrowUpSLine,
-  RiArrowDownSLine, RiWallet3Line, RiDownload2Line, RiShoppingCartLine
+  RiArrowDownSLine, RiWallet3Line, RiArrowLeftLine, RiDownload2Line, RiShoppingCartLine
 } from 'react-icons/ri'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function AdminDashboardPage({ variant = 'overview' }) {
   const [stats, setStats] = useState({ totalAssets: 0, revenue: 0, totalDownloads: 0, totalSales: 0, totalCreators: 0, pendingAssetsCount: 0, recentOrders: [] })
@@ -434,7 +435,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     </div>
   )
 
-  if (loading) return <div className="loading-screen">Loading Dashboard...</div>
+  if (loading) return <LoadingScreen message="Syncing Dashboard Data..." />
 
   return (
     <main className="admin-shell" style={{ background: '#f8fafc', minHeight: '100vh' }}>

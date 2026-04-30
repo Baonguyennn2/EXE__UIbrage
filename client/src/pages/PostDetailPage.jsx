@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
 import { postService } from '../services/api'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { RiChat3Line, RiEyeLine, RiArrowLeftLine, RiSendPlane2Line } from 'react-icons/ri'
@@ -46,7 +47,7 @@ export default function PostDetailPage() {
     }
   }
 
-  if (loading) return <div className="loading-screen">Loading Post...</div>
+  if (loading) return <LoadingScreen message="Loading Post..." />
   if (!post) return <div className="error-screen">Post not found</div>
 
   return (

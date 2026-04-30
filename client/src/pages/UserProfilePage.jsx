@@ -39,7 +39,7 @@ export default function UserProfilePage() {
     fetchProfile()
   }, [username])
 
-  if (loading) return <div className="loading-screen">Loading Profile...</div>
+  if (loading) return <LoadingScreen message="Loading Profile..." />
   if (!profileUser) return <div className="error-screen">User not found</div>
 
   return (
