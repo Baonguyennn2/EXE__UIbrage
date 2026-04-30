@@ -12,27 +12,32 @@ export default function HomepagePage() {
   const [loading, setLoading] = useState(true)
   const [categories, setCategories] = useState([])
   
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const [assetsRes, catsRes] = await Promise.all([
-        assetService.getAll(),
-        metadataService.getCategories()
-      ])
-      
-      const allAssets = assetsRes.data
-      setFeaturedAssets(allAssets.slice(0, 4))
-      setLatestAssets(allAssets.slice(0, 8))
-      setCategories(catsRes.data)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const controller = new AbortController()
+    
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const [assetsRes, catsRes] = await Promise.all([
+          assetService.getAll(null, { signal: controller.signal }),
+          metadataService.getCategories({ signal: controller.signal })
+        ])
+        
+        const allAssets = assetsRes.data
+        setFeaturedAssets(allAssets.slice(0, 4))
+        setLatestAssets(allAssets.slice(0, 8))
+        setCategories(catsRes.data)
+        setLoading(false)
+      } catch (error) {
+        if (error.name !== 'CanceledError') {
+          console.error('Error fetching data:', error)
+        }
+        setLoading(false)
+      }
+    }
+
     fetchData()
+    return () => controller.abort()
   }, [])
 
   if (loading) return <div className="loading-screen">Loading Marketplace...</div>

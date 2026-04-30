@@ -37,8 +37,8 @@ api.interceptors.response.use(
 );
 
 export const assetService = {
-  getAll: (params) => api.get('/assets', { params }),
-  getById: (id) => api.get(`/assets/${id}`),
+  getAll: (params, config) => api.get('/assets', { params, ...config }),
+  getById: (id, config) => api.get(`/assets/${id}`, config),
   add: (data) => api.post('/assets', data, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
@@ -47,9 +47,9 @@ export const assetService = {
 };
 
 export const adminService = {
-  getStats: () => api.get('/admin/stats'),
-  getCreators: () => api.get('/admin/creators'),
-  getPending: () => api.get('/admin/pending-assets'),
+  getStats: (config) => api.get('/admin/stats', config),
+  getCreators: (config) => api.get('/admin/creators', config),
+  getPending: (config) => api.get('/admin/pending-assets', config),
   approve: (id, data) => api.patch(`/admin/approve/${id}`, data),
   deleteAsset: (id) => api.delete(`/admin/assets/${id}`),
 };
@@ -81,8 +81,8 @@ export const authService = {
 };
 
 export const metadataService = {
-  getCategories: () => api.get('/categories'),
-  getTags: () => api.get('/tags'),
+  getCategories: (config) => api.get('/categories', config),
+  getTags: (config) => api.get('/tags', config),
 };
 
 export const commentService = {
