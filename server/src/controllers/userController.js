@@ -5,7 +5,7 @@ const updateProfile = async (req, res) => {
   try {
     const { id } = req.user;
     const updateData = {};
-    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl'];
+    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl', 'profileFrame'];
     
     fields.forEach(field => {
       if (req.body[field] !== undefined) {
@@ -13,8 +13,9 @@ const updateProfile = async (req, res) => {
       }
     });
 
-    if (req.file) {
-      updateData.avatarUrl = req.file.path; // Cloudinary URL from multer-storage-cloudinary
+    if (req.files) {
+      if (req.files.avatar) updateData.avatarUrl = req.files.avatar[0].path;
+      if (req.files.coverImage) updateData.coverImageUrl = req.files.coverImage[0].path;
     }
 
     await User.update(updateData, { where: { id } });
@@ -95,9 +96,33 @@ const getEarnings = async (req, res) => {
   }
 };
 
+const getUserProfile = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ 
+      where: { username },
+      attributes: { exclude: ['passwordHash'] }
+    });
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    const followerCount = await user.countFollowers();
+    const followingCount = await user.countFollowing();
+    
+    const profileData = user.toJSON();
+    profileData.followerCount = followerCount;
+    profileData.followingCount = followingCount;
+    
+    res.json(profileData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getWishlist,
   toggleWishlist,
-  getEarnings
+  getEarnings,
+  getUserProfile
 };

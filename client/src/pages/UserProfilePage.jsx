@@ -13,6 +13,12 @@ import {
   RiGithubFill
 } from 'react-icons/ri'
 
+const FRAMES = [
+  { id: 'sakura', class: 'frame-sakura' },
+  { id: 'pixel', class: 'frame-pixel' },
+  { id: 'modern_vn', class: 'frame-modern-vn' }
+]
+
 export default function UserProfilePage() {
   const { username } = useParams()
   const [profileUser, setProfileUser] = useState(null)
@@ -23,19 +29,14 @@ export default function UserProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Mocking user profile fetch - in real app, add an endpoint for this
-        // For now, we use the logged-in user if it matches, or find from assets
-        const savedUser = JSON.parse(localStorage.getItem('user') || 'null')
+        setLoading(true)
+        // Fetch real user profile from API
+        const userRes = await userService.getProfile(username)
+        setProfileUser(userRes.data)
         
         // Fetch assets by this user
-        const assetsRes = await assetService.getAll({ username }) // Assuming search by username works
+        const assetsRes = await assetService.getAll({ username })
         setAssets(assetsRes.data)
-        
-        if (savedUser && savedUser.username === username) {
-          setProfileUser(savedUser)
-        } else if (assetsRes.data.length > 0) {
-          setProfileUser(assetsRes.data[0].author)
-        }
         
         setLoading(false)
       } catch (error) {
@@ -49,6 +50,8 @@ export default function UserProfilePage() {
   if (loading) return <div className="loading-screen">Loading Profile...</div>
   if (!profileUser) return <div className="error-screen">User not found</div>
 
+  const frameClass = FRAMES.find(f => f.id === profileUser.profileFrame)?.class || ''
+
   return (
     <main className="market-home">
       <AppHeader />
@@ -56,25 +59,32 @@ export default function UserProfilePage() {
       <div className="profile-v2-container">
         {/* Cover & Avatar Header */}
         <div className="profile-v2-header">
-          <div className="profile-v2-cover">
-             {/* Default Cover */}
-             <div className="cover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.1)' }}></div>
+          <div className="profile-v2-cover" style={{ 
+            height: '300px', 
+            background: profileUser.coverImageUrl ? `url(${profileUser.coverImageUrl}) center/cover` : '#312e81',
+            borderRadius: '1.5rem 1.5rem 0 0',
+            position: 'relative'
+          }}>
+             <div className="cover-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.4))' }}></div>
           </div>
           
           <div className="profile-v2-info-bar">
-            <div className="profile-v2-avatar-wrap">
-              {profileUser.avatarUrl ? (
-                <img src={profileUser.avatarUrl} className="profile-v2-avatar" alt={profileUser.username} />
-              ) : (
-                <div className="profile-v2-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', fontWeight: 800, color: '#4f46e5' }}>
-                  {profileUser.username[0].toUpperCase()}
-                </div>
-              )}
+            <div className="avatar-frame-container" style={{ marginTop: '-80px', background: 'transparent' }}>
+              <div className={`profile-frame-overlay ${frameClass}`}></div>
+              <div className="profile-v2-avatar-wrap" style={{ borderRadius: '50%', overflow: 'hidden', background: 'transparent' }}>
+                {profileUser.avatarUrl ? (
+                  <img src={profileUser.avatarUrl} className="profile-v2-avatar" alt={profileUser.username} style={{ width: '140px', height: '140px', objectFit: 'cover' }} />
+                ) : (
+                  <div className="profile-v2-avatar" style={{ width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', fontWeight: 800, color: '#4f46e5', background: '#fff' }}>
+                    {profileUser.username[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="profile-v2-text">
               <h1>{profileUser.fullName || profileUser.username}</h1>
-              <p>@{profileUser.username} • 4.5k Followers • 120 Following</p>
+              <p>@{profileUser.username} • {profileUser.followerCount || 0} Followers • {profileUser.followingCount || 0} Following</p>
             </div>
             
             <div className="profile-v2-actions">

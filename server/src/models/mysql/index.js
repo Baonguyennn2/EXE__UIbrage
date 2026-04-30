@@ -6,6 +6,7 @@ const Category = require('./Category');
 const Tag = require('./Tag');
 const Post = require('./Post');
 const PostComment = require('./PostComment');
+const Follower = require('./Follower');
 
 // Relations
 User.hasMany(Asset, { foreignKey: 'authorId' });
@@ -36,6 +37,20 @@ Asset.belongsToMany(User, { through: 'Wishlists', as: 'wishlistedBy' });
 User.hasMany(Post, { foreignKey: 'authorId' });
 Post.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
 
+// Follower Relations
+User.belongsToMany(User, { 
+  as: 'Followers', 
+  through: Follower, 
+  foreignKey: 'followingId', 
+  otherKey: 'followerId' 
+});
+User.belongsToMany(User, { 
+  as: 'Following', 
+  through: Follower, 
+  foreignKey: 'followerId', 
+  otherKey: 'followingId' 
+});
+
 module.exports = {
   User,
   Asset,
@@ -43,5 +58,6 @@ module.exports = {
   Order,
   Category,
   Tag,
-  Post
+  Post,
+  Follower
 };

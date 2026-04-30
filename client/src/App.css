@@ -7065,3 +7065,112 @@
   background: #f1f5f9;
   color: #4f46e5;
 }
+
+/* Profile Frames & Refined Inputs */
+.profile-edit-canvas {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.input-v3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+}
+
+.input-v3:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-v3 input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.field-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Discord-like Profile Frames */
+.avatar-frame-container {
+  position: relative;
+  width: fit-content;
+  padding: 8px;
+}
+
+.profile-avatar-wrap-v3 {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: 50%;
+}
+
+/* SAKURA FRAME */
+.frame-sakura {
+  background: url('/assets/frames/sakura.png') center/140% no-repeat;
+  mix-blend-mode: screen;
+  transform: scale(1.4);
+  z-index: 5;
+}
+
+/* PIXEL KNIGHT FRAME */
+.frame-pixel {
+  background: url('/assets/frames/pixel.png') center/130% no-repeat;
+  mix-blend-mode: screen;
+  transform: scale(1.3);
+}
+
+/* MODERN VIETNAM FRAME */
+.frame-modern-vn {
+  background: url('/assets/frames/vietnam.png') center/130% no-repeat;
+  mix-blend-mode: screen;
+  transform: scale(1.3);
+}
+
+@keyframes sakura-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(244, 114, 182, 0.4)); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 15px rgba(244, 114, 182, 0.8)); }
+}
+
+.frame-sakura, .frame-pixel, .frame-modern-vn {
+  animation: frame-pulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes frame-pulse {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-10px) rotate(15deg); }
+}

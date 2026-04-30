@@ -13,7 +13,13 @@ const startServer = async () => {
     console.log('MySQL connected successfully');
 
     // Sync MySQL models (In production, use migrations)
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    
+    // Clean up orphaned categoryIds in Assets before re-enabling constraints
+    await sequelize.query('UPDATE Assets SET categoryId = NULL WHERE categoryId NOT IN (SELECT id FROM Categories)');
+    
     await sequelize.sync({ alter: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log('MySQL models synchronized');
 
     // Seed initial data

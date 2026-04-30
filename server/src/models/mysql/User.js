@@ -50,6 +50,13 @@ const User = sequelize.define('User', {
   githubUrl: {
     type: DataTypes.STRING,
   },
+  coverImageUrl: {
+    type: DataTypes.STRING,
+  },
+  profileFrame: {
+    type: DataTypes.STRING, // 'none', 'sakura', 'pixel', 'modern_vn'
+    defaultValue: 'none',
+  },
 }, {
   timestamps: true,
 });
