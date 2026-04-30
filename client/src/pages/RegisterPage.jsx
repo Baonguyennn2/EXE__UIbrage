@@ -48,9 +48,9 @@ export default function RegisterPage() {
 
   const handleGoogleLogin = () => {
      setNotification({ type: 'info', message: 'Redirecting to Google...' })
-     const apiUrl = window.location.hostname === 'localhost' 
+     const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
        ? 'http://localhost:5000/api' 
-       : 'https://exe-uibrage.onrender.com/api'
+       : 'https://exe-uibrage.onrender.com/api')
      window.location.href = `${apiUrl}/auth/google`
   }
 

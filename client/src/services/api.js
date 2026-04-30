@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const API_URL = window.location.hostname === 'localhost' 
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api' 
-  : 'https://exe-uibrage.onrender.com/api';
+  : 'https://exe-uibrage.onrender.com/api');
 
 const api = axios.create({
   baseURL: API_URL,
