@@ -8,7 +8,13 @@ const getAdminStats = async (req, res) => {
     const totalCreators = await User.count({ where: { role: 'creator' } });
     const pendingAssetsCount = await Asset.count({ where: { status: 'pending' } });
     
-    // Revenue (completed orders)
+    // Total Downloads (sum of all assets)
+    const totalDownloads = await Asset.sum('downloads') || 0;
+
+    // Total Sales (count of completed orders)
+    const totalSales = await Order.count({ where: { status: 'completed' } });
+
+    // Revenue (sum of amount for completed orders)
     const revenue = await Order.sum('amount', { where: { status: 'completed' } }) || 0;
 
     // Last 5 orders
@@ -23,6 +29,8 @@ const getAdminStats = async (req, res) => {
       totalCreators,
       pendingAssetsCount,
       revenue,
+      totalDownloads,
+      totalSales,
       recentOrders
     });
   } catch (error) {
@@ -33,12 +41,11 @@ const getAdminStats = async (req, res) => {
 const getCreators = async (req, res) => {
   try {
     const creators = await User.findAll({
-      where: { role: 'creator' },
+      where: { role: { [Op.ne]: 'admin' } }, // Show everyone except admins
       attributes: { exclude: ['passwordHash'] },
       include: [{ model: Asset, attributes: ['id'] }]
     });
 
-    // Map to include asset count and other stats
     const creatorsWithStats = await Promise.all(creators.map(async (creator) => {
       const assetCount = creator.Assets ? creator.Assets.length : 0;
       const totalSales = await Order.count({

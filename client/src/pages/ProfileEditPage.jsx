@@ -8,7 +8,7 @@ import {
   RiTwitterFill, RiGithubFill, RiCloseLine, RiCheckLine, RiZoomInLine, RiDragMoveLine
 } from 'react-icons/ri'
 
-export default function ProfileEditPage() {
+export default function ProfileEditPage({ isAdminContext = false }) {
   const [user, setUser] = useState(null)
   const [formData, setFormData] = useState({
     fullName: '',
@@ -96,8 +96,8 @@ export default function ProfileEditPage() {
   if (!user) return null
 
   return (
-    <main className="profile-edit-canvas">
-      <AppHeader />
+    <main className="profile-edit-canvas" style={{ padding: isAdminContext ? 0 : 'inherit' }}>
+      {!isAdminContext && <AppHeader />}
       
       {notification && (
         <div className="toast-container">
@@ -109,7 +109,7 @@ export default function ProfileEditPage() {
         </div>
       )}
 
-      <div className="profile-edit-content" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
+      <div className="profile-edit-content" style={{ maxWidth: '900px', margin: isAdminContext ? '0' : '0 auto', padding: isAdminContext ? '0 0 2rem 0' : '2rem' }}>
         <header className="profile-edit-header" style={{ marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '2rem', color: '#1e293b' }}>Professional Settings</h1>
           <p style={{ color: '#64748b' }}>Customize your presence on UIbrage.</p>

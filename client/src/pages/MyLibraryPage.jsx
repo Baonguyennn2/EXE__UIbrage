@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { assetService } from '../services/api'
 import { RiEditLine, RiEyeLine, RiDeleteBin6Line, RiUploadCloud2Line, RiDownloadCloud2Line, RiStarLine, RiBarChartFill } from 'react-icons/ri'
 
-export default function MyLibraryPage({ isAdmin = false }) {
+export default function MyLibraryPage({ isAdmin = false, customStats }) {
   const [myAssets, setMyAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All Categories')
@@ -38,9 +38,9 @@ export default function MyLibraryPage({ isAdmin = false }) {
   }
 
   const stats = [
-    { label: 'Monthly Revenue', value: '$2,450.00', icon: <RiBarChartFill />, color: '#6366f1' },
-    { label: 'Total Downloads', value: '18.2k', icon: <RiDownloadCloud2Line />, color: '#3b82f6' },
-    { label: 'Avg. Rating', value: '4.8', icon: <RiStarLine />, color: '#10b981' }
+    { label: 'Monthly Revenue', value: customStats ? `$${customStats.revenue}` : '$2,450.00', icon: <RiBarChartFill />, color: '#6366f1' },
+    { label: 'Total Downloads', value: customStats ? customStats.downloads : '18.2k', icon: <RiDownloadCloud2Line />, color: '#3b82f6' },
+    { label: 'Avg. Rating', value: customStats ? customStats.rating : '4.8', icon: <RiStarLine />, color: '#10b981' }
   ]
 
   if (loading) return <div className="loading-screen">Loading My Assets...</div>

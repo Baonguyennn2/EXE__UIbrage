@@ -36,7 +36,11 @@ function LegacyFrameRoute() {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomepagePage />} />
+      <Route path="/" element={
+        localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).role === 'admin' 
+        ? <Navigate to="/admin/dashboard" replace /> 
+        : <HomepagePage />
+      } />
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       <Route path="/profile/:username" element={<UserProfilePage />} />
@@ -55,7 +59,7 @@ export default function AppRoutes() {
         <ProtectedRoute allowedRoles={['customer']}><MyLibraryPage /></ProtectedRoute>
       } />
       <Route path="/profile/edit" element={
-        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><ProfileEditPage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer', 'creator']}><ProfileEditPage /></ProtectedRoute>
       } />
       <Route path="/assets/upload" element={
         <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><UploadAssetPage variant="create" /></ProtectedRoute>
@@ -94,6 +98,9 @@ export default function AppRoutes() {
       <Route path="/admin/asset-approval" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="moderation" /></ProtectedRoute>
       } />
+      <Route path="/admin/all-assets" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="all-assets" /></ProtectedRoute>
+      } />
       <Route path="/admin/reports" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="reports" /></ProtectedRoute>
       } />
@@ -106,9 +113,12 @@ export default function AppRoutes() {
       <Route path="/admin/messages" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="messages" /></ProtectedRoute>
       } />
+      <Route path="/admin/settings" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="settings" /></ProtectedRoute>
+      } />
 
       <Route path="/messages" element={
-        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><MessagePage /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={['customer', 'creator']}><MessagePage /></ProtectedRoute>
       } />
 
       <Route path="/community" element={<CommunityPage />} />
