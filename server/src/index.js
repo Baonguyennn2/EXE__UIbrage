@@ -40,10 +40,8 @@ app.set('io', io);
 const startServer = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-    await sequelize.query('UPDATE Assets SET categoryId = NULL WHERE categoryId NOT IN (SELECT id FROM Categories)');
-    await sequelize.sync({ alter: true });
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    console.log('MySQL connected');
+    await sequelize.sync();
     console.log('MySQL models synchronized');
 
     await seed();
