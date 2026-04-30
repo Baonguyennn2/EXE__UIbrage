@@ -48,7 +48,10 @@ export default function RegisterPage() {
 
   const handleGoogleLogin = () => {
      setNotification({ type: 'info', message: 'Redirecting to Google...' })
-     window.location.href = 'http://localhost:5000/api/auth/google'
+     const apiUrl = window.location.hostname === 'localhost' 
+       ? 'http://localhost:5000/api' 
+       : 'https://exe-uibrage.onrender.com/api'
+     window.location.href = `${apiUrl}/auth/google`
   }
 
   const handleFacebookLogin = () => {

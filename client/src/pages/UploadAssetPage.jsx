@@ -116,7 +116,9 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
 
     try {
       const token = localStorage.getItem('token')
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      const apiUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000/api' 
+        : 'https://exe-uibrage.onrender.com/api'
       
       if (variant === 'edit') {
         await axios.put(`${apiUrl}/assets/${id}`, data, {
