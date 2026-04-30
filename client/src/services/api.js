@@ -97,6 +97,9 @@ export const postService = {
   create: (data) => api.post('/posts', data),
   like: (id) => api.post(`/posts/${id}/like`),
   addComment: (id, data) => api.post(`/posts/${id}/comments`, data),
+  uploadImage: (formData) => api.post('/posts/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 export default api;

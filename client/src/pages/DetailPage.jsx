@@ -30,7 +30,7 @@ export default function DetailPage() {
       try {
         const [assetRes, commentsRes, recRes] = await Promise.all([
           assetService.getById(id),
-          commentService.getByAsset(id),
+          commentService.getByAssetId(id),
           assetService.getAll({ limit: 3 })
         ])
         setAsset(assetRes.data)
