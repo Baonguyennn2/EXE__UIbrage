@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api' 
@@ -8,7 +9,11 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-// Add interceptor to include token
+// Socket.io instance
+export const socket = io(API_URL.replace('/api', ''), {
+  autoConnect: false
+});
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -17,17 +22,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Add interceptor to handle 401 errors (expired token)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear user data and redirect to login
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // We can't use useNavigate here as it's not a React component,
-      // so we use window.location.href
       if (!window.location.pathname.includes('/auth/login')) {
         window.location.href = '/auth/login';
       }
@@ -42,34 +42,16 @@ export const assetService = {
   add: (data) => api.post('/assets', data, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-};
-
-export const commentService = {
-  getByAsset: (assetId) => api.get(`/comments/${assetId}`),
-  add: (data) => api.post('/comments', data),
+  update: (id, data) => api.put(`/assets/${id}`, data),
+  delete: (id) => api.delete(`/assets/${id}`),
 };
 
 export const adminService = {
   getStats: () => api.get('/admin/stats'),
+  getCreators: () => api.get('/admin/creators'),
   getPending: () => api.get('/admin/pending-assets'),
-  approve: (id, status) => api.patch(`/admin/approve/${id}`, { status }),
-  upload: (formData) => api.post('/admin/assets', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-};
-
-export const metadataService = {
-  getCategories: () => api.get('/categories'),
-  getTags: () => api.get('/tags'),
-};
-
-export const authService = {
-  login: (email, password) => api.post('/auth/login', { email, password }),
-  register: (data) => api.post('/auth/register', data),
-  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
-  resendCode: (email) => api.post('/auth/resend-code', { email }),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (email, code, newPassword) => api.post('/auth/reset-password', { email, code, newPassword }),
+  approve: (id, data) => api.patch(`/admin/approve/${id}`, data),
+  deleteAsset: (id) => api.delete(`/admin/assets/${id}`),
 };
 
 export const userService = {
@@ -82,16 +64,39 @@ export const userService = {
   getEarnings: () => api.get('/users/earnings'),
 };
 
+export const notificationService = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+};
+
+export const messageService = {
+  getConversations: () => api.get('/messages/conversations'),
+  getMessages: (conversationId) => api.get(`/messages/${conversationId}`),
+  sendMessage: (data) => api.post('/messages/send', data),
+};
+
+export const authService = {
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  register: (data) => api.post('/auth/register', data),
+};
+
+export const metadataService = {
+  getCategories: () => api.get('/categories'),
+  getTags: () => api.get('/tags'),
+};
+
+export const commentService = {
+  getByAssetId: (assetId) => api.get(`/comments/asset/${assetId}`),
+  add: (data) => api.post('/comments', data),
+  delete: (id) => api.delete(`/comments/${id}`),
+};
+
 export const postService = {
   getAll: (params) => api.get('/posts', { params }),
   getById: (id) => api.get(`/posts/${id}`),
-  create: (formData) => api.post('/posts', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  uploadImage: (formData) => api.post('/posts/upload-image', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  addComment: (postId, data) => api.post(`/posts/${postId}/comments`, data),
+  create: (data) => api.post('/posts', data),
+  like: (id) => api.post(`/posts/${id}/like`),
+  addComment: (id, data) => api.post(`/posts/${id}/comments`, data),
 };
 
 export default api;

@@ -11,6 +11,8 @@ const metadataRoutes = require('./routes/metadataRoutes');
 const userRoutes = require('./routes/userRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const postRoutes = require('./routes/postRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api', metadataRoutes);
 
 // Health check

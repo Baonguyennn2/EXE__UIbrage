@@ -30,6 +30,14 @@ const Asset = sequelize.define('Asset', {
     type: DataTypes.ENUM('draft', 'pending', 'published', 'rejected'),
     defaultValue: 'pending',
   },
+  rejectionReason: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  downloads: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
   coverImageUrl: {
     type: DataTypes.STRING,
   },

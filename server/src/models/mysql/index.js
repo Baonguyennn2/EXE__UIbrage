@@ -9,7 +9,7 @@ const PostComment = require('./PostComment');
 const Follower = require('./Follower');
 
 // Relations
-User.hasMany(Asset, { foreignKey: 'authorId' });
+User.hasMany(Asset, { as: 'Assets', foreignKey: 'authorId' });
 Asset.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
 
 Asset.hasMany(AssetMedia, { as: 'media', foreignKey: 'assetId' });

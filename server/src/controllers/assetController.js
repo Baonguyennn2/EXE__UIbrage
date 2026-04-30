@@ -128,7 +128,7 @@ const createAsset = async (req, res) => {
       coverImageUrl,
       fileUrl,
       authorId: userId,
-      status: 'published' // Auto-publish for now as requested or set to pending if moderation is needed
+      status: req.user.role === 'admin' ? 'published' : 'pending'
     });
 
     // 4. Handle Tags

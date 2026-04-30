@@ -22,6 +22,7 @@ import WishlistPage from '../pages/WishlistPage.jsx'
 import UserProfilePage from '../pages/UserProfilePage.jsx'
 import ManageAssetsPage from '../pages/ManageAssetsPage.jsx'
 import EarningsPage from '../pages/EarningsPage.jsx'
+import MessagePage from '../pages/MessagePage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
@@ -101,6 +102,13 @@ export default function AppRoutes() {
       } />
       <Route path="/admin/upload-asset" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="upload" /></ProtectedRoute>
+      } />
+      <Route path="/admin/messages" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="messages" /></ProtectedRoute>
+      } />
+
+      <Route path="/messages" element={
+        <ProtectedRoute allowedRoles={['customer', 'creator', 'admin']}><MessagePage /></ProtectedRoute>
       } />
 
       <Route path="/community" element={<CommunityPage />} />

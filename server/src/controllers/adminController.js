@@ -1,21 +1,64 @@
 const { Asset, User, Order, AssetMedia } = require('../models/mysql');
 const { Op } = require('sequelize');
+const Notification = require('../models/mongodb/Notification');
 
 const getAdminStats = async (req, res) => {
   try {
     const totalAssets = await Asset.count();
     const totalCreators = await User.count({ where: { role: 'creator' } });
-    const pendingAssets = await Asset.count({ where: { status: 'pending' } });
+    const pendingAssetsCount = await Asset.count({ where: { status: 'pending' } });
     
     // Revenue (completed orders)
     const revenue = await Order.sum('amount', { where: { status: 'completed' } }) || 0;
 
+    // Last 5 orders
+    const recentOrders = await Order.findAll({
+      limit: 5,
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['username'] }, { model: Asset, attributes: ['title'] }]
+    });
+
     res.json({
       totalAssets,
       totalCreators,
-      pendingAssets,
-      revenue
+      pendingAssetsCount,
+      revenue,
+      recentOrders
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCreators = async (req, res) => {
+  try {
+    const creators = await User.findAll({
+      where: { role: 'creator' },
+      attributes: { exclude: ['passwordHash'] },
+      include: [{ model: Asset, attributes: ['id'] }]
+    });
+
+    // Map to include asset count and other stats
+    const creatorsWithStats = await Promise.all(creators.map(async (creator) => {
+      const assetCount = creator.Assets ? creator.Assets.length : 0;
+      const totalSales = await Order.count({
+        include: [{ model: Asset, where: { authorId: creator.id } }],
+        where: { status: 'completed' }
+      });
+      const revenue = await Order.sum('amount', {
+        include: [{ model: Asset, where: { authorId: creator.id } }],
+        where: { status: 'completed' }
+      }) || 0;
+
+      return {
+        ...creator.toJSON(),
+        assetCount,
+        totalSales,
+        revenue
+      };
+    }));
+
+    res.json(creatorsWithStats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -25,7 +68,7 @@ const getPendingAssets = async (req, res) => {
   try {
     const assets = await Asset.findAll({
       where: { status: 'pending' },
-      include: [{ model: User, as: 'author', attributes: ['username', 'fullName'] }]
+      include: [{ model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] }]
     });
     res.json(assets);
   } catch (error) {
@@ -36,13 +79,25 @@ const getPendingAssets = async (req, res) => {
 const approveAsset = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body; // 'published' or 'rejected'
+    const { status, rejectionReason } = req.body; // 'published' or 'rejected'
 
     const asset = await Asset.findByPk(id);
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
 
     asset.status = status;
+    if (rejectionReason) asset.rejectionReason = rejectionReason;
     await asset.save();
+
+    // Send Notification to Creator
+    await Notification.create({
+      userId: asset.authorId,
+      type: status === 'published' ? 'asset_approved' : 'asset_rejected',
+      title: status === 'published' ? 'Asset Approved!' : 'Asset Rejected',
+      message: status === 'published' 
+        ? `Your asset "${asset.title}" has been approved and is now live.` 
+        : `Your asset "${asset.title}" was rejected. Reason: ${rejectionReason || 'No reason provided.'}`,
+      relatedId: asset.id
+    });
 
     res.json({ message: `Asset ${status} successfully`, asset });
   } catch (error) {
@@ -50,41 +105,11 @@ const approveAsset = async (req, res) => {
   }
 };
 
-const createAsset = async (req, res) => {
+const deleteAsset = async (req, res) => {
   try {
-    const { title, description, price, engine, category, licenseType, isFree } = req.body;
-    const authorId = req.user.id;
-    
-    // Assuming cover image is uploaded to req.files.coverImage[0]
-    // And file is uploaded to req.files.assetFile[0]
-    const coverImageUrl = req.files?.coverImage ? req.files.coverImage[0].path : null;
-    const fileUrl = req.files?.assetFile ? req.files.assetFile[0].path : null;
-
-    const asset = await Asset.create({
-      title,
-      description,
-      price,
-      engine,
-      category,
-      licenseType,
-      isFree: isFree === 'true',
-      coverImageUrl,
-      fileUrl,
-      authorId,
-      status: 'pending'
-    });
-
-    // Handle screenshots
-    if (req.files?.screenshots) {
-      const mediaData = req.files.screenshots.map(file => ({
-        url: file.path,
-        assetId: asset.id,
-        type: 'image'
-      }));
-      await AssetMedia.bulkCreate(mediaData);
-    }
-
-    res.status(201).json(asset);
+    const { id } = req.params;
+    await Asset.destroy({ where: { id } });
+    res.json({ message: 'Asset deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -92,7 +117,8 @@ const createAsset = async (req, res) => {
 
 module.exports = {
   getAdminStats,
+  getCreators,
   getPendingAssets,
   approveAsset,
-  createAsset
+  deleteAsset
 };
