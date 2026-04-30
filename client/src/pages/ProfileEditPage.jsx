@@ -5,7 +5,7 @@ import Toast from '../components/Toast.jsx'
 import { 
   RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill,
   RiMapPin2Fill, RiGlobalFill, RiBriefcaseFill, RiFacebookBoxFill, 
-  RiTwitterFill, RiGithubFill, RiLayoutTopLine, RiDragMove2Fill
+  RiTwitterFill, RiGithubFill, RiCloseLine, RiCheckLine, RiZoomInLine, RiDragMoveLine
 } from 'react-icons/ri'
 
 export default function ProfileEditPage() {
@@ -21,7 +21,8 @@ export default function ProfileEditPage() {
     facebookUrl: '',
     twitterUrl: '',
     githubUrl: '',
-    coverPosition: 50
+    coverPosition: 50,
+    coverZoom: 100
   })
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
@@ -29,6 +30,7 @@ export default function ProfileEditPage() {
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
+  const [showCoverModal, setShowCoverModal] = useState(false)
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user') || 'null')
@@ -45,7 +47,8 @@ export default function ProfileEditPage() {
         facebookUrl: savedUser.facebookUrl || '',
         twitterUrl: savedUser.twitterUrl || '',
         githubUrl: savedUser.githubUrl || '',
-        coverPosition: savedUser.coverPosition || 50
+        coverPosition: savedUser.coverPosition || 50,
+        coverZoom: savedUser.coverZoom || 100
       })
     }
   }, [])
@@ -54,6 +57,9 @@ export default function ProfileEditPage() {
     if (e.target.files && e.target.files[0]) {
       setter(e.target.files[0])
       previewSetter(URL.createObjectURL(e.target.files[0]))
+      if (setter === setCoverFile) {
+        setShowCoverModal(true)
+      }
     }
   }
 
@@ -110,68 +116,57 @@ export default function ProfileEditPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="profile-form">
-          {/* Cover & Avatar Preview Section */}
+          {/* LinkedIn-style Cover Section */}
           <section className="surface-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem', background: '#fff' }}>
             <div className="edit-cover-preview" style={{ 
               height: '240px', 
               background: (coverPreview || user.coverImageUrl) ? `url(${coverPreview || user.coverImageUrl})` : '#312e81',
-              backgroundSize: 'cover',
+              backgroundSize: `${formData.coverZoom}% auto`,
               backgroundPosition: `center ${formData.coverPosition}%`,
-              position: 'relative',
-              transition: 'background-position 0.1s ease'
+              backgroundRepeat: 'no-repeat',
+              position: 'relative'
             }}>
-              <div className="cover-edit-controls" style={{ 
-                position: 'absolute', 
-                inset: 0, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                background: 'rgba(0,0,0,0.3)',
-                opacity: 0,
-                transition: 'opacity 0.2s'
-              }} className="hover-show">
-                <RiDragMove2Fill size={40} color="#fff" />
-                <p style={{ color: '#fff', fontWeight: 600 }}>Adjust position below</p>
+              {/* Change Cover Button in corner */}
+              <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                <input type="file" accept="image/*" hidden id="coverUpload" onChange={(e) => handleFileChange(e, setCoverFile, setCoverPreview)} />
+                <label htmlFor="coverUpload" style={{ 
+                  background: '#fff', 
+                  color: '#4f46e5', 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                }} title="Change Cover">
+                  <RiImageEditFill size={20} />
+                </label>
               </div>
-
-              <input type="file" accept="image/*" hidden id="coverUpload" onChange={(e) => handleFileChange(e, setCoverFile, setCoverPreview)} />
-              <label htmlFor="coverUpload" className="btn-solid" style={{ 
-                position: 'absolute', 
-                top: '50%', 
-                left: '50%', 
-                transform: 'translate(-50%, -50%)',
-                background: '#fff',
-                color: '#4f46e5',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.75rem',
-                fontWeight: 700,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                cursor: 'pointer',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <RiImageEditFill /> Change Cover Photo
-              </label>
+              
+              {(coverPreview || user.coverImageUrl) && (
+                <button 
+                  type="button" 
+                  onClick={() => setShowCoverModal(true)}
+                  style={{ 
+                    position: 'absolute', 
+                    bottom: '1rem', 
+                    right: '1rem',
+                    background: 'rgba(0,0,0,0.5)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '2rem',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(4px)'
+                  }}
+                >
+                  Edit Position
+                </button>
+              )}
             </div>
-
-            {/* Position Adjustment Slider */}
-            {(coverPreview || user.coverImageUrl) && (
-              <div style={{ padding: '1rem 2rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}>REPOSITION COVER</span>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="100" 
-                  value={formData.coverPosition} 
-                  onChange={(e) => setFormData({...formData, coverPosition: parseInt(e.target.value)})}
-                  style={{ flex: 1, height: '6px', cursor: 'pointer' }}
-                />
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4f46e5', width: '40px' }}>{formData.coverPosition}%</span>
-              </div>
-            )}
             
             <div style={{ padding: '0 2rem 2rem', marginTop: '-60px', position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '2rem' }}>
               <div className="avatar-frame-container" style={{ position: 'relative' }}>
@@ -243,30 +238,6 @@ export default function ProfileEditPage() {
                   <input type="text" value={formData.website} placeholder="https://yourportfolio.com" onChange={e => setFormData({...formData, website: e.target.value})} />
                 </div>
               </div>
-              
-              <div style={{ gridColumn: 'span 2', height: '1px', background: '#f1f5f9', margin: '1rem 0' }} />
-              
-              <div className="field-group">
-                <label>Facebook</label>
-                <div className="input-v3">
-                  <RiFacebookBoxFill color="#1877F2" />
-                  <input type="text" value={formData.facebookUrl} placeholder="facebook.com/username" onChange={e => setFormData({...formData, facebookUrl: e.target.value})} />
-                </div>
-              </div>
-              <div className="field-group">
-                <label>Twitter</label>
-                <div className="input-v3">
-                  <RiTwitterFill color="#1DA1F2" />
-                  <input type="text" value={formData.twitterUrl} placeholder="twitter.com/username" onChange={e => setFormData({...formData, twitterUrl: e.target.value})} />
-                </div>
-              </div>
-              <div className="field-group">
-                <label>Github</label>
-                <div className="input-v3">
-                  <RiGithubFill color="#333" />
-                  <input type="text" value={formData.githubUrl} placeholder="github.com/username" onChange={e => setFormData({...formData, githubUrl: e.target.value})} />
-                </div>
-              </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '3rem' }}>
@@ -278,14 +249,85 @@ export default function ProfileEditPage() {
         </form>
       </div>
 
-      <style>{`
-        .hover-show {
-          pointer-events: none;
-        }
-        .edit-cover-preview:hover .hover-show {
-          opacity: 1;
-        }
-      `}</style>
+      {/* LinkedIn-style Cover Modal */}
+      {showCoverModal && (
+        <div className="modal-overlay" style={{ 
+          position: 'fixed', 
+          inset: 0, 
+          background: 'rgba(0,0,0,0.85)', 
+          zIndex: 1000, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '2rem'
+        }}>
+          <div className="cover-modal" style={{ 
+            background: '#fff', 
+            width: '100%', 
+            maxWidth: '800px', 
+            borderRadius: '1rem', 
+            overflow: 'hidden'
+          }}>
+            <header style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Edit Cover Photo</h2>
+              <button onClick={() => setShowCoverModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><RiCloseLine size={24} /></button>
+            </header>
+
+            <div style={{ background: '#000', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ 
+                width: '100%', 
+                height: '240px', 
+                background: `url(${coverPreview || user.coverImageUrl})`,
+                backgroundSize: `${formData.coverZoom}% auto`,
+                backgroundPosition: `center ${formData.coverPosition}%`,
+                backgroundRepeat: 'no-repeat',
+                border: '1px dashed rgba(255,255,255,0.5)',
+                transition: 'all 0.1s ease'
+              }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.6)' }} />
+                <div style={{ height: '240px' }} />
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.6)' }} />
+              </div>
+            </div>
+
+            <div style={{ padding: '2rem' }}>
+              <div style={{ marginBottom: '2rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem' }}>
+                  <RiZoomInLine /> Zoom
+                </label>
+                <input 
+                  type="range" 
+                  min="100" 
+                  max="300" 
+                  value={formData.coverZoom} 
+                  onChange={(e) => setFormData({...formData, coverZoom: parseInt(e.target.value)})}
+                  style={{ width: '100%', height: '6px' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem' }}>
+                  <RiDragMoveLine /> Straighten / Position
+                </label>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="100" 
+                  value={formData.coverPosition} 
+                  onChange={(e) => setFormData({...formData, coverPosition: parseInt(e.target.value)})}
+                  style={{ width: '100%', height: '6px' }}
+                />
+              </div>
+            </div>
+
+            <footer style={{ padding: '1.5rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              <button onClick={() => setShowCoverModal(false)} className="btn-ghost" style={{ padding: '0.6rem 1.5rem' }}>Cancel</button>
+              <button onClick={() => setShowCoverModal(false)} className="btn-solid" style={{ padding: '0.6rem 2rem' }}>Apply</button>
+            </footer>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

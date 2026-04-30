@@ -52,8 +52,10 @@ export default function UserProfilePage() {
           <div className="profile-v2-cover" style={{ 
             height: '320px', 
             background: profileUser.coverImageUrl ? `url(${profileUser.coverImageUrl})` : '#312e81',
-            backgroundSize: 'cover',
+            backgroundSize: `${profileUser.coverZoom || 100}% auto`,
             backgroundPosition: `center ${profileUser.coverPosition || 50}%`,
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#312e81',
             borderRadius: '1.5rem 1.5rem 0 0',
             position: 'relative'
           }}>

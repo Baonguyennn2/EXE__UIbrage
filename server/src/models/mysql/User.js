@@ -57,6 +57,10 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 50,
   },
+  coverZoom: {
+    type: DataTypes.INTEGER,
+    defaultValue: 100,
+  },
   profileFrame: {
     type: DataTypes.STRING, // 'none', 'sakura', 'pixel', 'modern_vn'
     defaultValue: 'none',
