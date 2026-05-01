@@ -71,7 +71,10 @@ export default function LoginPage({ variant = 'v1' }) {
 
   const handleGoogleLogin = () => {
     setNotification({ type: 'info', message: 'Redirecting to Google...' })
-    window.location.href = 'https://exe-uibrage.onrender.com/api/auth/google'
+    const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
+      ? 'http://localhost:5000/api' 
+      : 'https://exe-uibrage.onrender.com/api')
+    window.location.href = `${apiUrl}/auth/google`
   }
 
   const handleFacebookLogin = () => {
