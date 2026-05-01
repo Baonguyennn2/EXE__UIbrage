@@ -70,16 +70,27 @@ exports.googleCallback = async (req, res) => {
     const groups = decoded['cognito:groups'] || [];
     const role = groups.includes('admin') ? 'admin' : 'customer';
 
-    const [user] = await User.findOrCreate({
+    console.log('Syncing user with DB:', { email, sub, role });
+
+    // Ensure username is unique even if taken
+    let finalUsername = username || email.split('@')[0];
+    const existingUsername = await User.findOne({ where: { username: finalUsername } });
+    if (existingUsername && existingUsername.email !== email) {
+      finalUsername = `${finalUsername}_${sub.substring(0, 5)}`;
+    }
+
+    const [user, created] = await User.findOrCreate({
       where: { email },
       defaults: {
         id: sub,
         email,
         fullName: name || email.split('@')[0],
-        username: username || email.split('@')[0],
+        username: finalUsername,
         role: role
       }
     });
+
+    console.log('User sync result:', { id: user.id, created });
 
     // Update role if user already exists but role changed
     if (user.role !== role) {
@@ -88,11 +99,14 @@ exports.googleCallback = async (req, res) => {
     }
 
     // 4. Redirect to frontend with token and user info
-    // We stringify the user to pass it easily, or the frontend can fetch it later
-    res.redirect(`${clientOrigin}/auth/login/success?token=${id_token}&user=${encodeURIComponent(JSON.stringify(user))}`);
+    const successUrl = `${clientOrigin}/auth/login/success?token=${id_token}&user=${encodeURIComponent(JSON.stringify(user))}`;
+    console.log('Auth successful, redirecting to:', successUrl);
+    res.redirect(successUrl);
   } catch (error) {
-    console.error('Google Callback Error:', error.response?.data || error.message);
-    res.redirect(`${clientOrigin}/auth/login?error=google_auth_failed`);
+    const errorData = error.response?.data || error.message;
+    console.error('Google Callback Error Detailed:', errorData);
+    console.error('Stack:', error.stack);
+    res.redirect(`${clientOrigin}/auth/login?error=google_auth_failed&details=${encodeURIComponent(JSON.stringify(errorData))}`);
   }
 };
 
