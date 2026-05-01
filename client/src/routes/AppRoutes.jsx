@@ -23,6 +23,7 @@ import UserProfilePage from '../pages/UserProfilePage.jsx'
 import ManageAssetsPage from '../pages/ManageAssetsPage.jsx'
 import EarningsPage from '../pages/EarningsPage.jsx'
 import MessagePage from '../pages/MessagePage.jsx'
+import GoogleCallbackPage from '../pages/GoogleCallbackPage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
 
@@ -81,6 +82,7 @@ export default function AppRoutes() {
       <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
       <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/api/auth/google/callback" element={<GoogleCallbackPage />} />
 
       {/* Admin Protected Routes */}
       <Route path="/admin" element={
