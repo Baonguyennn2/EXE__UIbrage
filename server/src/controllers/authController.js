@@ -37,8 +37,9 @@ exports.googleLogin = async (req, res) => {
 
 exports.googleCallback = async (req, res) => {
   const { code } = req.query;
-  const domain = process.env.COGNITO_DOMAIN;
+  let domain = (process.env.COGNITO_DOMAIN || '').replace('https://', '').replace('http://', '');
   const clientId = process.env.COGNITO_CLIENT_ID;
+  const clientSecret = process.env.COGNITO_CLIENT_SECRET;
   const redirectUri = process.env.COGNITO_REDIRECT_URI;
   const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
@@ -52,6 +53,7 @@ exports.googleCallback = async (req, res) => {
       new URLSearchParams({
         grant_type: 'authorization_code',
         client_id: clientId,
+        client_secret: clientSecret,
         code: code,
         redirect_uri: redirectUri
       }), 
