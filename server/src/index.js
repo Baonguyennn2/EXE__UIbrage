@@ -15,27 +15,102 @@ const io = new Server(server, {
   }
 });
 
+// Track online users: userId -> Set of socketIds
+const onlineUsers = new Map();
+
 // Socket.io logic
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   socket.on('join', (userId) => {
+    if (!userId) return;
+    
+    // Track user's sockets
+    if (!onlineUsers.has(userId)) {
+      onlineUsers.set(userId, new Set());
+    }
+    onlineUsers.get(userId).add(socket.id);
+    socket.userId = userId;
     socket.join(userId);
-    console.log(`User ${userId} joined their room`);
+    
+    console.log(`User ${userId} joined their room (sockets: ${onlineUsers.get(userId).size})`);
+    
+    // Broadcast user online status
+    io.emit('userOnline', { userId, online: true });
   });
 
+  // Send & receive real-time message
   socket.on('sendMessage', (data) => {
-    // data: { senderId, receiverId, text, conversationId }
-    io.to(data.receiverId).emit('newMessage', data);
+    const { receiverId, conversationId, text, senderId } = data;
+    
+    // Broadcast to receiver's room
+    io.to(receiverId).emit('newMessage', {
+      ...data,
+      _id: data._id || Date.now().toString(),
+      createdAt: data.createdAt || new Date().toISOString()
+    });
+
+    // Also send back to sender (for other tabs)
+    if (senderId) {
+      io.to(senderId).emit('newMessage', data);
+    }
+  });
+
+  // Typing indicators
+  socket.on('typing', (data) => {
+    const { receiverId, conversationId } = data;
+    // Chỉ gửi typing indicator tới receiver
+    io.to(receiverId).emit('userTyping', {
+      userId: socket.userId,
+      conversationId
+    });
+  });
+
+  socket.on('stopTyping', (data) => {
+    const { receiverId, conversationId } = data;
+    io.to(receiverId).emit('userStopTyping', {
+      userId: socket.userId,
+      conversationId
+    });
+  });
+
+  // Mark messages as read
+  socket.on('markRead', (data) => {
+    const { conversationId, userId } = data;
+    // Notify the other participant that messages were read
+    // We'll find the other participant and emit
+    socket.broadcast.emit('messagesRead', {
+      conversationId,
+      readBy: userId
+    });
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('User disconnected:', socket.id);
+    
+    // Clean up online tracking
+    if (socket.userId && onlineUsers.has(socket.userId)) {
+      const sockets = onlineUsers.get(socket.userId);
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        onlineUsers.delete(socket.userId);
+        // User is fully offline now
+        io.emit('userOnline', { userId: socket.userId, online: false });
+        console.log(`User ${socket.userId} is now offline`);
+      }
+    }
   });
+});
+
+// API endpoint để kiểm tra online status (single user - public)
+app.get('/api/users/online-status/:userId', (req, res) => {
+  const { userId } = req.params;
+  res.json({ online: onlineUsers.has(userId) });
 });
 
 // Make io accessible in controllers if needed (using app.set)
 app.set('io', io);
+app.set('onlineUsers', onlineUsers);
 
 const startServer = async () => {
   try {

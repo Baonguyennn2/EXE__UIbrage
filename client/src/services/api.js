@@ -63,6 +63,7 @@ export const userService = {
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
   getEarnings: () => api.get('/users/earnings'),
   getAdminContact: () => api.get('/users/admin-contact'),
+  getOnlineStatus: (userIds) => api.post('/users/online-status', { userIds }),
 };
 
 export const notificationService = {

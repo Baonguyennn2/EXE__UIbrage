@@ -13,5 +13,6 @@ router.get('/wishlist', authenticate, userController.getWishlist);
 router.post('/wishlist/toggle', authenticate, userController.toggleWishlist);
 router.get('/earnings', authenticate, userController.getEarnings);
 router.get('/admin-contact', authenticate, userController.getAdminContact);
+router.post('/online-status', authenticate, userController.getOnlineStatus);
 
 module.exports = router;

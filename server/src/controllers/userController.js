@@ -132,11 +132,28 @@ const getAdminContact = async (req, res) => {
   }
 };
 
+const getOnlineStatus = async (req, res) => {
+  try {
+    const { userIds } = req.body;
+    const onlineUsers = req.app.get('onlineUsers') || new Map();
+    const status = {};
+    if (Array.isArray(userIds)) {
+      userIds.forEach(id => {
+        status[id] = onlineUsers.has(id);
+      });
+    }
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getWishlist,
   toggleWishlist,
   getEarnings,
   getUserProfile,
-  getAdminContact
+  getAdminContact,
+  getOnlineStatus
 };
