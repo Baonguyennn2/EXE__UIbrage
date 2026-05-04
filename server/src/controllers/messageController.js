@@ -1,6 +1,5 @@
 const { Conversation, Message } = require('../models/mongodb/Message');
 const { User } = require('../models/mysql');
-const { Op } = require('sequelize');
 
 const getConversations = async (req, res) => {
   try {
@@ -12,11 +11,11 @@ const getConversations = async (req, res) => {
     const enrichedConversations = await Promise.all(conversations.map(async (conv) => {
       const otherParticipantId = conv.participants.find(p => p !== req.user.id);
       const otherUser = await User.findByPk(otherParticipantId, {
-        attributes: ['username', 'fullName', 'avatarUrl']
+        attributes: ['id', 'username', 'fullName', 'avatarUrl']
       });
       return {
         ...conv.toJSON(),
-        otherUser
+        otherUser: otherUser ? otherUser.toJSON() : null
       };
     }));
 
@@ -40,7 +39,7 @@ const getMessages = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   try {
-    const { conversationId, receiverId, text } = req.body;
+    const { conversationId, receiverId, text, image } = req.body;
     let actualConvId = conversationId;
 
     if (!actualConvId) {
@@ -57,14 +56,17 @@ const sendMessage = async (req, res) => {
       actualConvId = conv._id;
     }
 
-    const message = await Message.create({
+    const messageData = {
       conversationId: actualConvId,
       senderId: req.user.id,
-      text
-    });
+    };
+    if (text) messageData.text = text;
+    if (image) messageData.image = image;
+
+    const message = await Message.create(messageData);
 
     await Conversation.findByIdAndUpdate(actualConvId, {
-      lastMessage: text,
+      lastMessage: text || '[Hình ảnh]',
       lastMessageAt: Date.now()
     });
 
@@ -74,8 +76,18 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const uploadImage = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+    res.json({ url: req.file.path });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getConversations,
   getMessages,
-  sendMessage
+  sendMessage,
+  uploadImage
 };

@@ -59,17 +59,26 @@ io.on('connection', (socket) => {
   // Typing indicators
   socket.on('typing', (data) => {
     const { receiverId, conversationId } = data;
+    if (!receiverId || !conversationId) return;
+    
+    // Gán userId nếu chưa có
+    const userId = socket.userId || data.userId;
+    
     // Chỉ gửi typing indicator tới receiver
     io.to(receiverId).emit('userTyping', {
-      userId: socket.userId,
+      userId: userId,
       conversationId
     });
   });
 
   socket.on('stopTyping', (data) => {
     const { receiverId, conversationId } = data;
+    if (!receiverId || !conversationId) return;
+    
+    const userId = socket.userId || data.userId;
+    
     io.to(receiverId).emit('userStopTyping', {
-      userId: socket.userId,
+      userId: userId,
       conversationId
     });
   });

@@ -9,7 +9,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ||
 const SocketContext = createContext(null)
 
 export function SocketProvider({ children }) {
-  const socketRef = useRef(null)
+  const [socket, setSocket] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
   const userRef = useRef(null)
 
@@ -32,7 +32,7 @@ export function SocketProvider({ children }) {
     checkUser()
 
     // Tạo socket connection
-    const socket = io(SOCKET_URL, {
+    const s = io(SOCKET_URL, {
       autoConnect: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -41,53 +41,67 @@ export function SocketProvider({ children }) {
       reconnectionDelayMax: 5000,
     })
 
-    socketRef.current = socket
+    setSocket(s)
 
-    socket.on('connect', () => {
+    s.on('connect', () => {
       setIsConnected(true)
       // Join user room nếu đã đăng nhập
       if (userRef.current?.id) {
-        socket.emit('join', userRef.current.id)
+        s.emit('join', userRef.current.id)
       }
     })
 
-    socket.on('disconnect', () => {
+    s.on('connect_error', (err) => {
+      console.warn('Socket connection error:', err.message)
+    })
+
+    s.on('disconnect', () => {
       setIsConnected(false)
     })
 
-    // Tự động join lại khi user đăng nhập
-    window.addEventListener('user-login', (e) => {
-      if (e.detail?.id) {
-        userRef.current = e.detail
-        socket.emit('join', e.detail.id)
+    // Re-join on reconnect
+    s.on('reconnect', (attempt) => {
+      if (userRef.current?.id) {
+        s.emit('join', userRef.current.id)
       }
     })
 
-    window.addEventListener('user-logout', () => {
+    // Tự động join lại khi user đăng nhập
+    const handleLogin = (e) => {
+      if (e.detail?.id) {
+        userRef.current = e.detail
+        s.emit('join', e.detail.id)
+      }
+    }
+
+    const handleLogout = () => {
       userRef.current = null
-    })
+    }
+
+    window.addEventListener('user-login', handleLogin)
+    window.addEventListener('user-logout', handleLogout)
 
     // Storage event cho cross-tab sync
-    window.addEventListener('storage', (e) => {
+    const handleStorage = (e) => {
       if (e.key === 'user') {
         checkUser()
         if (userRef.current?.id) {
-          socket.emit('join', userRef.current.id)
+          s.emit('join', userRef.current.id)
         }
       }
-    })
+    }
+    window.addEventListener('storage', handleStorage)
 
     return () => {
-      window.removeEventListener('user-login', () => {})
-      window.removeEventListener('user-logout', () => {})
-      window.removeEventListener('storage', () => {})
-      socket.disconnect()
-      socketRef.current = null
+      window.removeEventListener('user-login', handleLogin)
+      window.removeEventListener('user-logout', handleLogout)
+      window.removeEventListener('storage', handleStorage)
+      s.disconnect()
     }
   }, [])
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   )

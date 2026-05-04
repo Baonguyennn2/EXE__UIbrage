@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
 import { messageService, userService } from '../services/api'
 import { useSocket } from '../services/SocketContext'
-import { RiSendPlane2Fill, RiMore2Fill, RiCustomerService2Fill, RiCheckDoubleFill, RiCheckLine } from 'react-icons/ri'
+import {
+  RiSendPlane2Fill, RiMore2Fill, RiCustomerService2Fill,
+  RiCheckDoubleFill, RiCheckLine, RiImageAddFill,
+  RiEmotionHappyLine, RiCloseFill, RiFileCopyLine,
+  RiSearchLine, RiArrowDownSLine
+} from 'react-icons/ri'
 
-const TYPING_TIMEOUT = 2000 // 2 giây không gõ thì ngừng "đang soạn tin nhắn"
+const TYPING_TIMEOUT = 2500
+const MSG_PAGE_SIZE = 50
 
 export default function MessagePage() {
   const [conversations, setConversations] = useState([])
@@ -15,30 +21,44 @@ export default function MessagePage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
   const [contactingAdmin, setContactingAdmin] = useState(false)
-
-  // Typing states
-  const [typingUsers, setTypingUsers] = useState({}) // { conversationId: true/false }
-  const typingTimeoutRef = useRef(null)
-  const isTypingRef = useRef(false)
-
-  // Online status
+  const [typingUsers, setTypingUsers] = useState({})
   const [onlineUsers, setOnlineUsers] = useState({})
+  const [searchQuery, setSearchQuery] = useState('')
+  const [unreadCounts, setUnreadCounts] = useState({})
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   const navigate = useNavigate()
   const chatEndRef = useRef(null)
+  const chatContainerRef = useRef(null)
+  const fileInputRef = useRef(null)
   const { socket, isConnected } = useSocket()
 
-  // Auto scroll xuống cuối khi có tin nhắn mới
-  const scrollToBottom = useCallback(() => {
+  const typingTimeoutRef = useRef(null)
+  const isTypingRef = useRef(false)
+  const activeConvRef = useRef(activeConversation)
+  const userRef = useRef(user)
+
+  // Sync refs
+  useEffect(() => {
+    activeConvRef.current = activeConversation
+    userRef.current = user
+  }, [activeConversation, user])
+
+  // Auto scroll
+  const scrollToBottom = useCallback((smooth = true) => {
     setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
+      if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' })
+      }
+    }, 50)
   }, [])
 
   useEffect(() => {
-    scrollToBottom()
+    if (messages.length > 0) scrollToBottom()
   }, [messages, scrollToBottom])
 
+  // Init - rejoin socket room để đảm bảo
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user'))
     if (!savedUser) {
@@ -46,58 +66,64 @@ export default function MessagePage() {
       return
     }
     setUser(savedUser)
-
+    // Gán ngay vào ref để các effect khác dùng được
+    userRef.current = savedUser
+    
+    // Đảm bảo socket join room của user
+    if (socket && isConnected) {
+      socket.emit('join', savedUser.id)
+    }
+    
     fetchConversations()
     setLoading(false)
-  }, [])
+  }, [socket, isConnected])
 
-  // Socket listeners - tách riêng để không bị re-subscribe khi activeConversation thay đổi
+  // Socket listeners
   useEffect(() => {
     if (!socket) return
 
     const handleNewMessage = (msg) => {
-      // Nếu msg có senderId === current user và msg là từ socket echo về
-      // thì chỉ refresh list, không thêm vào messages (vì đã có từ API response)
-      const isOwnMessage = msg.senderId === user?.id
+      const currentUser = userRef.current
+      const currentConv = activeConvRef.current
+      const isOwnMessage = msg.senderId === currentUser?.id
 
-      if (activeConversation && !isOwnMessage) {
-        const belongsToActiveConv =
-          msg.conversationId === activeConversation._id ||
-          msg.conversationId?.toString() === activeConversation._id?.toString()
-
-        if (belongsToActiveConv) {
+      // Nếu đang xem conversation này, thêm message vào list
+      if (currentConv && (
+        msg.conversationId === currentConv._id ||
+        msg.conversationId?.toString() === currentConv._id?.toString()
+      )) {
+        if (!isOwnMessage) {
           setMessages(prev => {
-            // Tránh trùng message
             if (prev.some(m => m._id === msg._id || m._id?.toString() === msg._id?.toString())) return prev
             return [...prev, msg]
           })
         }
+      } else {
+        // Nếu không phải conversation đang xem, vẫn đánh dấu để hiển thị badge
+        console.log('New message in other conversation:', msg.conversationId)
       }
-
-      // Luôn refresh conversation list để cập nhật lastMessage
+      // Refresh danh sách conversations để cập nhật lastMessage
       fetchConversations()
     }
 
     const handleUserTyping = (data) => {
       const { userId, conversationId } = data
-      if (userId === user?.id) return // Bỏ qua typing của chính mình
-
-      // Chỉ hiển thị typing nếu đang ở conversation đó
-      if (activeConversation &&
-        (conversationId === activeConversation._id ||
-          conversationId?.toString() === activeConversation._id?.toString())) {
+      const currentConv = activeConvRef.current
+      if (userId === userRef.current?.id) return
+      if (currentConv && (
+        conversationId === currentConv._id ||
+        conversationId?.toString() === currentConv._id?.toString()
+      )) {
         setTypingUsers(prev => ({ ...prev, [conversationId]: true }))
-
-        // Tự động tắt sau 3 giây nếu không nhận được typing tiếp theo
-        setTimeout(() => {
-          setTypingUsers(prev => ({ ...prev, [conversationId]: false }))
-        }, TYPING_TIMEOUT + 1000)
+      } else {
+        // Nếu typing ở conversation khác, set cho đúng conversationId
+        setTypingUsers(prev => ({ ...prev, [conversationId]: true }))
       }
     }
 
     const handleUserStopTyping = (data) => {
       const { userId, conversationId } = data
-      if (userId === user?.id) return
+      if (userId === userRef.current?.id) return
       setTypingUsers(prev => ({ ...prev, [conversationId]: false }))
     }
 
@@ -110,30 +136,32 @@ export default function MessagePage() {
     socket.on('userStopTyping', handleUserStopTyping)
     socket.on('userOnline', handleUserOnline)
 
+    // Đảm bảo join room mỗi khi socket listeners được setup lại
+    const currentUser = userRef.current
+    if (currentUser && socket.connected) {
+      socket.emit('join', currentUser.id)
+    }
+
     return () => {
       socket.off('newMessage', handleNewMessage)
       socket.off('userTyping', handleUserTyping)
       socket.off('userStopTyping', handleUserStopTyping)
       socket.off('userOnline', handleUserOnline)
     }
-  }, [socket, activeConversation, user?.id])
+  }, [socket])
 
   const fetchConversations = async () => {
     try {
       const res = await messageService.getConversations()
       setConversations(res.data)
-
-      // Fetch online status cho tất cả participants
       const userIds = res.data.map(c => c.otherUser?.id).filter(Boolean)
       if (userIds.length > 0) {
         try {
           const statusRes = await userService.getOnlineStatus(userIds)
-          if (statusRes.data) {
-            setOnlineUsers(prev => ({ ...prev, ...statusRes.data }))
-          }
+          if (statusRes.data) setOnlineUsers(prev => ({ ...prev, ...statusRes.data }))
         } catch (e) { /* ignore */ }
       }
-    } catch (e) { }
+    } catch (e) { /* ignore */ }
   }
 
   const fetchMessages = async (conv) => {
@@ -142,15 +170,13 @@ export default function MessagePage() {
     try {
       const res = await messageService.getMessages(conv._id)
       setMessages(res.data)
-    } catch (e) { }
+    } catch (e) { /* ignore */ }
   }
 
-  // Handle typing indicator
+  // Handle typing
   const handleTyping = (e) => {
     setNewMessage(e.target.value)
-
     if (!socket || !activeConversation) return
-
     if (!isTypingRef.current) {
       isTypingRef.current = true
       socket.emit('typing', {
@@ -158,10 +184,7 @@ export default function MessagePage() {
         conversationId: activeConversation._id
       })
     }
-
-    // Reset timeout
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
-
     typingTimeoutRef.current = setTimeout(() => {
       isTypingRef.current = false
       socket.emit('stopTyping', {
@@ -171,14 +194,7 @@ export default function MessagePage() {
     }, TYPING_TIMEOUT)
   }
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !activeConversation) return
-
-    const msgText = newMessage
-    setNewMessage('')
-
-    // Stop typing
+  const stopTyping = () => {
     if (isTypingRef.current) {
       isTypingRef.current = false
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
@@ -187,8 +203,18 @@ export default function MessagePage() {
         conversationId: activeConversation._id
       })
     }
+  }
 
-    // Optimistic UI: thêm tin nhắn tạm thời
+  // Send text message
+  const handleSendMessage = async (e) => {
+    e.preventDefault()
+    if ((!newMessage.trim() && !uploadingImage) || !activeConversation) return
+
+    const msgText = newMessage.trim()
+    setNewMessage('')
+    stopTyping()
+    setShowEmojiPicker(false)
+
     const tempId = 'temp_' + Date.now()
     const tempMsg = {
       _id: tempId,
@@ -206,11 +232,7 @@ export default function MessagePage() {
         receiverId: activeConversation.otherUser.id,
         text: msgText
       })
-
-      // Thay thế tin nhắn tạm bằng tin nhắn thật
       setMessages(prev => prev.map(m => m._id === tempId ? { ...res.data, sending: false } : m))
-
-      // Gửi socket real-time tới receiver
       if (socket) {
         socket.emit('sendMessage', {
           ...res.data,
@@ -219,21 +241,71 @@ export default function MessagePage() {
           conversationId: activeConversation._id
         })
       }
-
       fetchConversations()
     } catch (error) {
-      console.error('Send error:', error)
-      // Đánh dấu tin nhắn lỗi
       setMessages(prev => prev.map(m => m._id === tempId ? { ...m, error: true, sending: false } : m))
     }
   }
 
-  // Gửi tin nhắn bằng Enter
+  // Send image message
+  const handleImageSelect = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeConversation) return
+
+    setUploadingImage(true)
+    const formData = new FormData()
+    formData.append('image', file)
+
+    try {
+      const uploadRes = await messageService.uploadImage(formData)
+      const imageUrl = uploadRes.data.url
+
+      const tempId = 'temp_' + Date.now()
+      const tempMsg = {
+        _id: tempId,
+        conversationId: activeConversation._id,
+        senderId: user.id,
+        image: imageUrl,
+        createdAt: new Date().toISOString(),
+        sending: true
+      }
+      setMessages(prev => [...prev, tempMsg])
+
+      const res = await messageService.sendMessage({
+        conversationId: activeConversation._id,
+        receiverId: activeConversation.otherUser.id,
+        image: imageUrl
+      })
+      setMessages(prev => prev.map(m => m._id === tempId ? { ...res.data, sending: false } : m))
+      if (socket) {
+        socket.emit('sendMessage', {
+          ...res.data,
+          receiverId: activeConversation.otherUser.id,
+          senderId: user.id,
+          conversationId: activeConversation._id
+        })
+      }
+      fetchConversations()
+    } catch (error) {
+      console.error('Upload image error:', error)
+    }
+    setUploadingImage(false)
+    e.target.value = ''
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage(e)
     }
+  }
+
+  // Simple emoji list
+  const EMOJIS = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','❤️','🧡','💛','💚','💙','💜','🖤','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','👍','👎','👊','✊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','👂','👃','👣','👀','👁️']
+
+  const insertEmoji = (emoji) => {
+    setNewMessage(prev => prev + emoji)
+    setShowEmojiPicker(false)
   }
 
   const contactAdmin = async () => {
@@ -267,40 +339,119 @@ export default function MessagePage() {
     }
   }
 
-  if (loading) return <div className="loading-screen">Loading Messages...</div>
+  const filteredConversations = conversations.filter(conv => {
+    if (!searchQuery) return true
+    const name = (conv.otherUser?.username || '').toLowerCase()
+    const lastMsg = (conv.lastMessage || '').toLowerCase()
+    const q = searchQuery.toLowerCase()
+    return name.includes(q) || lastMsg.includes(q)
+  })
+
+  const formatTime = (dateStr) => {
+    const d = new Date(dateStr)
+    const now = new Date()
+    const isToday = d.toDateString() === now.toDateString()
+    if (isToday) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua'
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+  }
+
+  const formatDateSeparator = (dateStr) => {
+    const d = new Date(dateStr)
+    const now = new Date()
+    const isToday = d.toDateString() === now.toDateString()
+    if (isToday) return 'Hôm nay'
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua'
+    return d.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  }
+
+  if (loading) return <div className="loading-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#64748b' }}>Loading Messages...</div>
 
   return (
-    <main className="market-home">
+    <main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f0f2f5' }}>
       <AppHeader />
 
-      <div className="messenger-container" style={{
-        maxWidth: '1200px',
-        margin: '2rem auto',
-        display: 'grid',
-        gridTemplateColumns: '320px 1fr',
-        height: 'calc(100vh - 160px)',
-        background: '#fff',
-        borderRadius: '1.5rem',
-        overflow: 'hidden',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        maxWidth: '1400px',
+        width: '100%',
+        margin: '0 auto',
+        padding: '1rem',
+        gap: '0',
+        height: 'calc(100vh - 70px)',
+        overflow: 'hidden'
       }}>
-        {/* Sidebar */}
-        <aside style={{ borderRight: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column' }}>
-          <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Messages</h2>
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: isConnected ? '#22c55e' : '#ef4444',
-              display: 'inline-block'
-            }} title={isConnected ? 'Connected' : 'Disconnected'} />
-          </header>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {conversations.length === 0 && (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                No conversations yet
+        {/* ===== SIDEBAR: Danh sách hội thoại ===== */}
+        <aside style={{
+          width: '360px',
+          minWidth: '360px',
+          background: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRight: '1px solid #e0e0e0',
+          borderTopLeftRadius: '12px',
+          borderBottomLeftRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: '1.25rem 1.25rem 0.75rem',
+            borderBottom: '1px solid #f0f0f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: '#1a1a2e' }}>Đoạn chat</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: isConnected ? '#22c55e' : '#ef4444',
+                  display: 'inline-block'
+                }} />
+                <span style={{ fontSize: '0.75rem', color: isConnected ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
+                  {isConnected ? 'Online' : 'Offline'}
+                </span>
+              </div>
+            </div>
+            {/* Search */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              background: '#f0f2f5', borderRadius: '24px',
+              padding: '0.5rem 1rem'
+            }}>
+              <RiSearchLine size={18} color="#94a3b8" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Tìm kiếm đoạn chat..."
+                style={{
+                  border: 'none', background: 'transparent', outline: 'none',
+                  width: '100%', fontSize: '0.85rem', color: '#1a1a2e'
+                }}
+              />
+              {searchQuery && (
+                <RiCloseFill size={16} color="#94a3b8" style={{ cursor: 'pointer' }} onClick={() => setSearchQuery('')} />
+              )}
+            </div>
+          </div>
+
+          {/* Danh sách */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden'
+          }}>
+            {filteredConversations.length === 0 && (
+              <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+                {searchQuery ? 'Không tìm thấy đoạn chat nào' : 'Chưa có đoạn chat nào'}
               </div>
             )}
-            {conversations.map(conv => {
+            {filteredConversations.map(conv => {
               const isActive = activeConversation?._id === conv._id
               const isOtherOnline = onlineUsers[conv.otherUser?.id]
               const isTyping = typingUsers[conv._id]
@@ -310,32 +461,40 @@ export default function MessagePage() {
                   key={conv._id}
                   onClick={() => fetchMessages(conv)}
                   style={{
-                    padding: '1.25rem 1.5rem',
+                    padding: '0.85rem 1.25rem',
                     display: 'flex',
-                    gap: '1rem',
+                    gap: '0.85rem',
                     cursor: 'pointer',
-                    background: isActive ? '#f8fafc' : 'transparent',
-                    borderLeft: isActive ? '4px solid #4f46e5' : '4px solid transparent',
-                    transition: 'all 0.15s ease'
+                    background: isActive ? '#e8f0fe' : 'transparent',
+                    transition: 'background 0.15s',
+                    borderLeft: isActive ? '3px solid #4f46e5' : '3px solid transparent'
                   }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#f5f5f5' }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
                 >
-                  <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
                     <img
                       src={conv.otherUser?.avatarUrl || '/default-avatar.png'}
-                      style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
+                      style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
                       alt=""
+                      onError={(e) => { e.target.src = '/default-avatar.png' }}
                     />
                     {isOtherOnline && (
                       <span style={{
-                        position: 'absolute', bottom: 0, right: 0,
-                        width: 12, height: 12, borderRadius: '50%',
-                        background: '#22c55e', border: '2px solid #fff'
+                        position: 'absolute', bottom: 1, right: 1,
+                        width: 13, height: 13, borderRadius: '50%',
+                        background: '#22c55e', border: '2.5px solid #fff'
                       }} />
                     )}
                   </div>
-                  <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
-                      {conv.otherUser?.username || 'Unknown'}
+                  <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                      <span style={{ fontWeight: 700, color: '#1a1a2e', fontSize: '0.95rem' }}>
+                        {conv.otherUser?.username || 'Unknown'}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', flexShrink: 0 }}>
+                        {conv.lastMessageAt ? formatTime(conv.lastMessageAt) : ''}
+                      </span>
                     </div>
                     <div style={{
                       fontSize: '0.82rem',
@@ -343,9 +502,10 @@ export default function MessagePage() {
                       fontStyle: isTyping ? 'italic' : 'normal',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis'
+                      textOverflow: 'ellipsis',
+                      lineHeight: 1.4
                     }}>
-                      {isTyping ? 'đang soạn tin nhắn...' : (conv.lastMessage || 'Start a conversation')}
+                      {isTyping ? 'đang soạn tin nhắn...' : (conv.lastMessage || 'Chưa có tin nhắn')}
                     </div>
                   </div>
                 </div>
@@ -354,80 +514,171 @@ export default function MessagePage() {
           </div>
         </aside>
 
-        {/* Chat Area */}
-        <section style={{ display: 'flex', flexDirection: 'column', background: '#fcfdfe' }}>
+        {/* ===== CHAT AREA: Khung chat chính ===== */}
+        <section style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#fff',
+          borderTopRightRadius: '12px',
+          borderBottomRightRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+          overflow: 'hidden',
+          minWidth: 0
+        }}>
           {activeConversation ? (
             <>
-              <header style={{
-                padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #f1f5f9',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+              {/* Chat header */}
+              <div style={{
+                padding: '0.85rem 1.5rem',
+                background: '#fff',
+                borderBottom: '1px solid #f0f0f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexShrink: 0
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div style={{ position: 'relative' }}>
                     <img
                       src={activeConversation.otherUser?.avatarUrl || '/default-avatar.png'}
-                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                      style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
                       alt=""
+                      onError={(e) => { e.target.src = '/default-avatar.png' }}
                     />
                     {onlineUsers[activeConversation.otherUser?.id] && (
                       <span style={{
                         position: 'absolute', bottom: 0, right: 0,
-                        width: 10, height: 10, borderRadius: '50%',
-                        background: '#22c55e', border: '2px solid #fff'
+                        width: 11, height: 11, borderRadius: '50%',
+                        background: '#22c55e', border: '2.5px solid #fff'
                       }} />
                     )}
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a2e' }}>
                       {activeConversation.otherUser?.username}
-                    </h3>
+                    </div>
                     <span style={{ fontSize: '0.75rem', color: onlineUsers[activeConversation.otherUser?.id] ? '#22c55e' : '#94a3b8' }}>
-                      {onlineUsers[activeConversation.otherUser?.id] ? 'Online' : 'Offline'}
+                      {onlineUsers[activeConversation.otherUser?.id] ? 'Đang hoạt động' : 'Không hoạt động'}
                     </span>
                   </div>
                 </div>
-                <RiMore2Fill size={24} color="#64748b" style={{ cursor: 'pointer' }} />
-              </header>
+                <RiMore2Fill size={22} color="#64748b" style={{ cursor: 'pointer' }} />
+              </div>
 
-              <div style={{
-                flex: 1, padding: '2rem', overflowY: 'auto',
-                display: 'flex', flexDirection: 'column', gap: '0.5rem'
-              }}>
+              {/* Messages area - scrollable */}
+              <div
+                ref={chatContainerRef}
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  padding: '1.25rem 1.5rem',
+                  background: '#fafafa',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                {messages.length === 0 && (
+                  <div style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#94a3b8', fontSize: '0.9rem'
+                  }}>
+                    Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!
+                  </div>
+                )}
+
                 {messages.map((msg, i) => {
                   const isMine = msg.senderId === user.id
-                  const showDate = i === 0 || new Date(msg.createdAt).toDateString() !== new Date(messages[i - 1]?.createdAt).toDateString()
+                  const showDate = i === 0 ||
+                    new Date(msg.createdAt).toDateString() !== new Date(messages[i - 1]?.createdAt).toDateString()
 
                   return (
-                    <div key={msg._id || i}>
+                    <div key={msg._id || i} style={{ marginBottom: '0.25rem' }}>
                       {showDate && (
-                        <div style={{ textAlign: 'center', margin: '1rem 0', fontSize: '0.75rem', color: '#94a3b8' }}>
-                          {new Date(msg.createdAt).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        <div style={{
+                          textAlign: 'center', margin: '0.75rem 0 1rem',
+                          fontSize: '0.72rem', color: '#94a3b8',
+                          fontWeight: 600
+                        }}>
+                          <span style={{
+                            background: '#e8e8e8', padding: '0.25rem 0.75rem',
+                            borderRadius: '12px'
+                          }}>
+                            {formatDateSeparator(msg.createdAt)}
+                          </span>
                         </div>
                       )}
-                      <div style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '70%', marginLeft: isMine ? 'auto' : 0, marginRight: isMine ? 0 : 'auto' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: isMine ? 'flex-end' : 'flex-start',
+                        marginBottom: '0.3rem'
+                      }}>
                         <div style={{
-                          padding: '0.7rem 1.2rem',
-                          borderRadius: isMine ? '1.25rem 1.25rem 0.25rem 1.25rem' : '1.25rem 1.25rem 1.25rem 0.25rem',
-                          background: isMine ? '#4f46e5' : '#fff',
-                          color: isMine ? '#fff' : '#1e293b',
-                          boxShadow: isMine ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
-                          opacity: msg.sending ? 0.7 : 1,
-                          border: msg.error ? '1px solid #ef4444' : 'none'
+                          maxWidth: '70%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: isMine ? 'flex-end' : 'flex-start'
                         }}>
-                          {msg.text}
-                        </div>
-                        <small style={{
-                          display: 'block', marginTop: '0.25rem',
-                          textAlign: isMine ? 'right' : 'left', color: '#94a3b8',
-                          fontSize: '0.7rem'
-                        }}>
-                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          {isMine && (
-                            msg.sending
-                              ? <RiCheckLine size={12} style={{ marginLeft: 4, verticalAlign: 'middle' }} />
-                              : <RiCheckDoubleFill size={12} style={{ marginLeft: 4, verticalAlign: 'middle', color: msg.isRead ? '#4f46e5' : '#94a3b8' }} />
+                          {/* Image message */}
+                          {msg.image && (
+                            <div style={{ marginBottom: msg.text ? '0.4rem' : 0 }}>
+                              <img
+                                src={msg.image}
+                                alt=""
+                                style={{
+                                  maxWidth: '280px', maxHeight: '320px',
+                                  borderRadius: '12px',
+                                  objectFit: 'cover',
+                                  display: 'block',
+                                  opacity: msg.sending ? 0.7 : 1,
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => window.open(msg.image, '_blank')}
+                              />
+                            </div>
                           )}
-                        </small>
+                          {/* Text message */}
+                          {msg.text && (
+                            <div style={{
+                              padding: '0.6rem 1rem',
+                              borderRadius: isMine
+                                ? '18px 18px 4px 18px'
+                                : '18px 18px 18px 4px',
+                              background: isMine ? '#4f46e5' : '#fff',
+                              color: isMine ? '#fff' : '#1a1a2e',
+                              boxShadow: isMine
+                                ? '0 2px 8px rgba(79,70,229,0.15)'
+                                : '0 1px 4px rgba(0,0,0,0.06)',
+                              opacity: msg.sending ? 0.7 : 1,
+                              border: msg.error ? '1px solid #ef4444' : 'none',
+                              fontSize: '0.92rem',
+                              lineHeight: 1.45,
+                              wordBreak: 'break-word'
+                            }}>
+                              {msg.text}
+                            </div>
+                          )}
+                          {/* Time + status */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            marginTop: '0.15rem',
+                            padding: '0 0.25rem'
+                          }}>
+                            <span style={{
+                              fontSize: '0.65rem', color: '#94a3b8'
+                            }}>
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {isMine && (
+                              msg.sending
+                                ? <RiCheckLine size={12} color="#94a3b8" />
+                                : <RiCheckDoubleFill size={12} color={msg.isRead ? '#4f46e5' : '#94a3b8'} />
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )
@@ -435,87 +686,234 @@ export default function MessagePage() {
 
                 {/* Typing indicator */}
                 {typingUsers[activeConversation._id] && (
-                  <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0' }}>
-                    <div style={{ display: 'flex', gap: '3px', padding: '0.5rem 1rem', background: '#fff', borderRadius: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.5rem 0', marginTop: '0.25rem'
+                  }}>
+                    <div style={{
+                      display: 'flex', gap: '4px', padding: '0.6rem 1rem',
+                      background: '#fff', borderRadius: '18px',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      alignItems: 'center'
+                    }}>
                       <span style={{
-                        width: 6, height: 6, borderRadius: '50%', background: '#94a3b8',
-                        animation: 'typingAnim 1.4s infinite'
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: '#94a3b8',
+                        animation: 'typingBounce 1.4s infinite'
                       }} />
                       <span style={{
-                        width: 6, height: 6, borderRadius: '50%', background: '#94a3b8',
-                        animation: 'typingAnim 1.4s infinite 0.2s'
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: '#94a3b8',
+                        animation: 'typingBounce 1.4s infinite 0.2s'
                       }} />
                       <span style={{
-                        width: 6, height: 6, borderRadius: '50%', background: '#94a3b8',
-                        animation: 'typingAnim 1.4s infinite 0.4s'
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: '#94a3b8',
+                        animation: 'typingBounce 1.4s infinite 0.4s'
                       }} />
+                      <span style={{
+                        fontSize: '0.75rem', color: '#4f46e5', fontStyle: 'italic',
+                        marginLeft: '0.35rem'
+                      }}>
+                        {activeConversation.otherUser?.username} đang soạn...
+                      </span>
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#4f46e5', fontStyle: 'italic' }}>
-                      {activeConversation.otherUser?.username} đang soạn tin nhắn...
-                    </span>
                   </div>
                 )}
 
                 <div ref={chatEndRef} />
               </div>
 
-              <form onSubmit={handleSendMessage} style={{
-                padding: '1.5rem 2rem', background: '#fff', borderTop: '1px solid #f1f5f9',
-                display: 'flex', gap: '1rem', alignItems: 'center'
+              {/* Input area */}
+              <div style={{
+                padding: '0.75rem 1.5rem 1rem',
+                background: '#fff',
+                borderTop: '1px solid #f0f0f0',
+                flexShrink: 0
               }}>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={handleTyping}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type your message..."
-                  style={{
-                    flex: 1, padding: '0.75rem 1.5rem', borderRadius: '2rem',
-                    border: '1px solid #e2e8f0', background: '#f8fafc',
-                    outline: 'none', fontSize: '0.95rem'
-                  }}
-                />
-                <button
-                  type="submit"
-                  className="btn-solid"
-                  disabled={!newMessage.trim()}
-                  style={{
-                    width: '48px', height: '48px', borderRadius: '50%', padding: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: !newMessage.trim() ? 0.5 : 1,
-                    cursor: !newMessage.trim() ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  <RiSendPlane2Fill size={20} />
-                </button>
-              </form>
+                {/* Emoji picker */}
+                {showEmojiPicker && (
+                  <div style={{
+                    position: 'relative',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: 0,
+                      background: '#fff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '12px',
+                      padding: '0.75rem',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      width: '312px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.35rem',
+                      zIndex: 10
+                    }}>
+                      {EMOJIS.map((emoji, idx) => (
+                        <span
+                          key={idx}
+                          onClick={() => insertEmoji(emoji)}
+                          style={{
+                            cursor: 'pointer', fontSize: '1.3rem',
+                            padding: '0.2rem', borderRadius: '6px',
+                            transition: 'background 0.15s',
+                            lineHeight: 1
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f0f0f0'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {emoji}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={handleSendMessage} style={{
+                  display: 'flex', gap: '0.5rem', alignItems: 'flex-end'
+                }}>
+                  {/* Image button */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    style={{
+                      width: '40px', height: '40px', borderRadius: '50%',
+                      border: 'none', background: '#f0f0f0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                      color: '#64748b', flexShrink: 0, transition: 'all 0.15s'
+                    }}
+                    title="Gửi ảnh"
+                    onMouseEnter={e => { if (!uploadingImage) e.currentTarget.style.background = '#e0e0e0' }}
+                    onMouseLeave={e => { if (!uploadingImage) e.currentTarget.style.background = '#f0f0f0' }}
+                  >
+                    <RiImageAddFill size={20} />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleImageSelect}
+                  />
+
+                  {/* Emoji button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    style={{
+                      width: '40px', height: '40px', borderRadius: '50%',
+                      border: 'none', background: '#f0f0f0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', color: '#64748b', flexShrink: 0,
+                      transition: 'all 0.15s'
+                    }}
+                    title="Biểu tượng cảm xúc"
+                    onMouseEnter={e => e.currentTarget.style.background = '#e0e0e0'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#f0f0f0'}
+                  >
+                    <RiEmotionHappyLine size={20} />
+                  </button>
+
+                  {/* Text input */}
+                  <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: '#f0f2f5',
+                    borderRadius: '24px',
+                    padding: '0 1.25rem',
+                    minHeight: '44px'
+                  }}>
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={handleTyping}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Nhập tin nhắn..."
+                      style={{
+                        flex: 1,
+                        border: 'none',
+                        background: 'transparent',
+                        outline: 'none',
+                        fontSize: '0.95rem',
+                        color: '#1a1a2e',
+                        padding: '0.5rem 0'
+                      }}
+                    />
+                  </div>
+
+                  {/* Send button */}
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim() || uploadingImage}
+                    style={{
+                      width: '44px', height: '44px', borderRadius: '50%',
+                      border: 'none',
+                      background: newMessage.trim() ? '#4f46e5' : '#e0e0e0',
+                      color: '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: (!newMessage.trim() || uploadingImage) ? 'not-allowed' : 'pointer',
+                      flexShrink: 0, transition: 'all 0.15s'
+                    }}
+                    onMouseEnter={e => {
+                      if (newMessage.trim() && !uploadingImage) e.currentTarget.style.background = '#4338ca'
+                    }}
+                    onMouseLeave={e => {
+                      if (newMessage.trim() && !uploadingImage) e.currentTarget.style.background = '#4f46e5'
+                    }}
+                  >
+                    <RiSendPlane2Fill size={18} />
+                  </button>
+                </form>
+              </div>
             </>
           ) : (
+            /* No active conversation - placeholder */
             <div style={{
               flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', color: '#94a3b8'
+              alignItems: 'center', justifyContent: 'center', color: '#94a3b8',
+              background: '#fafafa', gap: '1rem'
             }}>
-              <RiCustomerService2Fill size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-              <p style={{ marginBottom: '1.5rem' }}>Need help? Contact our support team.</p>
+              <div style={{
+                width: '80px', height: '80px', borderRadius: '50%',
+                background: '#e8e8e8', display: 'flex', alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <RiCustomerService2Fill size={40} style={{ opacity: 0.3, color: '#64748b' }} />
+              </div>
+              <p style={{ fontSize: '0.95rem', color: '#94a3b8', margin: 0 }}>
+                Chọn một đoạn chat để bắt đầu trò chuyện
+              </p>
               <button
                 onClick={contactAdmin}
                 disabled={contactingAdmin}
-                className="btn-solid"
                 style={{
-                  background: '#4f46e5', display: 'flex', alignItems: 'center',
-                  gap: '0.5rem', padding: '0.75rem 2rem'
+                  background: '#4f46e5', color: '#fff',
+                  border: 'none', borderRadius: '24px',
+                  padding: '0.75rem 2rem', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  cursor: 'pointer', fontSize: '0.9rem',
+                  boxShadow: '0 4px 12px rgba(79,70,229,0.25)'
                 }}
               >
-                <RiCustomerService2Fill /> {contactingAdmin ? 'Connecting...' : 'Contact Admin'}
+                <RiCustomerService2Fill size={18} />
+                {contactingAdmin ? 'Đang kết nối...' : 'Liên hệ Admin'}
               </button>
             </div>
           )}
         </section>
       </div>
 
-      {/* Styles for typing animation */}
+      {/* Styles */}
       <style>{`
-        @keyframes typingAnim {
+        @keyframes typingBounce {
           0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
           30% { transform: translateY(-6px); opacity: 1; }
         }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
+import LoadingScreen from '../components/LoadingScreen.jsx'
 import { assetService, userService } from '../services/api'
 import { 
   RiMapPin2Line, 
@@ -27,7 +28,7 @@ export default function UserProfilePage() {
         const userRes = await userService.getProfile(username)
         setProfileUser(userRes.data)
         
-        const assetsRes = await assetService.getAll({ username })
+        const assetsRes = await assetService.getAll({ authorId: userRes.data.id })
         setAssets(assetsRes.data)
         
         setLoading(false)

@@ -75,6 +75,9 @@ export const messageService = {
   getConversations: () => api.get('/messages/conversations'),
   getMessages: (conversationId) => api.get(`/messages/${conversationId}`),
   sendMessage: (data) => api.post('/messages/send', data),
+  uploadImage: (formData) => api.post('/messages/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 export const authService = {

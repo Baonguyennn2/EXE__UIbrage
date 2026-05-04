@@ -12,7 +12,8 @@ const Conversation = mongoose.model('Conversation', conversationSchema);
 const messageSchema = new mongoose.Schema({
   conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
   senderId: { type: String, required: true }, // MySQL User ID
-  text: { type: String, required: true },
+  text: { type: String },
+  image: { type: String },
   isRead: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });

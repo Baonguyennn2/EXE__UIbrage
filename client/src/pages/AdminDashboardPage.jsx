@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminService, notificationService, messageService, socket, assetService } from '../services/api'
+import { useSocket } from '../services/SocketContext'
 import MyLibraryPage from './MyLibraryPage.jsx'
 import UploadAssetPage from './UploadAssetPage.jsx'
 import ProfileEditPage from './ProfileEditPage.jsx'
@@ -10,8 +10,9 @@ import {
   RiSettings4Line, RiEyeLine, RiProhibitedLine, RiDeleteBin6Line, RiCheckLine,
   RiCloseLine, RiSendPlane2Fill, RiMore2Fill, RiStackFill, RiLockLine, RiArrowUpSLine,
   RiArrowDownSLine, RiWallet3Line, RiArrowLeftLine, RiDownload2Line, RiShoppingCartLine,
-  RiMenuLine
+  RiMenuLine, RiCheckDoubleFill, RiCustomerService2Fill, RiImageAddLine
 } from 'react-icons/ri'
+import { adminService, notificationService, messageService, assetService, userService } from '../services/api'
 import LoadingScreen from '../components/LoadingScreen.jsx'
 
 export default function AdminDashboardPage({ variant = 'overview' }) {
@@ -31,11 +32,18 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const [selectedAsset, setSelectedAsset] = useState(null)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [typingUsers, setTypingUsers] = useState({}) // { conversationId: true/false }
+  const [onlineUsers, setOnlineUsers] = useState({})
+  const [uploadingImage, setUploadingImage] = useState(false)
+  
+  const typingTimeoutRef = useRef(null)
+  const isTypingRef = useRef(false)
   
   const navigate = useNavigate()
   const chatEndRef = useRef(null)
   const activeConvRef = useRef(null)
   const adminUserRef = useRef(null)
+  const { socket } = useSocket()
 
   // Cập nhật ref khi state thay đổi
   useEffect(() => { activeConvRef.current = activeConversation }, [activeConversation])
@@ -50,27 +58,50 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     setAdminUser(user)
     adminUserRef.current = user
     
-    socket.connect()
-    socket.emit('join', user.id)
-    
-    socket.on('newMessage', (msg) => {
+    if (!socket) return
+
+    const handleNewMessage = (msg) => {
       const currentConv = activeConvRef.current
-      // Nếu đang ở conversation active và tin nhắn thuộc conversation đó
       if (currentConv && msg.conversationId === currentConv._id) {
         setMessages(prev => {
           if (prev.some(m => m._id === msg._id || (m.text === msg.text && m.senderId === msg.senderId && m.createdAt === msg.createdAt))) return prev
           return [...prev, msg]
         })
       }
-      // Luôn refresh conversation list để cập nhật preview
       fetchConversationsRef.current()
+    }
+
+    const handleTyping = (data) => {
+      const { userId, conversationId } = data
+      const currentUser = adminUserRef.current
+      if (userId === currentUser?.id) return
+
+      const currentConv = activeConvRef.current
+      if (currentConv && (conversationId === currentConv._id || conversationId?.toString() === currentConv._id?.toString())) {
+        setTypingUsers(prev => ({ ...prev, [conversationId]: true }))
+      }
+    }
+
+    const handleStopTyping = (data) => {
+      const { userId, conversationId } = data
+      setTypingUsers(prev => ({ ...prev, [conversationId]: false }))
+    }
+
+    socket.on('newMessage', handleNewMessage)
+    socket.on('userTyping', handleTyping)
+    socket.on('userStopTyping', handleStopTyping)
+
+    socket.on('userOnline', (data) => {
+      setOnlineUsers(prev => ({ ...prev, [data.userId]: data.online }))
     })
 
     return () => {
-      socket.off('newMessage')
-      socket.disconnect()
+      socket.off('newMessage', handleNewMessage)
+      socket.off('userTyping', handleTyping)
+      socket.off('userStopTyping', handleStopTyping)
+      socket.off('userOnline')
     }
-  }, []) // Chỉ chạy 1 lần, dùng ref để truy cập state mới nhất
+  }, [socket]) // Chỉ chạy 1 lần, dùng ref để truy cập state mới nhất
 
   const fetchConversationsRef = useRef()
   const fetchData = async () => {
@@ -138,26 +169,134 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     setConversations(res.data)
     const unread = res.data.filter(c => !c.lastMessage?.isRead && c.lastMessage?.senderId !== adminUser?.id).length
     setUnreadMessages(unread)
+
+    // Fetch online status
+    const userIds = res.data.map(c => c.otherUser?.id).filter(Boolean)
+    if (userIds.length > 0) {
+      try {
+        const statusRes = await userService.getOnlineStatus(userIds)
+        if (statusRes.data) {
+          setOnlineUsers(prev => ({ ...prev, ...statusRes.data }))
+        }
+      } catch (e) { /* ignore */ }
+    }
   }
   fetchConversationsRef.current = fetchConversations
 
   const fetchMessages = async (conv) => {
     setActiveConversation(conv)
+    setTypingUsers(prev => ({ ...prev, [conv._id]: false }))
     const res = await messageService.getMessages(conv._id)
     setMessages(res.data)
+    
+    // Mark as read
+    if (conv.lastMessage && !conv.lastMessage.isRead && conv.lastMessage.senderId !== adminUser.id) {
+       socket?.emit('markRead', { conversationId: conv._id, userId: adminUser.id })
+       fetchConversations()
+    }
   }
+
+  // Handle typing indicator
+  const handleTyping = (e) => {
+    setNewMessage(e.target.value)
+
+    if (!socket || !activeConversation) return
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      socket.emit('typing', {
+        receiverId: activeConversation.otherUser.id,
+        conversationId: activeConversation._id
+      })
+    }
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+
+    typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false
+      socket.emit('stopTyping', {
+        receiverId: activeConversation.otherUser.id,
+        conversationId: activeConversation._id
+      })
+    }, 2000)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage(e)
+    }
+  }
+
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages])
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!newMessage.trim() || !activeConversation) return
-    const msgData = { conversationId: activeConversation._id, receiverId: activeConversation.otherUser.id, text: newMessage }
+
+    const msgText = newMessage
+    setNewMessage('')
+
+    // Stop typing
+    if (isTypingRef.current) {
+      isTypingRef.current = false
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+      socket?.emit('stopTyping', {
+        receiverId: activeConversation.otherUser.id,
+        conversationId: activeConversation._id
+      })
+    }
+
+    const msgData = { conversationId: activeConversation._id, receiverId: activeConversation.otherUser.id, text: msgText }
     try {
       const res = await messageService.sendMessage(msgData)
       setMessages(prev => [...prev, res.data])
-      setNewMessage('')
-      socket.emit('sendMessage', { ...res.data, receiverId: msgData.receiverId })
+      socket.emit('sendMessage', { ...res.data, receiverId: msgData.receiverId, senderId: adminUser.id })
       fetchConversations()
     } catch (error) { console.error('Send error:', error) }
+  }
+
+  const handleImageSelect = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeConversation) return
+
+    setUploadingImage(true)
+    const formData = new FormData()
+    formData.append('image', file)
+
+    try {
+      const uploadRes = await messageService.uploadImage(formData)
+      const imageUrl = uploadRes.data.url
+
+      const msgData = { 
+        conversationId: activeConversation._id, 
+        receiverId: activeConversation.otherUser.id, 
+        image: imageUrl 
+      }
+      
+      const res = await messageService.sendMessage(msgData)
+      setMessages(prev => [...prev, res.data])
+      
+      if (socket) {
+        socket.emit('sendMessage', { 
+          ...res.data, 
+          receiverId: msgData.receiverId, 
+          senderId: adminUser.id,
+          conversationId: activeConversation._id
+        })
+      }
+      fetchConversations()
+    } catch (error) {
+      console.error('Upload image error:', error)
+      alert('Failed to upload image')
+    } finally {
+      setUploadingImage(false)
+      if (e.target) e.target.value = ''
+    }
   }
 
   const handleLogout = () => {
@@ -359,33 +498,255 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   )
 
   const renderMessages = () => (
-    <div className="messenger-container" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: 'calc(100vh - 180px)', background: '#fff', borderRadius: '1.5rem', overflow: 'hidden' }}>
-      <aside style={{ borderRight: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column' }}>
-        <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}><h2>Messages</h2></header>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {conversations.map(conv => (
-            <div key={conv._id} onClick={() => fetchMessages(conv)} style={{ padding: '1.25rem 1.5rem', display: 'flex', gap: '1rem', cursor: 'pointer', background: activeConversation?._id === conv._id ? '#f8fafc' : 'transparent', borderLeft: activeConversation?._id === conv._id ? '4px solid #4f46e5' : '4px solid transparent' }}>
-              <img src={conv.otherUser?.avatarUrl} style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
-              <div><div style={{ fontWeight: 700 }}>{conv.otherUser?.username}</div><div style={{ fontSize: '0.85rem', color: '#64748b' }}>{conv.lastMessage}</div></div>
+    <div className="messenger-container" style={{ 
+      display: 'grid', 
+      gridTemplateColumns: '320px 1fr', 
+      height: 'calc(100vh - 200px)', 
+      gap: '1.5rem',
+      width: '100%',
+      maxWidth: '1400px',
+      margin: '0 auto'
+    }}>
+      <aside style={{ 
+        background: '#fff', 
+        borderRadius: '1.5rem', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        border: '1px solid #f1f5f9'
+      }}>
+        <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ fontSize: '1.35rem', margin: 0, fontWeight: 800 }}>Messages</h2>
+          <span style={{
+            width: 10, height: 10, borderRadius: '50%',
+            background: '#22c55e',
+            border: '2px solid #fff',
+            boxShadow: '0 0 0 2px #dcfce7'
+          }} title="Server Connected" />
+        </header>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+          {conversations.length === 0 && (
+            <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: '#94a3b8' }}>
+              <RiMessage3Fill size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <p>No conversations found</p>
             </div>
-          ))}
+          )}
+          {conversations.map(conv => {
+            const isActive = activeConversation?._id === conv._id
+            const isTyping = typingUsers[conv._id]
+            const isOtherOnline = onlineUsers[conv.otherUser?.id]
+
+            return (
+              <div key={conv._id} onClick={() => fetchMessages(conv)} style={{ 
+                padding: '1rem 1.25rem', 
+                display: 'flex', 
+                gap: '1rem', 
+                cursor: 'pointer', 
+                borderRadius: '1rem',
+                margin: '2px 0',
+                background: isActive ? '#f1f5ff' : 'transparent', 
+                transition: 'all 0.2s ease',
+                position: 'relative'
+              }}>
+                {isActive && <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: '#4f46e5', borderRadius: '0 4px 4px 0' }} />}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <img src={conv.otherUser?.avatarUrl || '/default-avatar.png'} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+                  {isOtherOnline && (
+                    <span style={{
+                      position: 'absolute', bottom: 2, right: 2,
+                      width: 12, height: 12, borderRadius: '50%',
+                      background: '#22c55e', border: '2px solid #fff'
+                    }} />
+                  )}
+                </div>
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{conv.otherUser?.username || 'Unknown'}</span>
+                    {conv.lastMessage?.createdAt && (
+                       <small style={{ fontWeight: 400, color: '#94a3b8' }}>
+                         {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                       </small>
+                    )}
+                  </div>
+                  <div style={{ 
+                    fontSize: '0.82rem', 
+                    color: isTyping ? '#4f46e5' : '#64748b',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontStyle: isTyping ? 'italic' : 'normal',
+                    marginTop: '2px'
+                  }}>
+                    {isTyping ? 'đang soạn tin...' : (conv.lastMessage?.image ? 'Sent an image' : (conv.lastMessage?.text || conv.lastMessage || 'Start a conversation'))}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </aside>
-      <section style={{ display: 'flex', flexDirection: 'column' }}>
+
+      <section style={{ 
+        background: '#fff', 
+        borderRadius: '1.5rem', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        border: '1px solid #f1f5f9'
+      }}>
         {activeConversation ? (
           <>
-            <header style={{ padding: '1rem 2rem', borderBottom: '1px solid #f1f5f9' }}><h3>{activeConversation.otherUser?.username}</h3></header>
-            <div style={{ flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {messages.map((m, i) => (
-                <div key={i} style={{ alignSelf: m.senderId === adminUser.id ? 'flex-end' : 'flex-start', background: m.senderId === adminUser.id ? '#4f46e5' : '#f1f5f9', color: m.senderId === adminUser.id ? '#fff' : '#1e293b', padding: '0.8rem 1.2rem', borderRadius: '1rem' }}>{m.text}</div>
-              ))}
+            <header style={{ 
+              padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #f1f5f9',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <img src={activeConversation.otherUser?.avatarUrl || '/default-avatar.png'} style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+                  {onlineUsers[activeConversation.otherUser?.id] && (
+                    <span style={{
+                      position: 'absolute', bottom: 0, right: 0,
+                      width: 10, height: 10, borderRadius: '50%',
+                      background: '#22c55e', border: '2px solid #fff'
+                    }} />
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>{activeConversation.otherUser?.username}</h3>
+                  <span style={{ fontSize: '0.75rem', color: onlineUsers[activeConversation.otherUser?.id] ? '#22c55e' : '#94a3b8', fontWeight: 600 }}>
+                    {onlineUsers[activeConversation.otherUser?.id] ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <RiMore2Fill size={24} color="#64748b" style={{ cursor: 'pointer' }} />
+              </div>
+            </header>
+            
+            <div style={{ 
+              flex: 1, padding: '2rem', overflowY: 'auto', 
+              display: 'flex', flexDirection: 'column', gap: '0.5rem',
+              background: '#f8fafc'
+            }}>
+              {messages.map((m, i) => {
+                const isMine = m.senderId === adminUser.id
+                const showDate = i === 0 || new Date(m.createdAt).toDateString() !== new Date(messages[i - 1]?.createdAt).toDateString()
+                
+                return (
+                  <div key={m._id || i}>
+                    {showDate && (
+                      <div style={{ textAlign: 'center', margin: '1.5rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {new Date(m.createdAt).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      </div>
+                    )}
+                    <div style={{ 
+                      alignSelf: isMine ? 'flex-end' : 'flex-start', 
+                      maxWidth: '75%',
+                      marginLeft: isMine ? 'auto' : 0,
+                      marginRight: isMine ? 0 : 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: isMine ? 'flex-end' : 'flex-start'
+                    }}>
+                      <div style={{ 
+                        padding: m.image ? '0.5rem' : '0.75rem 1.25rem', 
+                        borderRadius: isMine ? '1.25rem 1.25rem 0.25rem 1.25rem' : '1.25rem 1.25rem 1.25rem 0.25rem',
+                        background: isMine ? '#4f46e5' : '#fff', 
+                        color: isMine ? '#fff' : '#1e293b', 
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                        border: m.error ? '1px solid #ef4444' : 'none',
+                        position: 'relative'
+                      }}>
+                        {m.image ? (
+                           <img 
+                             src={m.image} 
+                             alt="Sent image" 
+                             style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.75rem', display: 'block', cursor: 'pointer' }} 
+                             onClick={() => window.open(m.image, '_blank')}
+                           />
+                        ) : m.text}
+                      </div>
+                      <small style={{ 
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        marginTop: '0.35rem', 
+                        color: '#94a3b8',
+                        fontSize: '0.7rem',
+                        fontWeight: 600
+                      }}>
+                        {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {isMine && (
+                          m.sending
+                            ? <RiCheckLine size={12} />
+                            : <RiCheckDoubleFill size={12} style={{ color: m.isRead ? '#4f46e5' : '#94a3b8' }} />
+                        )}
+                      </small>
+                    </div>
+                  </div>
+                )
+              })}
+              
+              {typingUsers[activeConversation._id] && (
+                <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0' }}>
+                  <div className="typing-dots" style={{ display: 'flex', gap: '4px', padding: '0.6rem 1.2rem', background: '#fff', borderRadius: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#4f46e5', fontStyle: 'italic', fontWeight: 600 }}>{activeConversation.otherUser?.username} đang soạn tin...</span>
+                </div>
+              )}
+              
+              <div ref={chatEndRef} />
             </div>
-            <form onSubmit={handleSendMessage} style={{ padding: '1.5rem', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '1rem' }}>
-              <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '2rem', border: '1px solid #e2e8f0' }} />
-              <button type="submit" className="btn-solid">Send</button>
+            
+            <form onSubmit={handleSendMessage} style={{ 
+              padding: '1.25rem 2rem', background: '#fff', borderTop: '1px solid #f1f5f9', 
+              display: 'flex', gap: '0.75rem', alignItems: 'center' 
+            }}>
+              <label style={{ cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', transition: 'background 0.2s' }} className="hover-bg-f1">
+                <input type="file" accept="image/*" hidden onChange={handleImageSelect} disabled={uploadingImage} />
+                <RiImageAddLine size={24} color={uploadingImage ? "#cbd5e1" : "#64748b"} />
+              </label>
+              
+              <input 
+                type="text" 
+                value={newMessage} 
+                onChange={handleTyping} 
+                onKeyDown={handleKeyDown}
+                placeholder={uploadingImage ? "Uploading image..." : "Type your message..."}
+                disabled={uploadingImage}
+                style={{ 
+                  flex: 1, padding: '0.85rem 1.5rem', borderRadius: '2rem', 
+                  border: '1px solid #e2e8f0', background: '#f8fafc',
+                  outline: 'none', fontSize: '0.95rem',
+                  transition: 'all 0.2s'
+                }} 
+              />
+              <button 
+                type="submit" 
+                className="btn-solid" 
+                disabled={!newMessage.trim() || uploadingImage} 
+                style={{ 
+                  width: '45px', height: '45px', borderRadius: '50%', padding: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  opacity: (!newMessage.trim() || uploadingImage) ? 0.5 : 1,
+                  cursor: (!newMessage.trim() || uploadingImage) ? 'not-allowed' : 'pointer',
+                  background: '#4f46e5'
+                }}
+              >
+                <RiSendPlane2Fill size={20} />
+              </button>
             </form>
           </>
-        ) : <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>Select a chat</div>}
+        ) : (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', background: '#f8fafc' }}>
+            <RiCustomerService2Fill size={80} style={{ marginBottom: '1.5rem', opacity: 0.1 }} />
+            <h3 style={{ margin: 0, color: '#64748b' }}>Select a conversation</h3>
+            <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Choose a user from the list to start chatting</p>
+          </div>
+        )}
       </section>
     </div>
   )
@@ -541,7 +902,24 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         .side-link.danger:hover { background: #ef4444; }
         .side-link .badge { margin-left: auto; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 1rem; }
         .btn-link { background: none; border: none; color: #4f46e5; font-weight: 600; cursor: pointer; }
-        .admin-view-fade { animation: fadeIn 0.4s ease-out; }
+        .admin-view-fade { animation: fadeIn 0.4s ease-out; width: 100%; }
+        
+        .hover-bg-f1:hover { background: #f1f5f9; }
+        
+        .typing-dots .dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #94a3b8;
+          animation: dot-pulse 1.4s infinite ease-in-out;
+        }
+        .typing-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes dot-pulse {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+          30% { transform: translateY(-4px); opacity: 1; }
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </main>
