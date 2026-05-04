@@ -62,7 +62,7 @@ export default function UserProfilePage() {
              <div className="cover-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))' }}></div>
           </div>
           
-          <div className="profile-v2-info-bar" style={{ display: 'flex', alignItems: 'flex-end', gap: '2rem', padding: '0 3rem 1.5rem', marginTop: '-60px', position: 'relative' }}>
+          <div className="profile-v2-info-bar" style={{ display: 'flex', alignItems: 'flex-end', gap: '2rem', padding: '0 3rem 1.5rem', marginTop: '-60px', position: 'relative', flexWrap: 'wrap' }}>
             <div className="profile-v2-avatar-wrap" style={{ 
               borderRadius: '50%', 
               overflow: 'hidden', 
@@ -85,7 +85,7 @@ export default function UserProfilePage() {
               <p style={{ fontSize: '1.1rem', color: '#64748b', margin: 0 }}>@{profileUser.username} • {profileUser.followerCount || 0} Followers • {profileUser.followingCount || 0} Following</p>
             </div>
             
-            <div className="profile-v2-actions" style={{ paddingBottom: '1rem', display: 'flex', gap: '1rem' }}>
+            <div className="profile-v2-actions" style={{ paddingBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button className="btn-solid" style={{ padding: '0.75rem 2rem' }}><RiUserFollowLine /> Follow</button>
               <button className="btn-ghost" style={{ padding: '0.75rem 1.5rem' }}>Message</button>
             </div>
@@ -99,7 +99,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Content Layout */}
-        <div className="profile-v2-content">
+        <div className="profile-v2-content" style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '2rem', padding: '2rem 3rem' }}>
           <aside className="profile-v2-sidebar">
             <section className="detail-v2-card intro-card">
               <h3>Intro</h3>

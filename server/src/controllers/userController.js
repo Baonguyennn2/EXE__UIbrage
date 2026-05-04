@@ -119,10 +119,24 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+const getAdminContact = async (req, res) => {
+  try {
+    const admin = await User.findOne({
+      where: { role: 'admin' },
+      attributes: ['id', 'username', 'fullName', 'avatarUrl', 'email']
+    });
+    if (!admin) return res.status(404).json({ message: 'No admin found' });
+    res.json(admin);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getWishlist,
   toggleWishlist,
   getEarnings,
-  getUserProfile
+  getUserProfile,
+  getAdminContact
 };

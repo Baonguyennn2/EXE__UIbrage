@@ -11,7 +11,12 @@ import {
   RiMoneyDollarCircleLine,
   RiNotification3Line,
   RiMessage3Line,
-  RiHeadphoneLine
+  RiHeadphoneLine,
+  RiMenuLine,
+  RiCloseLine,
+  RiHome4Line,
+  RiCompass3Line,
+  RiCommunityLine
 } from 'react-icons/ri'
 import { metadataService, notificationService } from '../services/api'
 
@@ -37,6 +42,7 @@ export default function AppHeader({ onSearch }) {
   const [categories, setCategories] = useState([])
   const [notifications, setNotifications] = useState([])
   const [showNotifMenu, setShowNotifMenu] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const navigate = useNavigate()
   
   const categoryRef = useRef(null)
@@ -103,6 +109,10 @@ export default function AppHeader({ onSearch }) {
   return (
     <header className="site-header">
       <div className="header-inner">
+        <button className="mobile-toggle" onClick={() => setIsDrawerOpen(true)} style={{ marginRight: '0.5rem' }}>
+          <RiMenuLine size={24} color="#1e293b" />
+        </button>
+
         <Link to="/" className="logo-link">
           <BrandTile />
         </Link>
@@ -175,7 +185,6 @@ export default function AppHeader({ onSearch }) {
                     </div>
                     <div className="dropdown-divider" />
                     <Link to={`/profile/${user.username}`} onClick={() => setShowUserMenu(false)}><RiUser3Line /> View Profile</Link>
-                    <Link to="/messages" onClick={() => setShowUserMenu(false)}><RiMessage3Line /> Messages</Link>
                     <Link to="/messages" onClick={() => setShowUserMenu(false)}><RiHeadphoneLine /> Contact Support / Admin</Link>
                     <div className="dropdown-divider" />
                     <Link to="/wishlist" onClick={() => setShowUserMenu(false)}><RiBookletLine /> Wishlist</Link>
@@ -200,6 +209,45 @@ export default function AppHeader({ onSearch }) {
             </>
           )}
         </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {isDrawerOpen && <div className="drawer-overlay" onClick={() => setIsDrawerOpen(false)} />}
+      <div className={`mobile-drawer ${isDrawerOpen ? 'open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <BrandTile />
+          <button onClick={() => setIsDrawerOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <RiCloseLine size={28} color="#64748b" />
+          </button>
+        </div>
+
+        <nav className="mobile-nav-links">
+          <Link to="/" onClick={() => setIsDrawerOpen(false)}><RiHome4Line /> Home</Link>
+          <Link to="/marketplace" onClick={() => setIsDrawerOpen(false)}><RiCompass3Line /> Browse Assets</Link>
+          <Link to="/community" onClick={() => setIsDrawerOpen(false)}><RiCommunityLine /> Community</Link>
+          
+          <div style={{ margin: '1rem 0', height: '1px', background: '#f1f5f9' }} />
+          
+          {user ? (
+            <>
+              <Link to={`/profile/${user.username}`} onClick={() => setIsDrawerOpen(false)}><RiUser3Line /> My Profile</Link>
+              <Link to="/library" onClick={() => setIsDrawerOpen(false)}><RiBookletLine /> My Library</Link>
+              <Link to="/assets/manage" onClick={() => setIsDrawerOpen(false)}><RiBookletLine /> Manage Assets</Link>
+              {user.role === 'admin' && (
+                <Link to="/admin/dashboard" onClick={() => setIsDrawerOpen(false)}><RiLayout4Line /> Admin Panel</Link>
+              )}
+              <div style={{ margin: '1rem 0', height: '1px', background: '#f1f5f9' }} />
+              <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.8rem 0', background: 'none', border: 'none', color: '#ef4444', fontWeight: 700, fontSize: '1.1rem', textAlign: 'left', cursor: 'pointer' }}>
+                <RiLogoutBoxRLine /> Logout
+              </button>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+               <Link to="/auth/login" className="btn-ghost" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Login</Link>
+               <Link to="/auth/register" className="btn-solid" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Register</Link>
+            </div>
+          )}
+        </nav>
       </div>
       <style>{`
         .notif-badge {

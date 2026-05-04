@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
-import { messageService, socket } from '../services/api'
-import { RiSendPlane2Fill, RiMessage3Fill, RiMore2Fill } from 'react-icons/ri'
+import { messageService, socket, userService } from '../services/api'
+import { RiSendPlane2Fill, RiMessage3Fill, RiMore2Fill, RiCustomerService2Fill } from 'react-icons/ri'
 
 export default function MessagePage() {
   const [conversations, setConversations] = useState([])
@@ -11,6 +11,8 @@ export default function MessagePage() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
+  const [contactingAdmin, setContactingAdmin] = useState(false)
+  const [adminConv, setAdminConv] = useState(null)
   
   const navigate = useNavigate()
   const chatEndRef = useRef(null)
@@ -27,9 +29,18 @@ export default function MessagePage() {
     socket.emit('join', savedUser.id)
     
     socket.on('newMessage', (msg) => {
-      if (activeConversation && (msg.senderId === activeConversation.otherUser.id || msg.conversationId === activeConversation._id)) {
-        setMessages(prev => [...prev, msg])
+      // Nếu đang ở conversation active và tin nhắn thuộc conversation đó -> thêm vào messages
+      if (activeConversation && 
+          (msg.conversationId === activeConversation._id || 
+           (msg.senderId === activeConversation.otherUser?.id || msg.senderId === savedUser.id) &&
+           msg.conversationId === activeConversation._id)) {
+        setMessages(prev => {
+          // Tránh trùng message
+          if (prev.some(m => m._id === msg._id || (m.text === msg.text && m.senderId === msg.senderId && m.createdAt === msg.createdAt))) return prev
+          return [...prev, msg]
+        })
       }
+      // Luôn refresh conversation list
       fetchConversations()
     })
 
@@ -40,7 +51,7 @@ export default function MessagePage() {
       socket.off('newMessage')
       socket.disconnect()
     }
-  }, [activeConversation])
+  }, []) // Bỏ activeConversation khỏi dependency!
 
   const fetchConversations = async () => {
     try {
@@ -73,6 +84,40 @@ export default function MessagePage() {
       fetchConversations()
     } catch (error) {
       console.error('Send error:', error)
+    }
+  }
+
+  const contactAdmin = async () => {
+    try {
+      setContactingAdmin(true)
+      // Find admin user by checking if any conversation already exists with an admin
+      const existing = conversations.find(c => c.otherUser?.role === 'admin')
+      if (existing) {
+        fetchMessages(existing)
+        setContactingAdmin(false)
+        return
+      }
+      // Otherwise get admin profile (first admin user)
+      const res = await userService.getAdminContact()
+      if (res.data && res.data.id) {
+        const msgData = {
+          receiverId: res.data.id,
+          text: 'Hello, I need help from the admin.'
+        }
+        const msgRes = await messageService.sendMessage(msgData)
+        if (msgRes.data && msgRes.data.conversationId) {
+          setNewMessage('')
+          await fetchConversations()
+          // Find the new admin conversation
+          const updatedConv = (await messageService.getConversations()).data
+          const adminConv = updatedConv.find(c => c.otherUser?.id === res.data.id)
+          if (adminConv) fetchMessages(adminConv)
+        }
+      }
+      setContactingAdmin(false)
+    } catch (error) {
+      console.error('Contact admin error:', error)
+      setContactingAdmin(false)
     }
   }
 
@@ -170,8 +215,11 @@ export default function MessagePage() {
             </>
           ) : (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-              <RiMessage3Fill size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-              <p>Select a creator or admin to start chatting</p>
+              <RiCustomerService2Fill size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
+              <p style={{ marginBottom: '1.5rem' }}>Need help? Contact our support team.</p>
+              <button onClick={contactAdmin} disabled={contactingAdmin} className="btn-solid" style={{ background: '#4f46e5', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 2rem' }}>
+                <RiCustomerService2Fill /> {contactingAdmin ? 'Connecting...' : 'Contact Admin'}
+              </button>
             </div>
           )}
         </section>

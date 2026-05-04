@@ -43,33 +43,54 @@ const getAdminStats = async (req, res) => {
 
 const getCreators = async (req, res) => {
   try {
-    const creators = await User.findAll({
-      where: { role: { [Op.ne]: 'admin' } }, // Show everyone except admins
+    // Find all non-admin users who have uploaded at least one asset
+    const creatorsWithStats = await User.findAll({
+      where: { role: { [Op.ne]: 'admin' } },
       attributes: { exclude: ['passwordHash'] },
-      include: [{ model: Asset, attributes: ['id'] }]
+      include: [
+        { 
+          model: Asset, 
+          as: 'Assets', 
+          attributes: ['id', 'price', 'downloads'] 
+        }
+      ]
     });
 
-    const creatorsWithStats = await Promise.all(creators.map(async (creator) => {
-      const assetCount = creator.Assets ? creator.Assets.length : 0;
+    const result = await Promise.all(creatorsWithStats.map(async (creator) => {
+      const assets = creator.Assets || [];
+      const assetCount = assets.length;
+      
+      // Only include users who actually have assets
+      if (assetCount === 0) return null;
+      
+      // Get total sales from orders
+      const assetIds = assets.map(a => a.id);
       const totalSales = await Order.count({
-        include: [{ model: Asset, where: { authorId: creator.id } }],
-        where: { status: 'completed' }
+        where: { 
+          status: 'completed',
+          assetId: { [Op.in]: assetIds }
+        }
       });
       const revenue = await Order.sum('amount', {
-        include: [{ model: Asset, where: { authorId: creator.id } }],
-        where: { status: 'completed' }
+        where: { 
+          status: 'completed',
+          assetId: { [Op.in]: assetIds }
+        }
       }) || 0;
 
       return {
         ...creator.toJSON(),
+        Assets: undefined,
         assetCount,
         totalSales,
         revenue
       };
     }));
 
-    res.json(creatorsWithStats);
+    const filteredResult = result.filter(c => c !== null);
+    res.json(filteredResult);
   } catch (error) {
+    console.error('getCreators Error:', error);
     res.status(500).json({ message: error.message });
   }
 };

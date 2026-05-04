@@ -12,5 +12,6 @@ router.get('/profile/:username', userController.getUserProfile);
 router.get('/wishlist', authenticate, userController.getWishlist);
 router.post('/wishlist/toggle', authenticate, userController.toggleWishlist);
 router.get('/earnings', authenticate, userController.getEarnings);
+router.get('/admin-contact', authenticate, userController.getAdminContact);
 
 module.exports = router;

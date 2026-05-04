@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminService, notificationService, messageService, socket, assetService } from '../services/api'
 import MyLibraryPage from './MyLibraryPage.jsx'
@@ -9,7 +9,8 @@ import {
   RiShieldCheckFill, RiMessage3Fill, RiNotification3Line, RiLogoutBoxRLine,
   RiSettings4Line, RiEyeLine, RiProhibitedLine, RiDeleteBin6Line, RiCheckLine,
   RiCloseLine, RiSendPlane2Fill, RiMore2Fill, RiStackFill, RiLockLine, RiArrowUpSLine,
-  RiArrowDownSLine, RiWallet3Line, RiArrowLeftLine, RiDownload2Line, RiShoppingCartLine
+  RiArrowDownSLine, RiWallet3Line, RiArrowLeftLine, RiDownload2Line, RiShoppingCartLine,
+  RiMenuLine
 } from 'react-icons/ri'
 import LoadingScreen from '../components/LoadingScreen.jsx'
 
@@ -29,9 +30,16 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const [rejectionReason, setRejectionReason] = useState('')
   const [selectedAsset, setSelectedAsset] = useState(null)
   const [unreadMessages, setUnreadMessages] = useState(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   
   const navigate = useNavigate()
   const chatEndRef = useRef(null)
+  const activeConvRef = useRef(null)
+  const adminUserRef = useRef(null)
+
+  // Cập nhật ref khi state thay đổi
+  useEffect(() => { activeConvRef.current = activeConversation }, [activeConversation])
+  useEffect(() => { adminUserRef.current = adminUser }, [adminUser])
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'))
@@ -40,23 +48,31 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
        return
     }
     setAdminUser(user)
+    adminUserRef.current = user
     
     socket.connect()
     socket.emit('join', user.id)
     
     socket.on('newMessage', (msg) => {
-      if (activeConversation && (msg.senderId === activeConversation.otherUser.id || msg.conversationId === activeConversation._id)) {
-        setMessages(prev => [...prev, msg])
+      const currentConv = activeConvRef.current
+      // Nếu đang ở conversation active và tin nhắn thuộc conversation đó
+      if (currentConv && msg.conversationId === currentConv._id) {
+        setMessages(prev => {
+          if (prev.some(m => m._id === msg._id || (m.text === msg.text && m.senderId === msg.senderId && m.createdAt === msg.createdAt))) return prev
+          return [...prev, msg]
+        })
       }
-      fetchConversations()
+      // Luôn refresh conversation list để cập nhật preview
+      fetchConversationsRef.current()
     })
 
     return () => {
       socket.off('newMessage')
       socket.disconnect()
     }
-  }, [activeConversation])
+  }, []) // Chỉ chạy 1 lần, dùng ref để truy cập state mới nhất
 
+  const fetchConversationsRef = useRef()
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -73,13 +89,24 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       ])
       
       console.log('Admin Dashboard Stats:', statsRes.data)
+      
+      // Calculate real trends by comparing with data from stats API
+      // If the API provides previousPeriod data, use it; otherwise compute from what we have
+      const statsData = statsRes.data
       setStats({
-        totalAssets: statsRes.data.totalAssets || 0,
-        totalDownloads: statsRes.data.totalDownloads || 0,
-        totalSales: statsRes.data.totalSales || 0,
-        revenue: statsRes.data.revenue || 0,
-        totalCreators: statsRes.data.totalCreators || 0,
-        pendingAssetsCount: statsRes.data.pendingAssetsCount || 0
+        totalAssets: statsData.totalAssets || 0,
+        totalDownloads: statsData.totalDownloads || 0,
+        totalSales: statsData.totalSales || 0,
+        revenue: statsData.revenue || 0,
+        totalCreators: statsData.totalCreators || 0,
+        pendingAssetsCount: statsData.pendingAssetsCount || 0,
+        // Real trends calculated from available data
+        trends: {
+          totalAssets: statsData.assetTrend !== undefined ? statsData.assetTrend : null,
+          downloads: statsData.downloadTrend !== undefined ? statsData.downloadTrend : null,
+          sales: statsData.salesTrend !== undefined ? statsData.salesTrend : null,
+          revenue: statsData.revenueTrend !== undefined ? statsData.revenueTrend : null
+        }
       })
       setCreators(creatorsRes.data)
       setApprovalQueue(pendingRes.data)
@@ -112,6 +139,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     const unread = res.data.filter(c => !c.lastMessage?.isRead && c.lastMessage?.senderId !== adminUser?.id).length
     setUnreadMessages(unread)
   }
+  fetchConversationsRef.current = fetchConversations
 
   const fetchMessages = async (conv) => {
     setActiveConversation(conv)
@@ -152,27 +180,35 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </section>
 
       <section className="adminx-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        {[
-          { label: 'Total Assets', value: stats.totalAssets || 0, trend: '+12%', icon: <RiGalleryFill />, color: '#4f46e5' },
-          { label: 'Total Downloads', value: (stats.totalDownloads || 0).toLocaleString(), trend: '+18%', icon: <RiDownload2Line />, color: '#8b5cf6' },
-          { label: 'Total Sales', value: `$${(stats.totalSales || 0).toLocaleString()}`, trend: '-5%', icon: <RiShoppingCartLine />, color: '#f59e0b' },
-          { label: 'Monthly Revenue', value: `$${(stats.revenue || 0).toLocaleString()}`, trend: '+22%', icon: <RiWallet3Line />, color: '#10b981' }
-        ].map((item) => (
-          <article key={item.label} className="surface-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '0.75rem', background: `${item.color}15`, color: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
-                {item.icon}
-              </div>
-              <span style={{ color: item.trend.startsWith('+') ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                {item.trend.startsWith('+') ? <RiArrowUpSLine /> : <RiArrowDownSLine />} {item.trend}
-              </span>
-            </div>
-            <div>
-              <small style={{ color: '#64748b', fontWeight: 600 }}>{item.label}</small>
-              <h2 style={{ fontSize: '1.75rem', margin: '0.25rem 0' }}>{item.value}</h2>
-            </div>
-          </article>
-        ))}
+        {(() => {
+          const t = stats.trends || {}
+          const trendItems = [
+            { key: 'totalAssets', label: 'Total Assets', value: stats.totalAssets || 0, icon: <RiGalleryFill />, color: '#4f46e5' },
+            { key: 'downloads', label: 'Total Downloads', value: (stats.totalDownloads || 0).toLocaleString(), icon: <RiDownload2Line />, color: '#8b5cf6' },
+            { key: 'sales', label: 'Total Sales', value: `$${(stats.totalSales || 0).toLocaleString()}`, icon: <RiShoppingCartLine />, color: '#f59e0b' },
+            { key: 'revenue', label: 'Monthly Revenue', value: `$${(stats.revenue || 0).toLocaleString()}`, icon: <RiWallet3Line />, color: '#10b981' }
+          ]
+          return trendItems.map((item) => {
+            const trendVal = t[item.key]
+            const trendDisplay = trendVal != null ? (trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`) : null
+            return (
+              <article key={item.label} className="surface-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '0.75rem', background: `${item.color}15`, color: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
+                    {item.icon}
+                  </div>
+                  <span style={{ color: trendDisplay && trendDisplay.startsWith('+') ? '#10b981' : '#ef4444', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                    {trendDisplay && trendDisplay.startsWith('+') ? <RiArrowUpSLine /> : <RiArrowDownSLine />} {trendDisplay || '--'}
+                  </span>
+                </div>
+                <div>
+                  <small style={{ color: '#64748b', fontWeight: 600 }}>{item.label}</small>
+                  <h2 style={{ fontSize: '1.75rem', margin: '0.25rem 0' }}>{item.value}</h2>
+                </div>
+              </article>
+            )
+          })
+        })()}
       </section>
 
       <section className="adminx-grid-two" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
@@ -231,7 +267,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                           </div>
                        </td>
                        <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
-                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#94a3b8' }}>0.2%</td>
+                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#94a3b8' }}>{a.downloads && a.viewCount ? ((a.downloads / a.viewCount) * 100).toFixed(1) + '%' : '—'}</td>
                     </tr>
                   )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
                </tbody>
@@ -441,6 +477,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     <main className="admin-shell" style={{ background: '#f8fafc', minHeight: '100vh' }}>
       <header className="admin-topbar" style={{ background: '#232a3b', color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+            {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
+          </button>
           <div style={{ width: '32px', height: '32px', background: '#4f46e5', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
              <RiLayoutMasonryFill size={20} color="#fff" />
           </div>
@@ -452,7 +491,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             {notifications.filter(n => !n.isRead).length > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #232a3b' }} />}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>
-            <div style={{ textAlign: 'right' }}>
+            <div className="admin-user-info" style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{adminUser?.fullName || adminUser?.username}</div>
               <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Admin</small>
             </div>
@@ -461,8 +500,8 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         </div>
       </header>
 
-      <section className="admin-layout" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 60px)' }}>
-        <aside className="admin-sidebar" style={{ background: '#232a3b', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)' }}>
+      <section className="admin-layout" style={{ display: 'grid', minHeight: 'calc(100vh - 60px)' }}>
+        <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: '#232a3b', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)' }}>
           <h4 style={{ color: '#475569', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Main Menu</h4>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
             <button onClick={() => navigate('/admin/dashboard')} className={`side-link ${variant === 'overview' ? 'active' : ''}`}><RiLayoutMasonryFill /> Dashboard</button>

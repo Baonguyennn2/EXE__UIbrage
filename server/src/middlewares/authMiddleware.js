@@ -28,11 +28,15 @@ const authMiddleware = (req, res, next) => {
       return res.status(401).json({ message: 'Invalid token', error: err.message });
     }
 
+    // Try both possible claim locations for role
+    const groups = decoded['cognito:groups'] || [];
+    const role = decoded['custom:role'] || (groups.includes('admin') ? 'admin' : 'customer');
+
     req.user = {
       id: decoded.sub,
       email: decoded.email,
-      username: decoded['cognito:username'],
-      role: decoded['custom:role'] || 'customer'
+      username: decoded['cognito:username'] || decoded.username,
+      role: role
     };
     next();
   });

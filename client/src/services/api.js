@@ -62,6 +62,7 @@ export const userService = {
   getWishlist: () => api.get('/users/wishlist'),
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
   getEarnings: () => api.get('/users/earnings'),
+  getAdminContact: () => api.get('/users/admin-contact'),
 };
 
 export const notificationService = {
@@ -78,6 +79,8 @@ export const messageService = {
 export const authService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (data) => api.post('/auth/register', data),
+  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
+  resendCode: (email) => api.post('/auth/resend-code', { email }),
 };
 
 export const metadataService = {

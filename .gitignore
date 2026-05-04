@@ -31,3 +31,8 @@ build/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Claw Code files
+.claw/
+.clawd-todos.json
+.claw.json
