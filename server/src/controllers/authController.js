@@ -128,14 +128,18 @@ exports.register = async (req, res) => {
     };
 
     // Only sign up in Cognito. DO NOT save to MySQL yet.
-    await cognito.signUp(params).promise();
+    const signUpResult = await cognito.signUp(params).promise();
+    console.log('Cognito signUp result:', JSON.stringify(signUpResult));
 
     res.status(201).json({
-      message: 'User registered successfully. Please check your email for verification.'
+      message: 'User registered successfully. Please check your email for verification.',
+      cognito: signUpResult
     });
   } catch (error) {
-    console.error('Registration Error:', error);
-    res.status(400).json({ error: error.message });
+    // Log full error for debugging (includes AWS error code/details)
+    console.error('Registration Error Full:', error);
+    const errBody = error.response?.data || error.message || error;
+    res.status(400).json({ error: errBody, code: error.code });
   }
 };
 
