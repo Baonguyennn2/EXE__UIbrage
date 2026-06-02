@@ -26,7 +26,13 @@ export default function LoginPage({ variant = 'v1' }) {
       localStorage.setItem('user', JSON.stringify(user))
       
       setNotification({ type: 'success', message: 'Logged in successfully!' })
-      setTimeout(() => navigate('/marketplace'), 1500)
+      setTimeout(() => {
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard')
+        } else {
+          navigate('/marketplace')
+        }
+      }, 1500)
     } catch (error) {
       console.error('Login Error:', error)
       setNotification({ type: 'error', message: error.response?.data?.error || 'Login failed.' })
