@@ -158,13 +158,12 @@ export default function HomepagePage() {
             </header>
             <div className="latest-grid">
               {latestAssets.map((asset) => (
-                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="latest-card-item">
-                  <img src={asset.coverImageUrl} alt={asset.title} />
-                  <div className="latest-card-info">
-                    <h4>{asset.title}</h4>
-                    <div className="meta">
-                      By {asset.author?.username} • <span className="price">{asset.price === 0 ? 'FREE' : `$${asset.price}`}</span>
-                    </div>
+                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="latest-card">
+                  <div className="latest-card__img" style={{ backgroundImage: `url(${asset.coverImageUrl})` }}></div>
+                  <h4>{asset.title}</h4>
+                  <div className="latest-card__meta">
+                    <span>By {asset.author?.username}</span>
+                    {asset.price === 0 ? <strong className="free">FREE</strong> : <strong>${asset.price}</strong>}
                   </div>
                 </Link>
               ))}
