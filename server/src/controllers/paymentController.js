@@ -1,6 +1,9 @@
 const PayOSModule = require('@payos/node');
 const PayOS = PayOSModule.PayOS || PayOSModule.default || PayOSModule;
-const { Asset, User } = require('../models/mysql');
+const { Asset, User, Order } = require('../models/mysql');
+const Notification = require('../models/mongodb/Notification');
+const sequelize = require('../config/database');
+const { getCommissionPercent, createSaleLedger, roundMoney } = require('../utils/finance');
 
 const payos = new PayOS(
   process.env.PAYOS_CLIENT_ID || 'CLIENT_ID',
@@ -13,7 +16,9 @@ const createPaymentLink = async (req, res) => {
     const { assetId } = req.body;
     const { id: userId } = req.user;
 
-    const asset = await Asset.findByPk(assetId);
+    const asset = await Asset.findByPk(assetId, {
+      include: [{ model: User, as: 'author', attributes: ['id', 'username', 'fullName'] }],
+    });
     if (!asset) {
       return res.status(404).json({ message: 'Asset not found' });
     }
@@ -22,11 +27,22 @@ const createPaymentLink = async (req, res) => {
       return res.status(400).json({ message: 'Asset is free' });
     }
 
+    const commissionPercent = await getCommissionPercent();
+    const basePrice = roundMoney(asset.price);
+    const grossAmountUsd = roundMoney(basePrice * (1 + commissionPercent / 100));
     const orderCode = Number(String(Date.now()).slice(-6));
+
+    await Order.create({
+      userId,
+      assetId,
+      amount: grossAmountUsd,
+      transactionId: String(orderCode),
+      status: 'pending',
+    });
 
     const body = {
       orderCode: orderCode,
-      amount: Math.round(asset.price * 25000), // Assuming price is in USD and converting roughly to VND since PayOS usually uses VND. Adjust as needed.
+      amount: Math.round(grossAmountUsd * 25000),
       description: `Asset ${assetId}`.substring(0, 25),
       returnUrl: `${process.env.CLIENT_ORIGIN}/payment/success`,
       cancelUrl: `${process.env.CLIENT_ORIGIN}/payment/cancel`,
@@ -47,6 +63,47 @@ const createPaymentLink = async (req, res) => {
 const handleWebhook = async (req, res) => {
   try {
     const data = payos.verifyPaymentWebhookData(req.body);
+    const orderCode = String(data.orderCode || data.data?.orderCode || req.body.orderCode || req.body?.data?.orderCode || '');
+
+    const order = await Order.findOne({ where: { transactionId: orderCode } });
+    if (!order) {
+      return res.json({ success: true, message: 'Order not found, webhook ignored' });
+    }
+
+    if (order.status === 'completed') {
+      return res.json({ success: true, message: 'Webhook already processed' });
+    }
+
+    const asset = await Asset.findByPk(order.assetId);
+    if (!asset) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    const commissionPercent = await getCommissionPercent();
+
+    await sequelize.transaction(async (transaction) => {
+      order.status = 'completed';
+      await order.save({ transaction });
+
+      const { ledgerEntry, split } = await createSaleLedger({
+        userId: asset.authorId,
+        assetId: asset.id,
+        orderId: order.id,
+        basePrice: asset.price,
+        commissionPercent,
+        createdBy: req.user?.id || asset.authorId,
+      });
+
+      await Notification.create({
+        userId: asset.authorId,
+        type: 'new_order',
+        title: 'New sale recorded',
+        message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
+        relatedId: asset.id,
+      });
+
+      return ledgerEntry;
+    });
 
     // Here you would typically grant access to the asset
     // by creating a record in a UserAssets or Purchases table

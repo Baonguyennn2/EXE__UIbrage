@@ -52,6 +52,10 @@ export const adminService = {
   getPending: (config) => api.get('/admin/pending-assets', config),
   approve: (id, data) => api.patch(`/admin/approve/${id}`, data),
   deleteAsset: (id) => api.delete(`/admin/assets/${id}`),
+  getWithdrawals: (params) => api.get('/admin/withdrawals', { params }),
+  reviewWithdrawal: (id, data) => api.patch(`/admin/withdrawals/${id}`, data),
+  getCommission: () => api.get('/admin/commission'),
+  updateCommission: (data) => api.patch('/admin/commission', data),
 };
 
 export const userService = {
@@ -62,6 +66,9 @@ export const userService = {
   getWishlist: () => api.get('/users/wishlist'),
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
   getEarnings: () => api.get('/users/earnings'),
+  getWithdrawalRequests: () => api.get('/users/withdrawals'),
+  requestWithdrawal: (data) => api.post('/users/withdrawals', data),
+  getTransactions: () => api.get('/users/transactions'),
   getAdminContact: () => api.get('/users/admin-contact'),
   getOnlineStatus: (userIds) => api.post('/users/online-status', { userIds }),
 };

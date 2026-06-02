@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema({
   userId: { type: String, required: true }, // MySQL User ID
   type: { 
     type: String, 
-    enum: ['asset_approved', 'asset_rejected', 'new_order', 'new_message'],
+    enum: ['asset_approved', 'asset_rejected', 'new_order', 'new_message', 'withdrawal_requested', 'withdrawal_approved', 'withdrawal_rejected', 'commission_updated'],
     required: true 
   },
   title: { type: String, required: true },

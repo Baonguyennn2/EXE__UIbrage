@@ -10,7 +10,8 @@ import {
   RiSettings4Line, RiEyeLine, RiProhibitedLine, RiDeleteBin6Line, RiCheckLine,
   RiCloseLine, RiSendPlane2Fill, RiMore2Fill, RiStackFill, RiLockLine, RiArrowUpSLine,
   RiArrowDownSLine, RiWallet3Line, RiArrowLeftLine, RiDownload2Line, RiShoppingCartLine,
-  RiMenuLine, RiCheckDoubleFill, RiCustomerService2Fill, RiImageAddLine
+  RiMenuLine, RiCheckDoubleFill, RiCustomerService2Fill, RiImageAddLine,
+  RiBankCardLine, RiRefund2Line, RiPercentLine, RiFileList3Line, RiCheckboxCircleLine, RiCloseCircleLine
 } from 'react-icons/ri'
 import { adminService, notificationService, messageService, assetService, userService } from '../services/api'
 import LoadingScreen from '../components/LoadingScreen.jsx'
@@ -35,6 +36,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const [typingUsers, setTypingUsers] = useState({}) // { conversationId: true/false }
   const [onlineUsers, setOnlineUsers] = useState({})
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [withdrawals, setWithdrawals] = useState([])
+  const [commissionPercent, setCommissionPercent] = useState(5)
+  const [commissionDraft, setCommissionDraft] = useState(5)
+  const [withdrawalReviewNote, setWithdrawalReviewNote] = useState('')
+  const [processingWithdrawalId, setProcessingWithdrawalId] = useState(null)
+  const [commissionSaving, setCommissionSaving] = useState(false)
   
   const typingTimeoutRef = useRef(null)
   const isTypingRef = useRef(false)
@@ -109,14 +116,16 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       setLoading(true)
       const user = JSON.parse(localStorage.getItem('user'))
       
-      const [statsRes, creatorsRes, pendingRes, notifyRes, convRes, allAssetsRes, myAssetsRes] = await Promise.all([
+      const [statsRes, creatorsRes, pendingRes, notifyRes, convRes, allAssetsRes, myAssetsRes, withdrawalsRes, commissionRes] = await Promise.all([
         adminService.getStats(),
         adminService.getCreators(),
         adminService.getPending(),
         notificationService.getAll(),
         messageService.getConversations(),
         assetService.getAll({ isAdmin: 'true' }), // All assets (admin view)
-        assetService.getAll({ authorId: user.id }) // Admin's own assets
+        assetService.getAll({ authorId: user.id }), // Admin's own assets
+        adminService.getWithdrawals({ status: 'all' }),
+        adminService.getCommission()
       ])
       
       console.log('Admin Dashboard Stats:', statsRes.data)
@@ -144,6 +153,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       setNotifications(notifyRes.data)
       setConversations(convRes.data)
       setAllUserAssets(allAssetsRes.data)
+      setWithdrawals(withdrawalsRes.data || [])
+      setCommissionPercent(Number(commissionRes.data?.commissionPercent || statsData.commissionPercent || 5))
+      setCommissionDraft(Number(commissionRes.data?.commissionPercent || statsData.commissionPercent || 5))
       
       const unread = convRes.data.filter(c => !c.lastMessage?.isRead && c.lastMessage?.senderId !== adminUser?.id).length
       setUnreadMessages(unread)
@@ -303,6 +315,192 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     navigate('/auth/login')
+  }
+
+  const handleSaveCommission = async () => {
+    try {
+      setCommissionSaving(true)
+      await adminService.updateCommission({ commissionPercent: commissionDraft })
+      await fetchData()
+    } catch (error) {
+      console.error('Error updating commission:', error)
+      alert(error?.response?.data?.message || 'Failed to update commission')
+    } finally {
+      setCommissionSaving(false)
+    }
+  }
+
+  const handleReviewWithdrawal = async (requestId, status) => {
+    try {
+      setProcessingWithdrawalId(requestId)
+      await adminService.reviewWithdrawal(requestId, { status, reviewNote: withdrawalReviewNote })
+      setWithdrawalReviewNote('')
+      await fetchData()
+    } catch (error) {
+      console.error('Error reviewing withdrawal:', error)
+      alert(error?.response?.data?.message || 'Failed to review withdrawal')
+    } finally {
+      setProcessingWithdrawalId(null)
+    }
+  }
+
+  const renderWithdrawals = () => {
+    const pendingCount = withdrawals.filter((item) => item.status === 'pending').length
+    const pendingAmount = withdrawals
+      .filter((item) => item.status === 'pending')
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0)
+
+    const formatMoney = (value) => `$${Number(value || 0).toLocaleString()}`
+
+    return (
+      <div className="admin-view-fade">
+        <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+          <div>
+            <h1 style={{ fontSize: '2.25rem', marginBottom: '0.4rem' }}>Withdrawal Requests</h1>
+            <p style={{ color: '#64748b' }}>Review creator payout requests and keep commission settings in sync.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontWeight: 700 }}>
+            <RiBankCardLine size={20} /> Finance
+          </div>
+        </section>
+
+        <section className="adminx-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          <article className="surface-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>COMMISSION</small>
+                <h2 style={{ margin: '0.4rem 0 0' }}>{commissionPercent.toFixed(2)}%</h2>
+              </div>
+              <RiPercentLine size={22} color="#4f46e5" />
+            </div>
+          </article>
+          <article className="surface-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>PENDING REQUESTS</small>
+                <h2 style={{ margin: '0.4rem 0 0' }}>{pendingCount}</h2>
+              </div>
+              <RiFileList3Line size={22} color="#f59e0b" />
+            </div>
+          </article>
+          <article className="surface-card" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>PENDING AMOUNT</small>
+                <h2 style={{ margin: '0.4rem 0 0' }}>{formatMoney(pendingAmount)}</h2>
+              </div>
+              <RiWallet3Line size={22} color="#10b981" />
+            </div>
+          </article>
+        </section>
+
+        <section className="surface-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Platform commission</h3>
+              <p style={{ margin: '0.35rem 0 0', color: '#64748b' }}>Adjust the fee added on top of creator asset price when a sale completes.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={commissionDraft}
+                onChange={(e) => setCommissionDraft(e.target.value)}
+                style={{ width: '140px', padding: '0.8rem 1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1' }}
+              />
+              <button onClick={handleSaveCommission} className="btn-solid" disabled={commissionSaving} style={{ background: '#4f46e5' }}>
+                {commissionSaving ? 'Saving...' : 'Save commission'}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="surface-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <header style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Review queue</h3>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={withdrawalReviewNote}
+                onChange={(e) => setWithdrawalReviewNote(e.target.value)}
+                placeholder="Admin note for approval/rejection"
+                style={{ minWidth: '280px', padding: '0.7rem 0.9rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1' }}
+              />
+            </div>
+          </header>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: '#f8fafc', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem' }}>
+                <tr>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Creator</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Amount</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Status</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Requested</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Note</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawals.length === 0 ? (
+                  <tr><td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No withdrawal requests yet.</td></tr>
+                ) : withdrawals.map((request) => (
+                  <tr key={request.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <img src={request.creator?.avatarUrl || '/default-avatar.png'} alt="creator" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{request.creator?.fullName || request.creator?.username || 'Unknown creator'}</div>
+                          <small style={{ color: '#94a3b8' }}>{request.creator?.email || request.userId}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', fontWeight: 800 }}>{formatMoney(request.amount)}</td>
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                        padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+                        background: request.status === 'approved' ? '#dcfce7' : request.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                        color: request.status === 'approved' ? '#15803d' : request.status === 'rejected' ? '#b91c1c' : '#a16207'
+                      }}>
+                        {request.status === 'approved' ? <RiCheckboxCircleLine /> : request.status === 'rejected' ? <RiCloseCircleLine /> : <RiRefund2Line />}
+                        {request.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', color: '#64748b' }}>{new Date(request.createdAt).toLocaleString()}</td>
+                    <td style={{ padding: '1rem 1.5rem', color: '#64748b' }}>{request.note || request.adminNote || '-'}</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      {request.status === 'pending' ? (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          <button
+                            onClick={() => handleReviewWithdrawal(request.id, 'rejected')}
+                            disabled={processingWithdrawalId === request.id}
+                            className="btn-ghost"
+                            style={{ border: '1px solid #fecaca', color: '#b91c1c' }}
+                          >
+                            Reject
+                          </button>
+                          <button
+                            onClick={() => handleReviewWithdrawal(request.id, 'approved')}
+                            disabled={processingWithdrawalId === request.id}
+                            className="btn-solid"
+                            style={{ background: '#10b981' }}
+                          >
+                            {processingWithdrawalId === request.id ? 'Working...' : 'Approve'}
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Reviewed</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    )
   }
 
   const renderOverview = () => (
@@ -870,6 +1068,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             <button onClick={() => navigate('/admin/upload-asset')} className={`side-link ${variant === 'upload' ? 'active' : ''}`}><RiUploadCloud2Fill /> Upload Asset</button>
             <button onClick={() => navigate('/admin/creators')} className={`side-link ${variant === 'users' ? 'active' : ''}`}><RiGroupFill /> Creators</button>
             <button onClick={() => navigate('/admin/asset-approval')} className={`side-link ${variant === 'moderation' ? 'active' : ''}`}><RiShieldCheckFill /> Asset Approval</button>
+            <button onClick={() => navigate('/admin/withdrawals')} className={`side-link ${variant === 'withdrawals' ? 'active' : ''}`}><RiBankCardLine /> Withdrawals</button>
             <button onClick={() => navigate('/admin/all-assets')} className={`side-link ${variant === 'all-assets' ? 'active' : ''}`}><RiStackFill /> All User Assets</button>
             <button onClick={() => navigate('/admin/messages')} className={`side-link ${variant === 'messages' ? 'active' : ''}`}>
               <RiMessage3Fill /> Messages {unreadMessages > 0 && <span className="badge">{unreadMessages}</span>}
@@ -886,6 +1085,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               {variant === 'overview' && renderOverview()}
               {variant === 'users' && renderCreators()}
               {variant === 'moderation' && renderApproval()}
+              {variant === 'withdrawals' && renderWithdrawals()}
               {variant === 'all-assets' && renderAllAssets()}
               {variant === 'messages' && renderMessages()}
               {variant === 'library' && <MyLibraryPage isAdmin={true} customStats={myAssetStats} />}

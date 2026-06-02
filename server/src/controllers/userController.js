@@ -1,4 +1,7 @@
-const { User, Asset } = require('../models/mysql');
+const { User, Asset, RevenueLedger, WithdrawalRequest } = require('../models/mysql');
+const Notification = require('../models/mongodb/Notification');
+const sequelize = require('../config/database');
+const { getCreatorFinancials, roundMoney } = require('../utils/finance');
 
 const updateProfile = async (req, res) => {
   // ... (keep existing code)
@@ -61,36 +64,172 @@ const toggleWishlist = async (req, res) => {
   }
 };
 
-const { Order } = require('../models/mysql');
-
 const getEarnings = async (req, res) => {
   try {
-    const assets = await Asset.findAll({
-      where: { authorId: req.user.id },
-      include: [{
-        model: Order,
-        where: { status: 'completed' },
-        required: false
-      }]
+    const userId = req.user.id;
+    const financials = await getCreatorFinancials(userId);
+
+    const completedSales = await RevenueLedger.findAll({
+      where: { userId, type: 'sale_credit' },
+      include: [{ model: Asset, as: 'asset' }],
+      order: [['createdAt', 'DESC']],
     });
 
-    let totalEarnings = 0;
-    const salesBreakdown = assets.map(asset => {
-      const assetSales = asset.Orders || [];
-      const assetRevenue = assetSales.reduce((sum, order) => sum + parseFloat(order.amount), 0);
-      totalEarnings += assetRevenue;
-      return {
-        id: asset.id,
-        title: asset.title,
-        salesCount: assetSales.length,
-        revenue: assetRevenue
-      };
+    const withdrawals = await WithdrawalRequest.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
     });
+
+    const assetMap = new Map();
+    completedSales.forEach((entry) => {
+      const assetId = entry.assetId || entry.asset?.id || 'unknown';
+      const current = assetMap.get(assetId) || {
+        id: assetId,
+        title: entry.asset?.title || 'Unknown asset',
+        salesCount: 0,
+        grossRevenue: 0,
+        creatorRevenue: 0,
+        platformRevenue: 0,
+      };
+
+      current.salesCount += 1;
+      current.grossRevenue += Number(entry.grossAmount || 0);
+      current.creatorRevenue += Number(entry.creatorAmount || 0);
+      current.platformRevenue += Number(entry.platformAmount || 0);
+      assetMap.set(assetId, current);
+    });
+
+    const salesBreakdown = Array.from(assetMap.values()).map((item) => ({
+      ...item,
+      grossRevenue: roundMoney(item.grossRevenue),
+      revenue: roundMoney(item.creatorRevenue),
+      platformRevenue: roundMoney(item.platformRevenue),
+    }));
+
+    const transactions = [
+      ...completedSales.map((entry) => ({
+        id: entry.id,
+        type: entry.type,
+        amount: Number(entry.creatorAmount || 0),
+        grossAmount: Number(entry.grossAmount || 0),
+        platformAmount: Number(entry.platformAmount || 0),
+        assetId: entry.assetId,
+        title: entry.asset?.title || 'Unknown asset',
+        createdAt: entry.createdAt,
+      })),
+      ...withdrawals.map((request) => ({
+        id: request.id,
+        type: `withdrawal_${request.status}`,
+        amount: Number(request.amount || 0),
+        status: request.status,
+        note: request.adminNote || request.note,
+        createdAt: request.createdAt,
+        reviewedAt: request.reviewedAt,
+      })),
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json({
-      totalEarnings,
-      salesBreakdown
+      totalEarnings: financials.totalEarnings,
+      grossRevenue: financials.grossRevenue,
+      platformRevenue: financials.platformRevenue,
+      currentBalance: financials.currentBalance,
+      availableBalance: financials.availableBalance,
+      pendingWithdrawalAmount: financials.pendingWithdrawalAmount,
+      totalWithdrawn: financials.totalWithdrawn,
+      totalSales: financials.totalSales,
+      commissionPercent: await require('../utils/finance').getCommissionPercent(),
+      salesBreakdown,
+      withdrawals,
+      transactions,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const requestWithdrawal = async (req, res) => {
+  try {
+    if (req.user.role !== 'creator') {
+      return res.status(403).json({ message: 'Only creator accounts can request withdrawals' });
+    }
+
+    const userId = req.user.id;
+    const { amount, payoutMethod = 'bank', payoutDetails = '', note = '' } = req.body;
+    const numericAmount = roundMoney(amount);
+
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ message: 'Withdrawal amount must be greater than zero' });
+    }
+
+    const financials = await getCreatorFinancials(userId);
+    if (numericAmount > financials.availableBalance) {
+      return res.status(400).json({ message: 'Insufficient withdrawable balance' });
+    }
+
+    const withdrawal = await sequelize.transaction(async (transaction) => {
+      const createdRequest = await WithdrawalRequest.create({
+        userId,
+        amount: numericAmount,
+        payoutMethod,
+        payoutDetails,
+        note,
+        status: 'pending',
+      }, { transaction });
+
+      await RevenueLedger.create({
+        userId,
+        withdrawalRequestId: createdRequest.id,
+        type: 'withdrawal_request',
+        grossAmount: 0,
+        creatorAmount: numericAmount,
+        platformAmount: 0,
+        balanceDelta: 0,
+        note: `Withdrawal request submitted for $${numericAmount.toFixed(2)}`,
+        createdBy: userId,
+      }, { transaction });
+
+      return createdRequest;
+    });
+
+    const admin = await User.findOne({ where: { role: 'admin' }, attributes: ['id', 'username', 'fullName'] });
+    if (admin) {
+      await Notification.create({
+        userId: admin.id,
+        type: 'withdrawal_requested',
+        title: 'New withdrawal request',
+        message: `Creator ${req.user.username || req.user.id} requested a $${numericAmount.toFixed(2)} withdrawal.`,
+        relatedId: withdrawal.id,
+      });
+    }
+
+    res.status(201).json(withdrawal);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getWithdrawalRequests = async (req, res) => {
+  try {
+    const requests = await WithdrawalRequest.findAll({
+      where: { userId: req.user.id },
+      order: [['createdAt', 'DESC']],
+    });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getTransactions = async (req, res) => {
+  try {
+    const entries = await RevenueLedger.findAll({
+      where: { userId: req.user.id },
+      include: [
+        { model: Asset, as: 'asset', attributes: ['id', 'title', 'coverImageUrl'] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+    res.json(entries);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -153,6 +292,9 @@ module.exports = {
   getWishlist,
   toggleWishlist,
   getEarnings,
+  requestWithdrawal,
+  getWithdrawalRequests,
+  getTransactions,
   getUserProfile,
   getAdminContact,
   getOnlineStatus

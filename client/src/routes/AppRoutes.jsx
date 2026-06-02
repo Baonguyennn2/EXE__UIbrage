@@ -115,6 +115,9 @@ export default function AppRoutes() {
       <Route path="/admin/messages" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="messages" /></ProtectedRoute>
       } />
+      <Route path="/admin/withdrawals" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="withdrawals" /></ProtectedRoute>
+      } />
       <Route path="/admin/settings" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="settings" /></ProtectedRoute>
       } />

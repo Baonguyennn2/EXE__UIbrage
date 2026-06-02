@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
 import Toast from '../components/Toast.jsx'
 import { FaFacebookF } from 'react-icons/fa'
@@ -13,39 +13,7 @@ export default function LoginPage({ variant = 'v1' }) {
   const [loading, setLoading] = useState(false)
   const [notification, setNotification] = useState(null)
   const navigate = useNavigate()
-  const location = useLocation()
-
-  useEffect(() => {
-    // Check if there is a token in the URL (from Google Login callback)
-    const params = new URLSearchParams(location.search)
-    const token = params.get('token')
-    const userData = params.get('user')
-    
-    if (token) {
-      localStorage.setItem('token', token)
-      if (userData) {
-        try {
-          const user = JSON.parse(decodeURIComponent(userData))
-          localStorage.setItem('user', JSON.stringify(user))
-          
-          setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
-          
-          const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
-          setTimeout(() => navigate(redirectPath), 1500)
-        } catch (e) {
-          console.error('Error parsing user data', e)
-        }
-      } else {
-        setNotification({ type: 'success', message: 'Logged in!' })
-        setTimeout(() => navigate('/marketplace'), 1500)
-      }
-    }
-
-    const error = params.get('error')
-    if (error) {
-      setNotification({ type: 'error', message: 'Google authentication failed.' })
-    }
-  }, [location, navigate])
+  const isCompact = variant === 'v2'
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -57,10 +25,8 @@ export default function LoginPage({ variant = 'v1' }) {
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
       
-      setNotification({ type: 'success', message: `Logged in as ${user.role}!` })
-      
-      const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/marketplace'
-      setTimeout(() => navigate(redirectPath), 1500)
+      setNotification({ type: 'success', message: 'Logged in successfully!' })
+      setTimeout(() => navigate('/marketplace'), 1500)
     } catch (error) {
       console.error('Login Error:', error)
       setNotification({ type: 'error', message: error.response?.data?.error || 'Login failed.' })
@@ -71,10 +37,8 @@ export default function LoginPage({ variant = 'v1' }) {
 
   const handleGoogleLogin = () => {
     setNotification({ type: 'info', message: 'Redirecting to Google...' })
-    const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
-      ? 'http://localhost:5000/api' 
-      : 'https://exe-uibrage.onrender.com/api')
-    window.location.href = `${apiUrl}/auth/google`
+    // Placeholder for Google OAuth redirect
+    window.location.href = 'http://localhost:5000/api/auth/google'
   }
 
   const handleFacebookLogin = () => {
@@ -82,11 +46,11 @@ export default function LoginPage({ variant = 'v1' }) {
   }
 
   return (
-    <main className="auth-figma">
-      <div className="auth-figma__canvas">
+    <main className={`auth-figma auth-figma--login ${isCompact ? 'auth-figma--compact' : ''}`}>
+      <section className="auth-figma__canvas">
         <header className="auth-figma__brand">
-          <div className="auth-figma__brand-tile">▦</div>
-          <strong>UIbrage</strong>
+          <span className="auth-figma__brand-tile">▦</span>
+          <strong>Ulbrage</strong>
         </header>
 
         {notification && (
@@ -101,7 +65,7 @@ export default function LoginPage({ variant = 'v1' }) {
 
         <section className="auth-figma__card">
           <header>
-            <h1>Log in to your UIbrage account</h1>
+            <h1>Log in to your Ulbrage account</h1>
             <p>Welcome back! Please enter your details.</p>
           </header>
 
@@ -143,12 +107,12 @@ export default function LoginPage({ variant = 'v1' }) {
           </form>
 
           <div className="auth-figma__divider">
-            <span>Or log in with another service</span>
+            <span>OR LOG IN WITH ANOTHER SERVICE</span>
           </div>
 
           <div className="auth-figma__socials">
             <button type="button" className="auth-figma__social-btn" onClick={handleFacebookLogin}>
-              <FaFacebookF color="#1877F2" />
+              <FaFacebookF />
               Facebook
             </button>
             <button type="button" className="auth-figma__social-btn" onClick={handleGoogleLogin}>
@@ -169,7 +133,8 @@ export default function LoginPage({ variant = 'v1' }) {
           <a href="#">Contact</a>
           <a href="#">Terms of Service</a>
         </nav>
-      </div>
+      </section>
     </main>
   )
 }
+

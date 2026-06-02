@@ -48,10 +48,7 @@ export default function RegisterPage() {
 
   const handleGoogleLogin = () => {
      setNotification({ type: 'info', message: 'Redirecting to Google...' })
-     const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
-       ? 'http://localhost:5000/api' 
-       : 'https://exe-uibrage.onrender.com/api')
-     window.location.href = `${apiUrl}/auth/google`
+     window.location.href = 'http://localhost:5000/api/auth/google'
   }
 
   const handleFacebookLogin = () => {
@@ -59,71 +56,47 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="auth-figma">
-      <div className="auth-figma__canvas">
+    <main className="auth-figma auth-figma--register-page">
+      <section className="auth-figma__canvas">
         <header className="auth-figma__brand">
-          <div className="auth-figma__brand-tile">▦</div>
-          <strong>UIbrage</strong>
+          <span className="auth-figma__brand-tile">▦</span>
+          <strong>Ulbrage</strong>
         </header>
 
-        {notification && (
-          <div className="toast-container">
-            <Toast
-              type={notification.type}
-              message={notification.message}
-              onClose={() => setNotification(null)}
-            />
-          </div>
-        )}
+      {notification && (
+        <div className="toast-container">
+          <Toast 
+            type={notification.type} 
+            message={notification.message} 
+            onClose={() => setNotification(null)} 
+          />
+        </div>
+      )}
 
-        <section className="auth-figma__card">
+      <section className="auth-figma__card auth-figma__card--register">
           <header>
-            <h1>Create your UIbrage account</h1>
-            <p>Marketplace for game developers</p>
+            <h1>Create your Ulbrage account</h1>
           </header>
 
           <form className="auth-figma__form" onSubmit={handleSubmit}>
             <label>
               Username
-              <input
-                type="text"
-                value={form.username}
-                onChange={setField('username')}
-                placeholder="gameder_pro"
-                required
-              />
+              <input type="text" value={form.username} onChange={setField('username')} placeholder="gameder_pro" required />
             </label>
             <label>
               Email address
-              <input
-                type="email"
-                value={form.email}
-                onChange={setField('email')}
-                placeholder="dev@studio.com"
-                required
-              />
+              <input type="email" value={form.email} onChange={setField('email')} placeholder="you@example.com" required />
             </label>
             <label>
               Password
               <div className="auth-figma__input-wrap">
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={setField('password')}
-                  placeholder="••••••••"
-                  required
-                />
+                <input type="password" value={form.password} onChange={setField('password')} placeholder="••••••••" required />
+                <span><RiEyeLine /></span>
               </div>
             </label>
             <label>
               Confirm password
-              <input
-                type="password"
-                value={form.confirmPassword}
-                onChange={setField('confirmPassword')}
-                placeholder="••••••••"
-                required
-              />
+              <input type="password" value={form.confirmPassword} onChange={setField('confirmPassword')} placeholder="••••••••" required />
             </label>
 
             <button type="submit" className="auth-figma__submit" disabled={loading}>
@@ -132,12 +105,12 @@ export default function RegisterPage() {
           </form>
 
           <div className="auth-figma__divider">
-            <span>Or sign up with another service</span>
+            <span>OR SIGN UP WITH</span>
           </div>
 
           <div className="auth-figma__socials">
             <button type="button" className="auth-figma__social-btn" onClick={handleFacebookLogin}>
-              <FaFacebookF color="#1877F2" />
+              <FaFacebookF />
               Facebook
             </button>
             <button type="button" className="auth-figma__social-btn" onClick={handleGoogleLogin}>
@@ -150,15 +123,7 @@ export default function RegisterPage() {
             Already have an account? <Link to="/auth/login">Log in</Link>
           </footer>
         </section>
-
-        <nav className="auth-figma__meta-links">
-          <a href="#">About</a>
-          <a href="#">FAQ</a>
-          <a href="#">Blog</a>
-          <a href="#">Contact</a>
-          <a href="#">Terms of Service</a>
-        </nav>
-      </div>
+      </section>
     </main>
   )
 }

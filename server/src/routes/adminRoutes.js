@@ -19,5 +19,9 @@ router.get('/creators', isAdmin, adminController.getCreators);
 router.get('/pending-assets', isAdmin, adminController.getPendingAssets);
 router.patch('/approve/:id', isAdmin, adminController.approveAsset);
 router.delete('/assets/:id', isAdmin, adminController.deleteAsset);
+router.get('/withdrawals', isAdmin, adminController.getWithdrawalRequests);
+router.patch('/withdrawals/:id', isAdmin, adminController.reviewWithdrawalRequest);
+router.get('/commission', isAdmin, adminController.getCommissionSetting);
+router.patch('/commission', isAdmin, adminController.updateCommissionSetting);
 
 module.exports = router;
