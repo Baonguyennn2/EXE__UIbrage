@@ -1,5 +1,4 @@
 const User = require('./User');
-const User = require('./User');
 const Asset = require('./Asset');
 const AssetMedia = require('./AssetMedia');
 const Order = require('./Order');
@@ -75,4 +74,3 @@ module.exports = {
   PostComment,
   Follower,
 };
-  Follower
