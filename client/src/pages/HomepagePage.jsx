@@ -49,44 +49,44 @@ export default function HomepagePage() {
     <div className="homepage-container market-home">
       <AppHeader onSearch={(val) => navigate(`/marketplace?search=${encodeURIComponent(val)}`)} />
 
-      <main className="homepage-layout-with-sidebar">
+      <main className="main-layout">
         {/* Sidebar */}
-        <aside className="market-sidebar">
-          <div className="sidebar-group">
-            <h3 className="sidebar-title">FILTERS</h3>
-            <Link to="/marketplace" className="sidebar-item active">
+        <aside className="sidebar-filters">
+          <div className="filter-group">
+            <h3>FILTERS</h3>
+            <Link to="/marketplace" className="active">
               <RiFilter3Line /> Popular Tags
             </Link>
           </div>
 
-          <div className="sidebar-group">
-            <h3 className="sidebar-title">UI STYLE</h3>
-            <Link to="/marketplace?search=Fantasy" className="sidebar-item">Fantasy</Link>
-            <Link to="/marketplace?search=Sci-Fi" className="sidebar-item">Sci-Fi</Link>
-            <Link to="/marketplace?search=Pixel Art" className="sidebar-item">Pixel Art</Link>
-            <Link to="/marketplace?search=Minimalist" className="sidebar-item">Minimalist</Link>
+          <div className="filter-group">
+            <h3>UI STYLE</h3>
+            <Link to="/marketplace?search=Fantasy">Fantasy</Link>
+            <Link to="/marketplace?search=Sci-Fi">Sci-Fi</Link>
+            <Link to="/marketplace?search=Pixel Art">Pixel Art</Link>
+            <Link to="/marketplace?search=Minimalist">Minimalist</Link>
           </div>
 
-          <div className="sidebar-group">
-            <h3 className="sidebar-title">GAME GENRE</h3>
-            <Link to="/marketplace?search=RPG" className="sidebar-item">RPG</Link>
-            <Link to="/marketplace?search=Platformer" className="sidebar-item">Platformer</Link>
-            <Link to="/marketplace?search=Strategy" className="sidebar-item">Strategy</Link>
-            <Link to="/marketplace?search=Casual" className="sidebar-item">Casual</Link>
+          <div className="filter-group">
+            <h3>GAME GENRE</h3>
+            <Link to="/marketplace?search=RPG">RPG</Link>
+            <Link to="/marketplace?search=Platformer">Platformer</Link>
+            <Link to="/marketplace?search=Strategy">Strategy</Link>
+            <Link to="/marketplace?search=Casual">Casual</Link>
           </div>
 
-          <div className="sidebar-group">
-            <h3 className="sidebar-title">ENGINE</h3>
-            <Link to="/marketplace?search=Unity" className="sidebar-item">Unity</Link>
-            <Link to="/marketplace?search=Unreal Engine" className="sidebar-item">Unreal Engine</Link>
-            <Link to="/marketplace?search=Godot" className="sidebar-item">Godot</Link>
+          <div className="filter-group">
+            <h3>ENGINE</h3>
+            <Link to="/marketplace?search=Unity">Unity</Link>
+            <Link to="/marketplace?search=Unreal Engine">Unreal Engine</Link>
+            <Link to="/marketplace?search=Godot">Godot</Link>
           </div>
 
-          <div className="sidebar-group">
-            <h3 className="sidebar-title">PRICE</h3>
-            <Link to="/marketplace?price=0" className="sidebar-item">Free</Link>
-            <Link to="/marketplace?price_gt=0" className="sidebar-item">Paid</Link>
-            <Link to="/marketplace?sort=rating" className="sidebar-item">Top Rated</Link>
+          <div className="filter-group">
+            <h3>PRICE</h3>
+            <Link to="/marketplace?price=0">Free</Link>
+            <Link to="/marketplace?price_gt=0">Paid</Link>
+            <Link to="/marketplace?sort=rating">Top Rated</Link>
           </div>
         </aside>
 
@@ -175,7 +175,7 @@ export default function HomepagePage() {
 
       {/* Modern Footer */}
       <footer className="market-footer">
-        <div className="footer-content">
+        <div className="market-footer__cols">
           <div className="footer-brand">
             <div className="brand-logo-alt">
                <div className="logo-icon-grid">
@@ -186,14 +186,13 @@ export default function HomepagePage() {
             <p>The premier marketplace for high-quality game user interface assets.</p>
           </div>
           
-          <div className="footer-links-container">
-            <div className="footer-nav-col">
-              <h4>Explore</h4>
-              <Link to="/marketplace">Featured Assets</Link>
-              <Link to="/marketplace?sort=new">New Releases</Link>
-              <Link to="/marketplace?sort=rating">Top Rated</Link>
-              <Link to="/marketplace?price=0">Freebies</Link>
-            </div>
+          <div className="footer-nav-col">
+            <h4>Explore</h4>
+            <Link to="/marketplace">Featured Assets</Link>
+            <Link to="/marketplace?sort=new">New Releases</Link>
+            <Link to="/marketplace?sort=rating">Top Rated</Link>
+            <Link to="/marketplace?price=0">Freebies</Link>
+          </div>
             <div className="footer-nav-col">
               <h4>Community</h4>
               <Link to="/community">Forums</Link>
@@ -207,10 +206,9 @@ export default function HomepagePage() {
               <Link to="/sell">Sell your assets</Link>
               <Link to="/privacy">Privacy Policy</Link>
               <Link to="/terms">Terms of Service</Link>
-            </div>
           </div>
         </div>
-        <div className="footer-bottom">
+        <div className="market-footer__bottom">
           <p>© 2026 UIbrage Marketplace. All rights reserved.</p>
           <div className="footer-social">
             {/* Icons placeholders */}

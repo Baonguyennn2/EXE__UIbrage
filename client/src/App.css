@@ -3825,6 +3825,136 @@
   font-size: 0.9rem;
 }
 
+/* Header Dropdowns & User Profile */
+.dropdown-trigger {
+  position: relative;
+}
+
+.nav-dropdown-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.header-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 0.5rem 0;
+  min-width: 200px;
+  z-index: 200;
+  margin-top: 0.5rem;
+}
+
+.header-dropdown--categories {
+  left: 0;
+  right: auto;
+}
+
+.header-dropdown a,
+.header-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.header-dropdown a:hover,
+.header-dropdown button:hover {
+  background: #f8fafc;
+  color: #4338ca;
+}
+
+.header-user-wrapper {
+  position: relative;
+}
+
+.user-profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.dropdown-header {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-header strong {
+  font-size: 0.9rem;
+}
+
+.dropdown-header span {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0.5rem 0;
+}
+
+.dropdown-logout {
+  color: #ef4444 !important;
+}
+
+.dropdown-safe-bridge {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+}
+
 /* Main Layout */
 .main-layout {
   max-width: 1300px;
@@ -3850,7 +3980,8 @@
   margin-bottom: 1rem;
 }
 
-.filter-group button {
+.filter-group button,
+.filter-group a {
   display: block;
   width: 100%;
   text-align: left;
@@ -3861,9 +3992,12 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: color 0.2s;
+  text-decoration: none;
 }
 
-.filter-group button:hover {
+.filter-group button:hover,
+.filter-group a:hover,
+.filter-group a.active {
   color: #6366f1;
 }
 
