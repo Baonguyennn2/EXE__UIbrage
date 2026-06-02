@@ -90,6 +90,18 @@ export default function AppHeader({ onSearch }) {
     }
   }, [])
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1100) {
+        setIsDrawerOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       if (onSearch) onSearch(searchTerm)
