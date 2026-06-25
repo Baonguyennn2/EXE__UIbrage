@@ -22,12 +22,25 @@ const createPaymentLink = async (req, res) => {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
-    if (asset.price === 0) {
-      return res.status(400).json({ message: 'Asset is free' });
+    const basePrice = roundMoney(asset.price);
+
+    if (basePrice === 0) {
+      const orderCode = Number(String(Date.now()).slice(-6));
+      await Order.create({
+        userId,
+        assetId,
+        amount: 0,
+        transactionId: String(orderCode),
+        status: 'completed',
+      });
+      return res.json({
+        isFree: true,
+        orderCode: orderCode,
+        message: 'Asset claimed successfully'
+      });
     }
 
     const commissionPercent = await getCommissionPercent();
-    const basePrice = roundMoney(asset.price);
     const grossAmountUsd = roundMoney(basePrice * (1 + commissionPercent / 100));
     const orderCode = Number(String(Date.now()).slice(-6));
 
@@ -121,8 +134,18 @@ const verifyPayment = async (req, res) => {
     // Check if we already processed it
     const order = await Order.findOne({ where: { transactionId: orderCode } });
     if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    if (Number(order.amount) === 0) {
+      return res.json({
+        orderId: order.id,
+        assetId: order.assetId,
+        status: order.status,
+        amount: order.amount,
+        transactionId: order.transactionId
+      });
+    }
     
-    // Always fetch latest status from PayOS
+    // Always fetch latest status from PayOS for paid orders
     const paymentInfo = await payos.paymentRequests.get(orderCode);
     
     if (paymentInfo.status === 'PAID' && order.status === 'pending') {

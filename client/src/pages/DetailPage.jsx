@@ -191,7 +191,7 @@ export default function DetailPage() {
               </button>
             ) : (
               <button className="btn-purchase" onClick={() => navigate('/marketplace/checkout', { state: { asset: { ...asset, price: finalPrice.toFixed(2) } } })}>
-                <RiShoppingBag3Line /> Purchase Now
+                <RiShoppingBag3Line /> {finalPrice === 0 ? 'Claim for Free' : 'Purchase Now'}
               </button>
             )}
 

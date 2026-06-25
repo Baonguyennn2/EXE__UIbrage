@@ -48,6 +48,10 @@ export default function CheckoutPage() {
     try {
       setIsProcessing(true)
       const res = await paymentService.createLink(asset.id)
+      if (res.data && res.data.isFree) {
+        navigate(`/marketplace/order-success?orderCode=${res.data.orderCode}`)
+        return
+      }
       if (res.data && res.data.checkoutUrl) {
         window.location.href = res.data.checkoutUrl
       }
@@ -155,7 +159,7 @@ export default function CheckoutPage() {
             </div>
 
             <button className="btn-complete-v2" onClick={handlePay} disabled={isProcessing}>
-              {isProcessing ? 'Processing...' : <>Pay & Complete Purchase <RiArrowRightLine /></>}
+              {isProcessing ? 'Processing...' : Number(asset.price) === 0 ? 'Claim for Free' : <>Pay & Complete Purchase <RiArrowRightLine /></>}
             </button>
 
             <div className="security-badges-v2">
