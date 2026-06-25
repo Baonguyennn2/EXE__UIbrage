@@ -294,16 +294,37 @@ const getPurchases = async (req, res) => {
       include: [
         { 
           model: Asset,
+          as: 'asset',
           include: [{ model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] }]
         }
       ],
       order: [['updatedAt', 'DESC']],
     });
 
-    const purchasedAssets = orders.map(order => order.Asset).filter(a => a != null);
+    const purchasedAssets = orders.map(order => order.asset).filter(a => a != null);
     res.json(purchasedAssets);
   } catch (error) {
     console.error('Error fetching purchases:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getOrderHistory = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: { userId: req.user.id },
+      include: [
+        { 
+          model: Asset,
+          as: 'asset',
+          attributes: ['id', 'title', 'coverImageUrl']
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching order history:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -319,5 +340,6 @@ module.exports = {
   getUserProfile,
   getAdminContact,
   getOnlineStatus,
-  getPurchases
+  getPurchases,
+  getOrderHistory
 };

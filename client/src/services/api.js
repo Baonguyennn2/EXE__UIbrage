@@ -72,6 +72,7 @@ export const userService = {
   getAdminContact: () => api.get('/users/admin-contact'),
   getOnlineStatus: (userIds) => api.post('/users/online-status', { userIds }),
   getPurchases: () => api.get('/users/purchases'),
+  getOrderHistory: () => api.get('/users/orders'),
 };
 
 export const notificationService = {

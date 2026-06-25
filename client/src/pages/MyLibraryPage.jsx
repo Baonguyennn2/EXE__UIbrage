@@ -6,7 +6,9 @@ import { RiEditLine, RiEyeLine, RiDeleteBin6Line, RiUploadCloud2Line, RiDownload
 
 export default function MyLibraryPage({ isAdmin = false, customStats }) {
   const [myAssets, setMyAssets] = useState([])
+  const [orderHistory, setOrderHistory] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('purchases')
   const [activeCategory, setActiveCategory] = useState('All Categories')
 
   useEffect(() => {
@@ -14,8 +16,12 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
       try {
         const user = JSON.parse(localStorage.getItem('user'))
         if (user) {
-          const res = await userService.getPurchases()
-          setMyAssets(res.data)
+          const [purchasesRes, ordersRes] = await Promise.all([
+            userService.getPurchases(),
+            userService.getOrderHistory()
+          ])
+          setMyAssets(purchasesRes.data)
+          setOrderHistory(ordersRes.data)
         }
       } catch (error) {
         console.error('Failed to fetch library', error)
@@ -48,8 +54,19 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
       
       <section className="my-assets-container" style={{ padding: '2rem' }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <div>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Purchases</h1>
+          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+            <h1 
+              style={{ fontSize: '2.5rem', marginBottom: '0.5rem', cursor: 'pointer', opacity: activeTab === 'purchases' ? 1 : 0.4 }} 
+              onClick={() => setActiveTab('purchases')}
+            >
+              My Purchases
+            </h1>
+            <h1 
+              style={{ fontSize: '2.5rem', marginBottom: '0.5rem', cursor: 'pointer', opacity: activeTab === 'transactions' ? 1 : 0.4 }} 
+              onClick={() => setActiveTab('transactions')}
+            >
+              Transaction History
+            </h1>
           </div>
           <Link to="/marketplace" className="btn-solid" style={{ borderRadius: '0.75rem', padding: '0.8rem 1.5rem' }}>
             <RiDownloadCloud2Line /> Browse More
@@ -78,55 +95,111 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
           ))}
         </nav>
 
-        <div className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-          <table className="asset-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <tr>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset Preview</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Title & Author</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Price Paid</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {myAssets.length === 0 ? (
+        {activeTab === 'purchases' ? (
+          <div className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
+            <table className="asset-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                 <tr>
-                  <td colSpan="6" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No assets found.</td>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset Preview</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Title & Author</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Price Paid</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
-              ) : (
-                myAssets.map(asset => (
-                  <tr key={asset.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '1.5rem 2rem' }}>
-                      <img src={asset.coverImageUrl} style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
-                    </td>
-                    <td style={{ padding: '1.5rem 2rem' }}>
-                      <div style={{ fontWeight: 700, color: '#1e293b' }}>{asset.title}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>By {asset.author?.fullName || asset.author?.username || 'Unknown'}</div>
-                    </td>
-                    <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
-                      {asset.price === 0 ? 'Free' : `$${(asset.price * 1.05).toFixed(2)}`}
-                    </td>
-                    <td style={{ padding: '1.5rem 2rem' }}>
-                      <div style={{ display: 'flex', gap: '0.75rem', color: '#94a3b8' }}>
-                        <button onClick={() => handleDownload(asset.fileUrl)} className="btn-solid" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-                          <RiDownloadCloud2Line size={16} style={{ marginRight: '0.5rem' }} /> Download
-                        </button>
-                      </div>
-                    </td>
+              </thead>
+              <tbody>
+                {myAssets.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No assets found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          <footer style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {myAssets.length} assets</span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="page-btn">Previous</button>
-              <button className="page-btn active">1</button>
-              <button className="page-btn">Next</button>
-            </div>
-          </footer>
-        </div>
+                ) : (
+                  myAssets.map(asset => (
+                    <tr key={asset.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '1.5rem 2rem' }}>
+                        <img src={asset.coverImageUrl} style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem' }}>
+                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{asset.title}</div>
+                        <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>By {asset.author?.fullName || asset.author?.username || 'Unknown'}</div>
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
+                        {asset.price === 0 ? 'Free' : `$${(asset.price * 1.05).toFixed(2)}`}
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', color: '#94a3b8' }}>
+                          <button onClick={() => handleDownload(asset.fileUrl)} className="btn-solid" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                            <RiDownloadCloud2Line size={16} style={{ marginRight: '0.5rem' }} /> Download
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <footer style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {myAssets.length} assets</span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="page-btn">Previous</button>
+                <button className="page-btn active">1</button>
+                <button className="page-btn">Next</button>
+              </div>
+            </footer>
+          </div>
+        ) : (
+          <div className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
+            <table className="asset-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <tr>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Order ID</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Date</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Amount</th>
+                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No transactions found.</td>
+                  </tr>
+                ) : (
+                  orderHistory.map(order => (
+                    <tr key={order.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '1.5rem 2rem', fontWeight: 600 }}>#{order.transactionId || order.id}</td>
+                      <td style={{ padding: '1.5rem 2rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          {order.asset && <img src={order.asset.coverImageUrl} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '0.5rem' }} />}
+                          <span style={{ fontWeight: 600 }}>{order.asset?.title || 'Unknown Asset'}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem', color: '#64748b' }}>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
+                        ${Number(order.amount).toFixed(2)}
+                      </td>
+                      <td style={{ padding: '1.5rem 2rem' }}>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '2rem',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          background: order.status === 'completed' ? '#dcfce7' : order.status === 'pending' ? '#fef9c3' : '#fee2e2',
+                          color: order.status === 'completed' ? '#15803d' : order.status === 'pending' ? '#a16207' : '#b91c1c'
+                        }}>
+                          {order.status?.toUpperCase()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <footer style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {orderHistory.length} orders</span>
+            </footer>
+          </div>
+        )}
 
 
       </section>

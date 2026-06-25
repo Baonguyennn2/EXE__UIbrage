@@ -16,6 +16,7 @@ router.get('/withdrawals', authenticate, userController.getWithdrawalRequests);
 router.post('/withdrawals', authenticate, userController.requestWithdrawal);
 router.get('/transactions', authenticate, userController.getTransactions);
 router.get('/purchases', authenticate, userController.getPurchases);
+router.get('/orders', authenticate, userController.getOrderHistory);
 router.get('/admin-contact', authenticate, userController.getAdminContact);
 router.post('/online-status', authenticate, userController.getOnlineStatus);
 

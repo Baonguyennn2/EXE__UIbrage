@@ -17,11 +17,11 @@ Asset.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
 Asset.hasMany(AssetMedia, { as: 'media', foreignKey: 'assetId' });
 AssetMedia.belongsTo(Asset, { foreignKey: 'assetId' });
 
-User.hasMany(Order, { foreignKey: 'userId' });
-Order.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Order, { as: 'orders', foreignKey: 'userId' });
+Order.belongsTo(User, { as: 'buyer', foreignKey: 'userId' });
 
-Asset.hasMany(Order, { foreignKey: 'assetId' });
-Order.belongsTo(Asset, { foreignKey: 'assetId' });
+Asset.hasMany(Order, { as: 'orders', foreignKey: 'assetId' });
+Order.belongsTo(Asset, { as: 'asset', foreignKey: 'assetId' });
 
 User.hasMany(RevenueLedger, { as: 'RevenueLedgers', foreignKey: 'userId' });
 RevenueLedger.belongsTo(User, { as: 'creator', foreignKey: 'userId' });
