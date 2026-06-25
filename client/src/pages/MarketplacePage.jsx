@@ -164,7 +164,7 @@ export default function MarketplacePage() {
                 <div className="asset-card__body">
                   <div className="asset-card__title-row">
                     <h3>{asset.title}</h3>
-                    <span className="price">{asset.price === 0 ? 'Free' : `$${asset.price}`}</span>
+                    <span className="price">{asset.price === 0 ? 'Free' : `$${(asset.price * 1.05).toFixed(2)}`}</span>
                   </div>
                   <p className="author">By <span>{asset.author?.username || 'Creator'}</span></p>
                   <p className="desc">{asset.description?.substring(0, 60)}...</p>

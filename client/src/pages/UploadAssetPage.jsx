@@ -228,6 +228,13 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
                   <p className="truncate-text">{assetFile ? assetFile.name : (variant === 'edit' ? 'Keep current ZIP' : 'Upload source files')}</p>
                 </label>
               </div>
+              {variant === 'edit' && existingAsset?.fileUrl && (
+                <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                  <button type="button" className="btn-ghost" onClick={() => window.open(existingAsset.fileUrl, '_blank')} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                    Download Current ZIP
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

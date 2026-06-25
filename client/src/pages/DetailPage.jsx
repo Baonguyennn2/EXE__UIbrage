@@ -25,6 +25,7 @@ export default function DetailPage() {
   const [loading, setLoading] = useState(true)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistLoading, setWishlistLoading] = useState(false)
+  const [hasPurchased, setHasPurchased] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,8 +42,12 @@ export default function DetailPage() {
 
         const token = localStorage.getItem('token')
         if (token) {
-          const wishlistRes = await userService.getWishlist()
+          const [wishlistRes, purchasesRes] = await Promise.all([
+            userService.getWishlist(),
+            userService.getPurchases()
+          ])
           setIsWishlisted(wishlistRes.data.some(item => item.id === id))
+          setHasPurchased(purchasesRes.data.some(item => item.id === id))
         }
       } catch (error) {
         console.error('Error fetching details:', error)
@@ -98,6 +103,9 @@ export default function DetailPage() {
 
   if (loading) return <LoadingScreen message="Fetching Asset Details..." />
   if (!asset) return <div className="error-screen">Asset not found</div>
+
+  const isOwner = currentUser && (asset.authorId === currentUser.id || hasPurchased)
+  const finalPrice = asset.price === 0 ? 0 : asset.price * 1.05
 
   return (
     <main className="market-home">
@@ -174,11 +182,19 @@ export default function DetailPage() {
           <section className="detail-v2-card price-card">
             <div className="price-display">
               <span>Price</span>
-              <strong>{asset.price === 0 ? 'FREE' : `$${asset.price}`}</strong>
+              <strong>{finalPrice === 0 ? 'FREE' : `$${finalPrice.toFixed(2)}`}</strong>
             </div>
-            <button className="btn-purchase" onClick={() => navigate('/marketplace/checkout', { state: { asset } })}>
-              <RiShoppingBag3Line /> Purchase Now
-            </button>
+            
+            {isOwner ? (
+              <button className="btn-solid" onClick={() => window.open(asset.fileUrl, '_blank')} style={{ background: '#10b981', borderColor: '#10b981' }}>
+                <RiFileCopyLine /> Download Asset
+              </button>
+            ) : (
+              <button className="btn-purchase" onClick={() => navigate('/marketplace/checkout', { state: { asset: { ...asset, price: finalPrice.toFixed(2) } } })}>
+                <RiShoppingBag3Line /> Purchase Now
+              </button>
+            )}
+
             <button 
               className={`btn-wishlist ${isWishlisted ? 'active' : ''}`}
               onClick={handleToggleWishlist}

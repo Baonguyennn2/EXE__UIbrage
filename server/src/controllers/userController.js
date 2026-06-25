@@ -1,4 +1,4 @@
-const { User, Asset, RevenueLedger, WithdrawalRequest } = require('../models/mysql');
+const { User, Asset, RevenueLedger, WithdrawalRequest, Order } = require('../models/mysql');
 const Notification = require('../models/mongodb/Notification');
 const sequelize = require('../config/database');
 const { getCreatorFinancials, roundMoney } = require('../utils/finance');

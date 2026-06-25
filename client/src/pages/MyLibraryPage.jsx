@@ -83,10 +83,8 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
             <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
               <tr>
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset Preview</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Title & Category</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Price</th>
-                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Downloads</th>
+                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Title & Author</th>
+                <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Price Paid</th>
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Actions</th>
               </tr>
             </thead>
@@ -103,25 +101,10 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
                     </td>
                     <td style={{ padding: '1.5rem 2rem' }}>
                       <div style={{ fontWeight: 700, color: '#1e293b' }}>{asset.title}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{asset.category || 'General'}</div>
-                    </td>
-                    <td style={{ padding: '1.5rem 2rem' }}>
-                      <span className={`status-badge ${asset.status}`} style={{
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '2rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        background: asset.status === 'published' ? '#dcfce7' : asset.status === 'pending' ? '#fef9c3' : '#f1f5f9',
-                        color: asset.status === 'published' ? '#15803d' : asset.status === 'pending' ? '#a16207' : '#64748b'
-                      }}>
-                        ● {asset.status?.toUpperCase()}
-                      </span>
+                      <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>By {asset.author?.fullName || asset.author?.username || 'Unknown'}</div>
                     </td>
                     <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
-                      {asset.price === 0 ? 'Free' : `$${asset.price}`}
-                    </td>
-                    <td style={{ padding: '1.5rem 2rem', color: '#64748b' }}>
-                      {asset.downloads || 0}
+                      {asset.price === 0 ? 'Free' : `$${(asset.price * 1.05).toFixed(2)}`}
                     </td>
                     <td style={{ padding: '1.5rem 2rem' }}>
                       <div style={{ display: 'flex', gap: '0.75rem', color: '#94a3b8' }}>
@@ -145,19 +128,7 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
           </footer>
         </div>
 
-        <section className="my-assets-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginTop: '3rem' }}>
-          {stats.map(stat => (
-            <div key={stat.label} className="surface-card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '2rem' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: `${stat.color}15`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                {stat.icon}
-              </div>
-              <div>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>{stat.label}</p>
-                <h3 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800 }}>{stat.value}</h3>
-              </div>
-            </div>
-          ))}
-        </section>
+
       </section>
       <style>{`
         .page-btn {
