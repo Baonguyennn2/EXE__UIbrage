@@ -4686,10 +4686,10 @@
   border-radius: 0;
   display: grid;
   justify-items: center;
-  align-content: center;
-  gap: 1rem;
+  align-content: start;
+  gap: 2rem;
   position: relative;
-  padding: 4.5rem 1.25rem 3.25rem;
+  padding: 8rem 1.25rem 3.25rem;
 }
 
 .auth-figma--register-page .auth-figma__canvas {
