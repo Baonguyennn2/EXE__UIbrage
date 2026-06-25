@@ -10,6 +10,7 @@ import {
   RiPaypalLine,
   RiGoogleFill
 } from 'react-icons/ri'
+import { paymentService } from '../services/api'
 
 export default function CheckoutPage() {
   const location = useLocation()
@@ -33,9 +34,22 @@ export default function CheckoutPage() {
     country: 'United States'
   })
 
-  const handlePay = () => {
-    // Integrate PayOS logic here
-    alert('Redirecting to PayOS...')
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handlePay = async () => {
+    if (!asset || isProcessing) return
+    try {
+      setIsProcessing(true)
+      const res = await paymentService.createLink(asset.id)
+      if (res.data && res.data.checkoutUrl) {
+        window.location.href = res.data.checkoutUrl
+      }
+    } catch (error) {
+      console.error('PayOS error:', error)
+      alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   if (!asset) return <div className="loading-screen">Preparing checkout...</div>
@@ -129,8 +143,8 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <button className="btn-complete-v2" onClick={handlePay}>
-              Pay & Complete Purchase <RiArrowRightLine />
+            <button className="btn-complete-v2" onClick={handlePay} disabled={isProcessing}>
+              {isProcessing ? 'Processing...' : <>Pay & Complete Purchase <RiArrowRightLine /></>}
             </button>
 
             <div className="security-badges-v2">

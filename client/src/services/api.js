@@ -116,4 +116,8 @@ export const postService = {
   }),
 };
 
+export const paymentService = {
+  createLink: (assetId) => api.post('/payments/create-link', { assetId }),
+};
+
 export default api;
