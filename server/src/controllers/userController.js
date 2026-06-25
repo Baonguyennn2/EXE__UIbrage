@@ -293,15 +293,14 @@ const getPurchases = async (req, res) => {
       where: { userId: req.user.id, status: 'completed' },
       include: [
         { 
-          model: Asset, 
-          as: 'asset',
+          model: Asset,
           include: [{ model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] }]
         }
       ],
       order: [['updatedAt', 'DESC']],
     });
 
-    const purchasedAssets = orders.map(order => order.asset).filter(a => a != null);
+    const purchasedAssets = orders.map(order => order.Asset).filter(a => a != null);
     res.json(purchasedAssets);
   } catch (error) {
     console.error('Error fetching purchases:', error);
