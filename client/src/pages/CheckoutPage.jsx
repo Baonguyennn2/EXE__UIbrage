@@ -131,7 +131,7 @@ export default function CheckoutPage() {
                 <strong style={{ display: 'block' }}>{asset.title}</strong>
                 <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Digital License</span>
               </div>
-              <span style={{ marginLeft: 'auto', fontWeight: '600' }}>${asset.price.toFixed(2)}</span>
+              <span style={{ marginLeft: 'auto', fontWeight: '600' }}>${Number(asset.price).toFixed(2)}</span>
             </div>
 
             <div className="promo-row-v2">
@@ -142,15 +142,15 @@ export default function CheckoutPage() {
             <div className="summary-totals-v2">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span>Subtotal</span>
-                <span>${asset.price.toFixed(2)}</span>
+                <span>${Number(asset.price).toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span>Tax & Platform Fee (5%)</span>
-                <span>${(asset.price * 0.05).toFixed(2)}</span>
+                <span>${(Number(asset.price) * 0.05).toFixed(2)}</span>
               </div>
               <div className="total-row-v2" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                 <span>Total</span>
-                <span style={{ color: '#4f46e5' }}>${(asset.price * 1.05).toFixed(2)}</span>
+                <span style={{ color: '#4f46e5' }}>${(Number(asset.price) * 1.05).toFixed(2)}</span>
               </div>
             </div>
 
