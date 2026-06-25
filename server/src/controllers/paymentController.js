@@ -43,8 +43,8 @@ const createPaymentLink = async (req, res) => {
       orderCode: orderCode,
       amount: Math.round(grossAmountUsd * 25000),
       description: `Asset ${assetId}`.substring(0, 25),
-      returnUrl: `${process.env.CLIENT_ORIGIN}/payment/success`,
-      cancelUrl: `${process.env.CLIENT_ORIGIN}/payment/cancel`,
+      returnUrl: `${process.env.CLIENT_ORIGIN}/marketplace/order-success?orderCode=${orderCode}`,
+      cancelUrl: `${process.env.CLIENT_ORIGIN}/marketplace/checkout?canceled=true`,
     };
 
     const paymentLinkRes = await payos.paymentRequests.create(body);
@@ -114,7 +114,59 @@ const handleWebhook = async (req, res) => {
   }
 };
 
+const verifyPayment = async (req, res) => {
+  try {
+    const { orderCode } = req.params;
+    
+    // Check if we already processed it
+    const order = await Order.findOne({ where: { transactionId: orderCode } });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    
+    // Always fetch latest status from PayOS
+    const paymentInfo = await payos.paymentRequests.get(orderCode);
+    
+    if (paymentInfo.status === 'PAID' && order.status === 'pending') {
+      const asset = await Asset.findByPk(order.assetId);
+      const commissionPercent = await getCommissionPercent();
+
+      await sequelize.transaction(async (transaction) => {
+        order.status = 'completed';
+        await order.save({ transaction });
+
+        const { split } = await createSaleLedger({
+          userId: asset.authorId,
+          assetId: asset.id,
+          orderId: order.id,
+          basePrice: asset.price,
+          commissionPercent,
+          createdBy: req.user?.id || asset.authorId,
+        });
+
+        await Notification.create({
+          userId: asset.authorId,
+          type: 'new_order',
+          title: 'New sale recorded',
+          message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
+          relatedId: asset.id,
+        });
+      });
+    }
+    
+    res.json({
+      orderId: order.id,
+      assetId: order.assetId,
+      status: paymentInfo.status === 'PAID' ? 'completed' : order.status,
+      amount: order.amount,
+      transactionId: order.transactionId
+    });
+  } catch (error) {
+    console.error('PayOS Verification Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createPaymentLink,
-  handleWebhook
+  handleWebhook,
+  verifyPayment
 };

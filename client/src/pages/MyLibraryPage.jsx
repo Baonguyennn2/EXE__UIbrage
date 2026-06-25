@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
 import { Link } from 'react-router-dom'
-import { assetService } from '../services/api'
+import { userService } from '../services/api'
 import { RiEditLine, RiEyeLine, RiDeleteBin6Line, RiUploadCloud2Line, RiDownloadCloud2Line, RiStarLine, RiBarChartFill } from 'react-icons/ri'
 
 export default function MyLibraryPage({ isAdmin = false, customStats }) {
@@ -14,7 +14,7 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
       try {
         const user = JSON.parse(localStorage.getItem('user'))
         if (user) {
-          const res = await assetService.getAll({ authorId: user.id })
+          const res = await userService.getPurchases()
           setMyAssets(res.data)
         }
       } catch (error) {
@@ -26,15 +26,12 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
     fetchMyAssets()
   }, [])
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this asset? This will also remove it from Cloudinary and R2.')) {
-      try {
-        await assetService.delete(id)
-        setMyAssets(prev => prev.filter(a => a.id !== id))
-      } catch (error) {
-        alert('Failed to delete asset')
-      }
+  const handleDownload = (fileUrl) => {
+    if (!fileUrl) {
+      alert('Download link not available for this asset.')
+      return
     }
+    window.open(fileUrl, '_blank')
   }
 
   const stats = [
@@ -52,10 +49,10 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
       <section className="my-assets-container" style={{ padding: '2rem' }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <div>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Assets</h1>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>My Purchases</h1>
           </div>
-          <Link to={isAdmin ? "/admin/upload-asset" : "/upload-asset"} className="btn-solid" style={{ borderRadius: '0.75rem', padding: '0.8rem 1.5rem' }}>
-            <RiUploadCloud2Line /> Upload New Asset
+          <Link to="/marketplace" className="btn-solid" style={{ borderRadius: '0.75rem', padding: '0.8rem 1.5rem' }}>
+            <RiDownloadCloud2Line /> Browse More
           </Link>
         </header>
 
@@ -128,9 +125,9 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
                     </td>
                     <td style={{ padding: '1.5rem 2rem' }}>
                       <div style={{ display: 'flex', gap: '0.75rem', color: '#94a3b8' }}>
-                        <Link to={`/upload-asset?edit=${asset.id}`} style={{ color: 'inherit' }}><RiEditLine size={20} /></Link>
-                        <Link to={`/marketplace/assets/${asset.id}`} style={{ color: 'inherit' }}><RiEyeLine size={20} /></Link>
-                        <button onClick={() => handleDelete(asset.id)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}><RiDeleteBin6Line size={20} /></button>
+                        <button onClick={() => handleDownload(asset.fileUrl)} className="btn-solid" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                          <RiDownloadCloud2Line size={16} style={{ marginRight: '0.5rem' }} /> Download
+                        </button>
                       </div>
                     </td>
                   </tr>

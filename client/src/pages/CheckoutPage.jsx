@@ -15,6 +15,9 @@ import { paymentService } from '../services/api'
 export default function CheckoutPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [searchParams] = new URLSearchParams(location.search)
+  const isCanceled = searchParams[1] === 'true' || location.search.includes('canceled=true')
+  
   const [asset, setAsset] = useState(location.state?.asset || null)
   const [user, setUser] = useState(null)
   
@@ -22,11 +25,15 @@ export default function CheckoutPage() {
     const savedUser = JSON.parse(localStorage.getItem('user') || 'null')
     setUser(savedUser)
     
-    if (!asset) {
+    if (isCanceled) {
+      alert('Payment was canceled. You can try again when you are ready.')
+    }
+
+    if (!asset && !isCanceled) {
       // If no asset in state, maybe redirect back
       // navigate('/marketplace')
     }
-  }, [asset, navigate])
+  }, [asset, navigate, isCanceled])
 
   const [formData, setFormData] = useState({
     fullName: '',

@@ -71,6 +71,7 @@ export const userService = {
   getTransactions: () => api.get('/users/transactions'),
   getAdminContact: () => api.get('/users/admin-contact'),
   getOnlineStatus: (userIds) => api.post('/users/online-status', { userIds }),
+  getPurchases: () => api.get('/users/purchases'),
 };
 
 export const notificationService = {
@@ -118,6 +119,7 @@ export const postService = {
 
 export const paymentService = {
   createLink: (assetId) => api.post('/payments/create-link', { assetId }),
+  verifyPayment: (orderCode) => api.get(`/payments/verify/${orderCode}`),
 };
 
 export default api;

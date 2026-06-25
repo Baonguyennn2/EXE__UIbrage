@@ -287,6 +287,28 @@ const getOnlineStatus = async (req, res) => {
   }
 };
 
+const getPurchases = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: { userId: req.user.id, status: 'completed' },
+      include: [
+        { 
+          model: Asset, 
+          as: 'asset',
+          include: [{ model: User, as: 'author', attributes: ['username', 'fullName', 'avatarUrl'] }]
+        }
+      ],
+      order: [['updatedAt', 'DESC']],
+    });
+
+    const purchasedAssets = orders.map(order => order.asset).filter(a => a != null);
+    res.json(purchasedAssets);
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getWishlist,
@@ -297,5 +319,6 @@ module.exports = {
   getTransactions,
   getUserProfile,
   getAdminContact,
-  getOnlineStatus
+  getOnlineStatus,
+  getPurchases
 };

@@ -5,5 +5,6 @@ const { authenticate } = require('../middleware/auth');
 
 router.post('/create-link', authenticate, paymentController.createPaymentLink);
 router.post('/webhook', paymentController.handleWebhook);
+router.get('/verify/:orderCode', authenticate, paymentController.verifyPayment);
 
 module.exports = router;

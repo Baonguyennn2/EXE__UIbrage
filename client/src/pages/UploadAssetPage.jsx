@@ -251,6 +251,23 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
                   <button type="button" className={formData.isFree ? 'active' : ''} onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))}>FREE</button>
                 </div>
               </div>
+              
+              {!formData.isFree && formData.price > 0 && (
+                <div className="pricing-breakdown" style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span>Your Earnings (Base Price):</span>
+                    <strong>${parseFloat(formData.price).toFixed(2)}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span>Platform Commission (5%):</span>
+                    <strong>+${(parseFloat(formData.price) * 0.05).toFixed(2)}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #e2e8f0', color: '#1e293b', fontWeight: 'bold' }}>
+                    <span>Final Marketplace Price (Buyer Pays):</span>
+                    <span>${(parseFloat(formData.price) * 1.05).toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="tags-section-v3">
