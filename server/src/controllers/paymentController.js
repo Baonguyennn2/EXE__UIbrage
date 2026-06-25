@@ -1,15 +1,14 @@
-const PayOSModule = require('@payos/node');
-const PayOS = PayOSModule.PayOS || PayOSModule.default || PayOSModule;
+const { PayOS } = require('@payos/node');
 const { Asset, User, Order } = require('../models/mysql');
 const Notification = require('../models/mongodb/Notification');
 const sequelize = require('../config/database');
 const { getCommissionPercent, createSaleLedger, roundMoney } = require('../utils/finance');
 
-const payos = new PayOS(
-  process.env.PAYOS_CLIENT_ID || 'CLIENT_ID',
-  process.env.PAYOS_API_KEY || 'API_KEY',
-  process.env.PAYOS_CHECKSUM_KEY || 'CHECKSUM_KEY'
-);
+const payos = new PayOS({
+  clientId: process.env.PAYOS_CLIENT_ID || 'CLIENT_ID',
+  apiKey: process.env.PAYOS_API_KEY || 'API_KEY',
+  checksumKey: process.env.PAYOS_CHECKSUM_KEY || 'CHECKSUM_KEY'
+});
 
 const createPaymentLink = async (req, res) => {
   try {
@@ -48,7 +47,7 @@ const createPaymentLink = async (req, res) => {
       cancelUrl: `${process.env.CLIENT_ORIGIN}/payment/cancel`,
     };
 
-    const paymentLinkRes = await payos.createPaymentLink(body);
+    const paymentLinkRes = await payos.paymentRequests.create(body);
 
     res.json({
       checkoutUrl: paymentLinkRes.checkoutUrl,
@@ -62,7 +61,7 @@ const createPaymentLink = async (req, res) => {
 
 const handleWebhook = async (req, res) => {
   try {
-    const data = payos.verifyPaymentWebhookData(req.body);
+    const data = payos.webhooks.verify(req.body);
     const orderCode = String(data.orderCode || data.data?.orderCode || req.body.orderCode || req.body?.data?.orderCode || '');
 
     const order = await Order.findOne({ where: { transactionId: orderCode } });
