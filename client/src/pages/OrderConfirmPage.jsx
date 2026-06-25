@@ -27,6 +27,9 @@ export default function OrderConfirmPage() {
         }
       } catch (error) {
         console.error('Failed to verify payment', error)
+        if (error.response?.data) {
+          setOrderDetails(error.response.data)
+        }
         setStatus('error')
       }
     }
@@ -88,6 +91,7 @@ export default function OrderConfirmPage() {
             <h1>Unable to verify order</h1>
             <p>
               We couldn't verify your order status. If you have been charged, please contact support.
+              {orderDetails?.details && <><br /><small style={{color: '#ef4444'}}>Error: {orderDetails.details}</small></>}
             </p>
             <div className="order-success__actions">
               <Link to="/marketplace/checkout" className="btn-solid">Return to Checkout</Link>

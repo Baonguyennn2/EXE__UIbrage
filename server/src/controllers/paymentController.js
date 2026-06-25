@@ -104,6 +104,7 @@ const handleWebhook = async (req, res) => {
         basePrice: asset.price,
         commissionPercent,
         createdBy: req.user?.id || asset.authorId,
+        transaction
       });
 
       await Notification.create({
@@ -163,6 +164,7 @@ const verifyPayment = async (req, res) => {
           basePrice: asset.price,
           commissionPercent,
           createdBy: req.user?.id || asset.authorId,
+          transaction
         });
 
         await Notification.create({
@@ -184,7 +186,8 @@ const verifyPayment = async (req, res) => {
     });
   } catch (error) {
     console.error('PayOS Verification Error:', error);
-    res.status(500).json({ message: error.message });
+    require('fs').appendFileSync('payos-error.log', new Date().toISOString() + ' ' + JSON.stringify(error, Object.getOwnPropertyNames(error)) + '\n');
+    res.status(500).json({ message: error.message, details: error.desc || error.code || 'Unknown' });
   }
 };
 

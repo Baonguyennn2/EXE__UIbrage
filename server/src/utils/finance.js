@@ -91,7 +91,7 @@ async function getCreatorFinancials(userId) {
   };
 }
 
-async function createSaleLedger({ userId, assetId, orderId, basePrice, commissionPercent, createdBy }) {
+async function createSaleLedger({ userId, assetId, orderId, basePrice, commissionPercent, createdBy, transaction }) {
   const split = calculateSplit(basePrice, commissionPercent);
   const [ledgerEntry, created] = await RevenueLedger.findOrCreate({
     where: { orderId, type: 'sale_credit' },
@@ -107,6 +107,7 @@ async function createSaleLedger({ userId, assetId, orderId, basePrice, commissio
       note: `Sale credited with ${split.commissionPercent}% commission`,
       createdBy: createdBy || null,
     },
+    transaction
   });
 
   return { ledgerEntry, created, split };
