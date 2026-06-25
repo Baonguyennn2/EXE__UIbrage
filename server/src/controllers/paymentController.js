@@ -146,7 +146,7 @@ const verifyPayment = async (req, res) => {
     }
     
     // Always fetch latest status from PayOS for paid orders
-    const paymentInfo = await payos.paymentRequests.get(orderCode);
+    const paymentInfo = await payos.paymentRequests.get(Number(orderCode));
     
     if (paymentInfo.status === 'PAID' && order.status === 'pending') {
       const asset = await Asset.findByPk(order.assetId);
