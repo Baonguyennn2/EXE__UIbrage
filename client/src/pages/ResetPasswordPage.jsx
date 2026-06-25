@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { authService } from '../services/api'
+import { MdOutlineEmail } from 'react-icons/md'
+import { RiShieldCheckLine, RiLock2Line } from 'react-icons/ri'
 
 export default function ResetPasswordPage() {
   const location = useLocation()
@@ -32,67 +34,94 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-page__card">
-        <header>
-          <p className="eyebrow">Reset</p>
-          <h1>Set new password</h1>
-          <p>Your new password must be different from previous ones.</p>
+    <main className="auth-figma">
+      <section className="auth-figma__canvas">
+        <header className="auth-figma__brand">
+          <span className="auth-figma__brand-tile">▦</span>
+          <strong>Ulbrage</strong>
         </header>
 
-        <form className="auth-page__form" onSubmit={handleSubmit}>
-          {!location.state?.email && (
-             <label>
-              Email address
-              <input 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                placeholder="Enter your email" 
-                required 
-              />
+        <section className="auth-figma__card">
+          <header>
+            <p className="eyebrow">Reset</p>
+            <h1>Set new password</h1>
+            <p>Your new password must be different from previous ones.</p>
+          </header>
+
+          <form className="auth-figma__form" onSubmit={handleSubmit}>
+            {!location.state?.email && (
+               <label>
+                Email address
+                <div className="auth-figma__input-wrap">
+                  <span><MdOutlineEmail /></span>
+                  <input 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    placeholder="Enter your email" 
+                    required 
+                  />
+                </div>
+              </label>
+            )}
+            <label>
+              Verification Code
+              <div className="auth-figma__input-wrap">
+                <span><RiShieldCheckLine /></span>
+                <input 
+                  type="text" 
+                  value={code} 
+                  onChange={(e) => setCode(e.target.value)} 
+                  placeholder="000000" 
+                  maxLength={6}
+                  required 
+                />
+              </div>
             </label>
-          )}
-          <label>
-            Verification Code
-            <input 
-              type="text" 
-              value={code} 
-              onChange={(e) => setCode(e.target.value)} 
-              placeholder="000000" 
-              maxLength={6}
-              required 
-            />
-          </label>
-          <label>
-            New Password
-            <input 
-              type="password" 
-              value={newPassword} 
-              onChange={(e) => setNewPassword(e.target.value)} 
-              placeholder="••••••••" 
-              required 
-            />
-          </label>
-          <label>
-            Confirm Password
-            <input 
-              type="password" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              placeholder="••••••••" 
-              required 
-            />
-          </label>
+            <label>
+              New Password
+              <div className="auth-figma__input-wrap">
+                <span><RiLock2Line /></span>
+                <input 
+                  type="password" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  placeholder="••••••••" 
+                  required 
+                />
+              </div>
+            </label>
+            <label>
+              Confirm Password
+              <div className="auth-figma__input-wrap">
+                <span><RiLock2Line /></span>
+                <input 
+                  type="password" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  placeholder="••••••••" 
+                  required 
+                />
+              </div>
+            </label>
 
-          <button type="submit" className="market-primary-button auth-page__submit" disabled={loading}>
-            {loading ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
+            <button type="submit" className="auth-figma__submit" disabled={loading} style={{ marginTop: '1.5rem' }}>
+              {loading ? 'Updating...' : 'Update Password'}
+            </button>
+          </form>
 
-        <footer>
-           <Link to="/auth/login">Back to Login</Link>
-        </footer>
+          <footer className="auth-figma__footer">
+             <Link to="/auth/login">Back to Login</Link>
+          </footer>
+        </section>
+
+        <nav className="auth-figma__meta-links">
+          <a href="#">About</a>
+          <a href="#">FAQ</a>
+          <a href="#">Blog</a>
+          <a href="#">Contact</a>
+          <a href="#">Terms of Service</a>
+        </nav>
       </section>
     </main>
   )
