@@ -61,7 +61,7 @@ export default function OrderConfirmPage() {
             {orderDetails && (
               <div className="order-success__meta">
                 <p>Transaction ID: {orderDetails.transactionId}</p>
-                <p>Amount: ${orderDetails.amount?.toFixed(2)}</p>
+                <p>Amount: ${Number(orderDetails.amount).toFixed(2)}</p>
                 <p>Support: support@uibrage.com</p>
               </div>
             )}

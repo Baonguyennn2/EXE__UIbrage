@@ -9,6 +9,8 @@ router.put('/profile', authenticate, upload.fields([
   { name: 'coverImage', maxCount: 1 }
 ]), userController.updateProfile);
 router.get('/profile/:username', userController.getUserProfile);
+router.post('/:userId/follow', authenticate, userController.toggleFollow);
+router.get('/:userId/is-following', authenticate, userController.checkIsFollowing);
 router.get('/wishlist', authenticate, userController.getWishlist);
 router.post('/wishlist/toggle', authenticate, userController.toggleWishlist);
 router.get('/earnings', authenticate, userController.getEarnings);

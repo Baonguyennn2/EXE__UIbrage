@@ -235,6 +235,51 @@ const getTransactions = async (req, res) => {
   }
 };
 
+const checkIsFollowing = async (req, res) => {
+  try {
+    const { id: currentUserId } = req.user;
+    const { userId: targetUserId } = req.params;
+
+    const currentUser = await User.findByPk(currentUserId);
+    const targetUser = await User.findByPk(targetUserId);
+
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const isFollowing = await currentUser.hasFollowing(targetUser);
+    res.json({ isFollowing });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleFollow = async (req, res) => {
+  try {
+    const { id: currentUserId } = req.user;
+    const { userId: targetUserId } = req.params;
+
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({ message: 'You cannot follow yourself' });
+    }
+
+    const currentUser = await User.findByPk(currentUserId);
+    const targetUser = await User.findByPk(targetUserId);
+
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const isFollowing = await currentUser.hasFollowing(targetUser);
+
+    if (isFollowing) {
+      await currentUser.removeFollowing(targetUser);
+      res.json({ message: 'Unfollowed successfully', isFollowing: false });
+    } else {
+      await currentUser.addFollowing(targetUser);
+      res.json({ message: 'Followed successfully', isFollowing: true });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getUserProfile = async (req, res) => {
   try {
     const { username } = req.params;
@@ -247,10 +292,12 @@ const getUserProfile = async (req, res) => {
     
     const followerCount = await user.countFollowers();
     const followingCount = await user.countFollowing();
+    const assetCount = await Asset.count({ where: { authorId: user.id } });
     
     const profileData = user.toJSON();
     profileData.followerCount = followerCount;
     profileData.followingCount = followingCount;
+    profileData.assetCount = assetCount;
     
     res.json(profileData);
   } catch (error) {
@@ -338,6 +385,8 @@ module.exports = {
   getWithdrawalRequests,
   getTransactions,
   getUserProfile,
+  checkIsFollowing,
+  toggleFollow,
   getAdminContact,
   getOnlineStatus,
   getPurchases,

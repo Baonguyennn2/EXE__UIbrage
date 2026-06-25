@@ -63,6 +63,8 @@ export const userService = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   getProfile: (username) => api.get(`/users/profile/${username}`),
+  toggleFollow: (userId) => api.post(`/users/${userId}/follow`),
+  checkIsFollowing: (userId) => api.get(`/users/${userId}/is-following`),
   getWishlist: () => api.get('/users/wishlist'),
   toggleWishlist: (assetId) => api.post('/users/wishlist/toggle', { assetId }),
   getEarnings: () => api.get('/users/earnings'),
@@ -94,6 +96,8 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
   resendCode: (email) => api.post('/auth/resend-code', { email }),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (email, code, newPassword) => api.post('/auth/reset-password', { email, code, newPassword }),
 };
 
 export const metadataService = {

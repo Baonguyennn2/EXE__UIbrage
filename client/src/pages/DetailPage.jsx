@@ -26,6 +26,9 @@ export default function DetailPage() {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistLoading, setWishlistLoading] = useState(false)
   const [hasPurchased, setHasPurchased] = useState(false)
+  const [authorProfile, setAuthorProfile] = useState(null)
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +41,14 @@ export default function DetailPage() {
         setAsset(assetRes.data)
         setComments(commentsRes.data)
         setRecommended(recRes.data.filter(a => a.id !== id))
+        
+        try {
+          const profileRes = await userService.getProfile(assetRes.data.author.username)
+          setAuthorProfile(profileRes.data)
+        } catch (e) {
+          console.error('Failed to fetch author profile:', e)
+        }
+        
         setLoading(false)
 
         const token = localStorage.getItem('token')
@@ -48,6 +59,13 @@ export default function DetailPage() {
           ])
           setIsWishlisted(wishlistRes.data.some(item => item.id === id))
           setHasPurchased(purchasesRes.data.some(item => item.id === id))
+          
+          try {
+             const followRes = await userService.checkIsFollowing(assetRes.data.authorId)
+             setIsFollowing(followRes.data.isFollowing)
+          } catch (e) {
+             console.error('Failed to fetch follow status:', e)
+          }
         }
       } catch (error) {
         console.error('Error fetching details:', error)
@@ -72,6 +90,30 @@ export default function DetailPage() {
       console.error('Error toggling wishlist:', error)
     } finally {
       setWishlistLoading(false)
+    }
+  }
+
+  const handleToggleFollow = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/auth/login')
+      return
+    }
+
+    setFollowLoading(true)
+    try {
+      const res = await userService.toggleFollow(asset.authorId)
+      setIsFollowing(res.data.isFollowing)
+      if (authorProfile) {
+        setAuthorProfile({
+           ...authorProfile,
+           followerCount: res.data.isFollowing ? authorProfile.followerCount + 1 : authorProfile.followerCount - 1
+        })
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error)
+    } finally {
+      setFollowLoading(false)
     }
   }
 
@@ -221,17 +263,28 @@ export default function DetailPage() {
 
           <section className="detail-v2-card author-card-v2">
              <div className="author-header">
-                <div className="author-avatar-big">
+                <Link to={`/profile/${asset.author?.username}`} className="author-avatar-big" style={{ display: 'block', textDecoration: 'none' }}>
                   {asset.author?.avatarUrl ? <img src={asset.author.avatarUrl} style={{ width: '100%', height: '100%', borderRadius: 'inherit' }} /> : (asset.author?.fullName?.[0] || asset.author?.username?.[0] || 'U')}
-                </div>
+                </Link>
                 <div className="author-info-text">
-                  <h4>{asset.author?.fullName || asset.author?.username}</h4>
-                  <span>12 Assets • 4.5k Followers</span>
+                  <h4><Link to={`/profile/${asset.author?.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>{asset.author?.fullName || asset.author?.username}</Link></h4>
+                  <span>
+                    {authorProfile ? `${authorProfile.assetCount || 0} Assets • ${authorProfile.followerCount || 0} Followers` : 'Loading stats...'}
+                  </span>
                 </div>
              </div>
-             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>Premium game assets for indie developers. Specialized in RPG and RTS interface design.</p>
+             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>
+               {authorProfile?.bio || 'No bio provided.'}
+             </p>
              {currentUser?.id !== asset.authorId && (
-               <button className="btn-follow">Follow</button>
+               <button 
+                  className={`btn-follow ${isFollowing ? 'following' : ''}`}
+                  onClick={handleToggleFollow}
+                  disabled={followLoading}
+                  style={isFollowing ? { background: '#f1f5f9', color: '#0f172a', borderColor: '#e2e8f0' } : {}}
+               >
+                 {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+               </button>
              )}
           </section>
 
