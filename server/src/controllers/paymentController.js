@@ -97,7 +97,7 @@ const handleWebhook = async (req, res) => {
       order.status = 'completed';
       await order.save({ transaction });
 
-      const { ledgerEntry, split } = await createSaleLedger({
+      const { ledgerEntry, split, created } = await createSaleLedger({
         userId: asset.authorId,
         assetId: asset.id,
         orderId: order.id,
@@ -107,13 +107,15 @@ const handleWebhook = async (req, res) => {
         transaction
       });
 
-      await Notification.create({
-        userId: asset.authorId,
-        type: 'new_order',
-        title: 'New sale recorded',
-        message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
-        relatedId: asset.id,
-      });
+      if (created) {
+        await Notification.create({
+          userId: asset.authorId,
+          type: 'new_order',
+          title: 'New sale recorded',
+          message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
+          relatedId: asset.id,
+        });
+      }
 
       return ledgerEntry;
     });
@@ -157,7 +159,7 @@ const verifyPayment = async (req, res) => {
         order.status = 'completed';
         await order.save({ transaction });
 
-        const { split } = await createSaleLedger({
+        const { split, created } = await createSaleLedger({
           userId: asset.authorId,
           assetId: asset.id,
           orderId: order.id,
@@ -167,13 +169,15 @@ const verifyPayment = async (req, res) => {
           transaction
         });
 
-        await Notification.create({
-          userId: asset.authorId,
-          type: 'new_order',
-          title: 'New sale recorded',
-          message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
-          relatedId: asset.id,
-        });
+        if (created) {
+          await Notification.create({
+            userId: asset.authorId,
+            type: 'new_order',
+            title: 'New sale recorded',
+            message: `Your asset "${asset.title}" sold for $${split.grossAmount.toFixed(2)}. Creator share $${split.creatorAmount.toFixed(2)} has been added to your balance.`,
+            relatedId: asset.id,
+          });
+        }
       });
     }
     
