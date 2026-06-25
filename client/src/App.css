@@ -4673,27 +4673,23 @@
   min-height: 100svh;
   display: grid;
   justify-items: center;
-  align-content: start;
+  align-content: stretch;
   padding: 1.5rem;
   background: #f3f5f9;
 }
 
 .auth-figma__canvas {
   width: min(1280px, 100%);
-  min-height: 1024px;
   background: #e9edf3;
   border: 1px solid #d3dbe7;
   border-radius: 0;
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 2rem;
+  gap: 1.5rem;
   position: relative;
-  padding: 8rem 1.25rem 3.25rem;
-}
-
-.auth-figma--register-page .auth-figma__canvas {
-  min-height: 1117px;
+  padding: 10vh 1.25rem 2.5rem;
+  overflow-y: auto;
 }
 
 .auth-figma .toast-container {
