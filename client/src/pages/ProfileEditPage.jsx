@@ -3,10 +3,11 @@ import { userService } from '../services/api'
 import AppHeader from '../components/AppHeader.jsx'
 import Toast from '../components/Toast.jsx'
 import { 
-  RiUser3Fill, RiMailFill, RiShieldUserFill, RiSave3Line, RiImageEditFill,
-  RiMapPin2Fill, RiGlobalFill, RiBriefcaseFill, RiFacebookBoxFill, 
-  RiTwitterFill, RiGithubFill, RiCloseLine, RiCheckLine, RiZoomInLine, RiDragMoveLine
+  RiUser3Fill, RiBriefcaseFill, RiMapPin2Fill, RiGlobalFill,
+  RiImageEditFill, RiSave3Line, RiCloseLine, RiZoomInLine, RiDragMoveLine,
+  RiTerminalBoxLine
 } from 'react-icons/ri'
+import '../dashboard-redesign.css'
 
 export default function ProfileEditPage({ isAdminContext = false }) {
   const [user, setUser] = useState(null)
@@ -81,26 +82,33 @@ export default function ProfileEditPage({ isAdminContext = false }) {
       const res = await userService.updateProfile(data)
       const updatedUser = res.data
       
-      setNotification({ type: 'success', message: 'Profile updated successfully!' })
+      setNotification({ type: 'success', message: 'Identity node updated successfully.' })
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
       window.dispatchEvent(new Event('authChange'))
     } catch (error) {
       console.error('Update Error:', error)
-      setNotification({ type: 'error', message: error.response?.data?.message || 'Update failed' })
+      setNotification({ type: 'error', message: error.response?.data?.message || 'Handshake failed.' })
     } finally {
       setLoading(false)
     }
   }
 
-  if (!user) return null
+  if (!user) return <div className="loading-screen" style={{color: 'white', padding: '2rem'}}>Accessing Identity...</div>
 
   return (
-    <main className="profile-edit-canvas" style={{ padding: isAdminContext ? 0 : 'inherit' }}>
-      {!isAdminContext && <AppHeader />}
+    <div className="dashboard-layout" style={{ minHeight: isAdminContext ? 'auto' : '100vh' }}>
+      
+      {!isAdminContext && (
+        <>
+          <div className="scanlines"></div>
+          <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
+          <AppHeader />
+        </>
+      )}
       
       {notification && (
-        <div className="toast-container">
+        <div className="toast-container" style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 1000 }}>
           <Toast 
             type={notification.type} 
             message={notification.message} 
@@ -109,38 +117,39 @@ export default function ProfileEditPage({ isAdminContext = false }) {
         </div>
       )}
 
-      <div className="profile-edit-content" style={{ maxWidth: '900px', margin: isAdminContext ? '0' : '0 auto', padding: isAdminContext ? '0 0 2rem 0' : '2rem' }}>
-        <header className="profile-edit-header" style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2rem', color: '#1e293b' }}>Professional Settings</h1>
-          <p style={{ color: '#64748b' }}>Customize your presence on UIbrage.</p>
-        </header>
+      <main className="dashboard-container" style={{ padding: isAdminContext ? '0' : '3rem 1.5rem', maxWidth: isAdminContext ? '100%' : '1000px' }}>
+        
+        {!isAdminContext && (
+          <header className="dashboard-header">
+            <div className="dashboard-title-wrap">
+              <h1 className="dashboard-title">Profile_Config</h1>
+              <p className="dashboard-subtitle">Adjust neural identity parameters</p>
+            </div>
+          </header>
+        )}
 
-        <form onSubmit={handleSubmit} className="profile-form">
-          {/* LinkedIn-style Cover Section */}
-          <section className="surface-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem', background: '#fff' }}>
-            <div className="edit-cover-preview" style={{ 
+        <form onSubmit={handleSubmit}>
+          
+          {/* Cover & Avatar Section */}
+          <section className="cyber-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '3rem' }}>
+            {/* Cover Image */}
+            <div style={{ 
               height: '240px', 
-              background: (coverPreview || user.coverImageUrl) ? `url(${coverPreview || user.coverImageUrl})` : '#312e81',
+              background: (coverPreview || user.coverImageUrl) ? `url(${coverPreview || user.coverImageUrl})` : '#0a0a0f',
               backgroundSize: `${formData.coverZoom}% auto`,
               backgroundPosition: `center ${formData.coverPosition}%`,
               backgroundRepeat: 'no-repeat',
-              position: 'relative'
+              position: 'relative',
+              borderBottom: '1px solid var(--cyber-border)'
             }}>
-              {/* Change Cover Button in corner */}
-              <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+              
+              <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem' }}>
                 <input type="file" accept="image/*" hidden id="coverUpload" onChange={(e) => handleFileChange(e, setCoverFile, setCoverPreview)} />
                 <label htmlFor="coverUpload" style={{ 
-                  background: '#fff', 
-                  color: '#4f46e5', 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '50%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                }} title="Change Cover">
+                  background: 'rgba(0,0,0,0.8)', color: 'var(--cyber-cyan)', width: '40px', height: '40px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', border: '1px solid var(--cyber-border)', transition: 'all 0.2s'
+                }} title="Change Cover Node">
                   <RiImageEditFill size={20} />
                 </label>
               </div>
@@ -150,184 +159,170 @@ export default function ProfileEditPage({ isAdminContext = false }) {
                   type="button" 
                   onClick={() => setShowCoverModal(true)}
                   style={{ 
-                    position: 'absolute', 
-                    bottom: '1rem', 
-                    right: '1rem',
-                    background: 'rgba(0,0,0,0.5)',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '2rem',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    backdropFilter: 'blur(4px)'
+                    position: 'absolute', bottom: '1.5rem', right: '1.5rem',
+                    background: 'rgba(0,0,0,0.8)', color: 'white', border: '1px solid var(--cyber-border)',
+                    padding: '0.5rem 1rem', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em',
+                    cursor: 'pointer', transition: 'all 0.2s'
                   }}
                 >
-                  Edit Position
+                  Edit_Calibration
                 </button>
               )}
             </div>
             
+            {/* Avatar & User Details */}
             <div style={{ padding: '0 2rem 2rem', marginTop: '-60px', position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '2rem' }}>
-              <div className="avatar-frame-container" style={{ position: 'relative' }}>
-                <div className="profile-avatar-wrap-v3" style={{ 
-                  width: '120px', 
-                  height: '120px', 
-                  borderRadius: '50%', 
-                  background: '#e2e8f0',
+              <div style={{ position: 'relative' }}>
+                <div style={{ 
+                  width: '120px', height: '120px', 
+                  background: '#05050a',
                   backgroundImage: (avatarPreview || user.avatarUrl) ? `url(${avatarPreview || user.avatarUrl})` : 'none',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '3rem',
-                  fontWeight: 700,
-                  color: '#4f46e5',
-                  overflow: 'hidden',
-                  border: '4px solid #fff',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                  backgroundSize: 'cover', backgroundPosition: 'center',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '3rem', fontWeight: 900, color: 'var(--cyber-cyan)',
+                  border: '2px solid var(--cyber-cyan)',
+                  boxShadow: '0 0 20px rgba(0,212,255,0.2)'
                 }}>
                   {!(avatarPreview || user.avatarUrl) && formData.username?.[0]?.toUpperCase()}
                 </div>
+                
                 <input type="file" accept="image/*" hidden id="avatarUpload" onChange={(e) => handleFileChange(e, setAvatarFile, setAvatarPreview)} />
-                <label htmlFor="avatarUpload" className="avatar-edit-badge" style={{ position: 'absolute', bottom: 4, right: 4, background: '#4f46e5', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.2)', cursor: 'pointer', border: '3px solid #fff' }}>
-                  <RiImageEditFill color="#fff" size={18} />
+                <label htmlFor="avatarUpload" style={{ 
+                  position: 'absolute', bottom: '-0.5rem', right: '-0.5rem', 
+                  background: 'var(--cyber-cyan)', color: 'black', 
+                  width: '2rem', height: '2rem', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  cursor: 'pointer', border: '1px solid var(--cyber-cyan)' 
+                }}>
+                  <RiImageEditFill size={16} />
                 </label>
               </div>
               
-              <div style={{ paddingBottom: '1rem' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>{formData.fullName || formData.username}</h2>
-                <p style={{ margin: 0, color: '#64748b' }}>@{formData.username}</p>
+              <div style={{ paddingBottom: '0.5rem' }}>
+                <h2 style={{ margin: 0, fontFamily: 'var(--font-cyber-heading)', fontSize: '2rem', color: 'white', textTransform: 'uppercase' }}>
+                  {formData.fullName || formData.username}
+                </h2>
+                <p style={{ margin: 0, color: 'var(--cyber-cyan)', fontFamily: 'var(--font-cyber-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  ID: @{formData.username}
+                </p>
               </div>
             </div>
           </section>
 
-          {/* Form Fields */}
-          <section className="surface-card" style={{ padding: '2rem' }}>
-            <div className="form-grid-v2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-              <div className="field-group">
-                <label>Full Name</label>
-                <div className="input-v3">
-                  <RiUser3Fill color="#94a3b8" />
-                  <input type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
+          {/* Core Settings */}
+          <section className="cyber-card" style={{ padding: '2.5rem' }}>
+            <h3 style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '1.25rem', color: 'white', textTransform: 'uppercase', marginBottom: '2rem', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1rem' }}>
+              <RiTerminalBoxLine style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Node_Parameters
+            </h3>
+            
+            <div className="profile-form-grid">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label className="cyber-label">Alias</label>
+                  <div style={{ position: 'relative' }}>
+                    <RiUser3Fill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label className="cyber-label">Role_Designation</label>
+                  <div style={{ position: 'relative' }}>
+                    <RiBriefcaseFill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} placeholder="e.g. Netrunner, UI Construct" value={formData.jobTitle} onChange={e => setFormData({...formData, jobTitle: e.target.value})} />
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label className="cyber-label">System_Loc</label>
+                  <div style={{ position: 'relative' }}>
+                    <RiMapPin2Fill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} placeholder="Sector 7, Neo Tokyo" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label className="cyber-label">External_Node</label>
+                  <div style={{ position: 'relative' }}>
+                    <RiGlobalFill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} placeholder="https://yourlink.com" value={formData.website} onChange={e => setFormData({...formData, website: e.target.value})} />
+                  </div>
                 </div>
               </div>
-              <div className="field-group">
-                <label>Job Title</label>
-                <div className="input-v3">
-                  <RiBriefcaseFill color="#94a3b8" />
-                  <input type="text" value={formData.jobTitle} placeholder="e.g. Senior UI/UX Designer" onChange={e => setFormData({...formData, jobTitle: e.target.value})} />
-                </div>
-              </div>
-              <div className="field-group" style={{ gridColumn: 'span 2' }}>
-                <label>Bio</label>
-                <textarea rows={4} value={formData.bio} className="textarea-v3" style={{ width: '100%', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', minHeight: '120px' }} placeholder="Write a short bio..." onChange={e => setFormData({...formData, bio: e.target.value})} />
-              </div>
-              <div className="field-group">
-                <label>Location</label>
-                <div className="input-v3">
-                  <RiMapPin2Fill color="#94a3b8" />
-                  <input type="text" value={formData.location} placeholder="City, Country" onChange={e => setFormData({...formData, location: e.target.value})} />
-                </div>
-              </div>
-              <div className="field-group">
-                <label>Website</label>
-                <div className="input-v3">
-                  <RiGlobalFill color="#94a3b8" />
-                  <input type="text" value={formData.website} placeholder="https://yourportfolio.com" onChange={e => setFormData({...formData, website: e.target.value})} />
-                </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label className="cyber-label">Bio_Signature</label>
+                <textarea rows={8} className="cyber-input" style={{ width: '100%', minHeight: '200px', resize: 'vertical' }} placeholder="Input data stream..." value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} />
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '3rem' }}>
-              <button type="submit" className="btn-solid" style={{ padding: '0.8rem 3rem', borderRadius: '1rem' }} disabled={loading}>
-                <RiSave3Line /> {loading ? 'Processing...' : 'Save Profile'}
+              <button type="submit" className="cyber-btn interactive-ripple" style={{ border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }} disabled={loading}>
+                <RiSave3Line /> {loading ? 'Transmitting...' : 'Upload_Config'}
               </button>
             </div>
           </section>
         </form>
-      </div>
+      </main>
 
-      {/* LinkedIn-style Cover Modal */}
+      {/* Cover Modal */}
       {showCoverModal && (
-        <div className="modal-overlay" style={{ 
-          position: 'fixed', 
-          inset: 0, 
-          background: 'rgba(0,0,0,0.85)', 
-          zIndex: 1000, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          padding: '2rem'
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', 
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'
         }}>
-          <div className="cover-modal" style={{ 
-            background: '#fff', 
-            width: '100%', 
-            maxWidth: '800px', 
-            borderRadius: '1rem', 
-            overflow: 'hidden'
-          }}>
-            <header style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Edit Cover Photo</h2>
+          <div className="cyber-card" style={{ width: '100%', maxWidth: '800px', padding: 0 }}>
+            <header style={{ padding: '1.5rem', borderBottom: '1px solid var(--cyber-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontFamily: 'var(--font-cyber-heading)', fontSize: '1.25rem', color: 'white', textTransform: 'uppercase' }}>Cover_Calibration</h2>
               <button onClick={() => setShowCoverModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><RiCloseLine size={24} /></button>
             </header>
 
             <div style={{ background: '#000', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
               <div style={{ 
-                width: '100%', 
-                height: '240px', 
+                width: '100%', height: '240px', 
                 background: `url(${coverPreview || user.coverImageUrl})`,
                 backgroundSize: `${formData.coverZoom}% auto`,
                 backgroundPosition: `center ${formData.coverPosition}%`,
                 backgroundRepeat: 'no-repeat',
-                border: '1px dashed rgba(255,255,255,0.5)',
-                transition: 'all 0.1s ease'
+                border: '1px dashed rgba(0,212,255,0.5)'
               }} />
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ flex: 1, background: 'rgba(0,0,0,0.6)' }} />
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.7)' }} />
                 <div style={{ height: '240px' }} />
-                <div style={{ flex: 1, background: 'rgba(0,0,0,0.6)' }} />
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.7)' }} />
               </div>
             </div>
 
             <div style={{ padding: '2rem' }}>
               <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem' }}>
-                  <RiZoomInLine /> Zoom
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '10px', textTransform: 'uppercase', fontWeight: 900, marginBottom: '1rem' }}>
+                  <RiZoomInLine /> Zoom_Level
                 </label>
                 <input 
-                  type="range" 
-                  min="100" 
-                  max="300" 
-                  value={formData.coverZoom} 
+                  type="range" min="100" max="300" value={formData.coverZoom} 
                   onChange={(e) => setFormData({...formData, coverZoom: parseInt(e.target.value)})}
-                  style={{ width: '100%', height: '6px' }}
+                  style={{ width: '100%', accentColor: 'var(--cyber-cyan)' }}
                 />
               </div>
-
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem' }}>
-                  <RiDragMoveLine /> Straighten / Position
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '10px', textTransform: 'uppercase', fontWeight: 900, marginBottom: '1rem' }}>
+                  <RiDragMoveLine /> Y-Axis_Align
                 </label>
                 <input 
-                  type="range" 
-                  min="0" 
-                  max="100" 
-                  value={formData.coverPosition} 
+                  type="range" min="0" max="100" value={formData.coverPosition} 
                   onChange={(e) => setFormData({...formData, coverPosition: parseInt(e.target.value)})}
-                  style={{ width: '100%', height: '6px' }}
+                  style={{ width: '100%', accentColor: 'var(--cyber-cyan)' }}
                 />
               </div>
             </div>
 
-            <footer style={{ padding: '1.5rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-              <button onClick={() => setShowCoverModal(false)} className="btn-ghost" style={{ padding: '0.6rem 1.5rem' }}>Cancel</button>
-              <button onClick={() => setShowCoverModal(false)} className="btn-solid" style={{ padding: '0.6rem 2rem' }}>Apply</button>
+            <footer style={{ padding: '1.5rem', borderTop: '1px solid var(--cyber-border)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              <button onClick={() => setShowCoverModal(false)} className="btn-ghost-cyber">Cancel</button>
+              <button onClick={() => setShowCoverModal(false)} className="cyber-btn interactive-ripple" style={{ border: 'none' }}>Apply_Parameters</button>
             </footer>
           </div>
         </div>
       )}
-    </main>
+    </div>
   )
 }

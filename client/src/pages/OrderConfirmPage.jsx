@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import AppHeader from '../components/AppHeader.jsx'
+import { 
+  RiCheckLine, 
+  RiCloseLine, 
+  RiTimeLine,
+  RiArrowRightSLine
+} from 'react-icons/ri'
 import { paymentService } from '../services/api'
+import '../checkout-redesign.css'
 
 export default function OrderConfirmPage() {
   const location = useLocation()
@@ -38,68 +46,129 @@ export default function OrderConfirmPage() {
   }, [orderCode])
 
   return (
-    <main className="order-success">
-      <section className="order-success__card">
-        {status === 'verifying' && (
-          <>
-            <div className="confirm-badge" style={{ background: '#f59e0b' }}>Verifying Payment...</div>
-            <h1>Please wait</h1>
-            <p>We are verifying your transaction with the payment gateway.</p>
-          </>
-        )}
+    <div className="checkout-layout">
+      <div className="scanlines"></div>
+      <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
+      
+      <AppHeader />
 
-        {status === 'success' && (
-          <>
-            <div className="confirm-badge">Payment successful</div>
-            <h1>Order #{orderCode} confirmed</h1>
-            <p>
-              Thank you! Your purchase has been recorded successfully. You can now download your asset from your library.
-            </p>
+      <main className="checkout-main-container">
+        
+        {/* Breadcrumbs Top Left */}
+        <div className="checkout-breadcrumbs" style={{ position: 'absolute', top: '2rem', left: '1.5rem' }}>
+          <div className="breadcrumb-step">
+            <span>01_Cart</span>
+            <RiArrowRightSLine />
+          </div>
+          <div className="breadcrumb-step">
+            <span>02_Checkout</span>
+            <RiArrowRightSLine />
+          </div>
+          <div className="breadcrumb-step active">
+            <span>03_Success</span>
+          </div>
+        </div>
 
-            <div className="order-success__actions">
-              <Link to="/library" className="btn-solid">Go to My Purchases</Link>
-              <Link to="/marketplace" className="btn-ghost">Continue shopping</Link>
-            </div>
-
-            {orderDetails && (
-              <div className="order-success__meta">
-                <p>Transaction ID: {orderDetails.transactionId}</p>
-                <p>Amount: ${Number(orderDetails.amount).toFixed(2)}</p>
-                <p>Support: support@uibrage.com</p>
-              </div>
+        <div className="success-layout">
+          <div className="cyber-card success-card">
+            
+            {status === 'verifying' && (
+              <>
+                <div className="success-icon-wrap pending">
+                  <RiTimeLine />
+                </div>
+                <div className="success-badge pending">Verifying_Payment</div>
+                <h1 className="success-title">Please_Wait</h1>
+                <p className="success-desc">
+                  We are verifying your neural transaction with the payment gateway. Stand by for handshake completion.
+                </p>
+              </>
             )}
-          </>
-        )}
 
-        {status === 'pending' && (
-          <>
-            <div className="confirm-badge" style={{ background: '#f59e0b' }}>Payment Pending</div>
-            <h1>Order #{orderCode} is pending</h1>
-            <p>
-              Your payment is still being processed or hasn't been completed yet. Please check your bank app.
-            </p>
-            <div className="order-success__actions">
-              <button type="button" className="btn-solid" onClick={() => window.location.reload()}>Refresh Status</button>
-              <Link to="/library" className="btn-ghost">Go to My Purchases</Link>
-            </div>
-          </>
-        )}
+            {status === 'success' && (
+              <>
+                <div className="success-icon-wrap">
+                  <RiCheckLine />
+                </div>
+                <div className="success-badge">Payment_Successful</div>
+                <h1 className="success-title">Order_{orderCode}_Confirmed</h1>
+                <p className="success-desc">
+                  Transmission complete! Your purchase has been successfully recorded in the node. You can now download your asset from the library terminal.
+                </p>
 
-        {status === 'error' && (
-          <>
-            <div className="confirm-badge" style={{ background: '#ef4444' }}>Verification Failed</div>
-            <h1>Unable to verify order</h1>
-            <p>
-              We couldn't verify your order status. If you have been charged, please contact support.
-              {orderDetails?.details && <><br /><small style={{color: '#ef4444'}}>Error: {orderDetails.details}</small></>}
-            </p>
-            <div className="order-success__actions">
-              <Link to="/marketplace/checkout" className="btn-solid">Return to Checkout</Link>
-              <Link to="/marketplace" className="btn-ghost">Continue shopping</Link>
-            </div>
-          </>
-        )}
-      </section>
-    </main>
+                <div className="success-actions">
+                  <Link to="/library" className="cyber-btn interactive-ripple" style={{ textDecoration: 'none' }}>
+                    Access_Library
+                  </Link>
+                  <Link to="/marketplace" className="btn-ghost-cyber">
+                    Continue_Shopping
+                  </Link>
+                </div>
+
+                {orderDetails && (
+                  <div className="success-meta">
+                    <div className="meta-grid">
+                      <div className="meta-item">
+                        <span className="meta-label">Transaction_ID</span>
+                        <span className="meta-val">{orderDetails.transactionId}</span>
+                      </div>
+                      <div className="meta-item">
+                        <span className="meta-label">Total_Credits</span>
+                        <span className="meta-val" style={{ color: 'var(--cyber-green)' }}>${Number(orderDetails.amount).toFixed(2)}</span>
+                      </div>
+                      <div className="meta-item" style={{ gridColumn: '1 / -1' }}>
+                        <span className="meta-label">Support_Node</span>
+                        <span className="meta-val">support@uibrage.link</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {status === 'pending' && (
+              <>
+                <div className="success-icon-wrap pending">
+                  <RiTimeLine />
+                </div>
+                <div className="success-badge pending">Payment_Pending</div>
+                <h1 className="success-title">Order_{orderCode}_Pending</h1>
+                <p className="success-desc">
+                  Your transaction is still propagating through the network. Please check your external bank app or wait for confirmation.
+                </p>
+                <div className="success-actions">
+                  <button type="button" className="cyber-btn interactive-ripple" onClick={() => window.location.reload()} style={{ border: 'none' }}>
+                    Refresh_Status
+                  </button>
+                  <Link to="/library" className="btn-ghost-cyber">
+                    Access_Library
+                  </Link>
+                </div>
+              </>
+            )}
+
+            {status === 'error' && (
+              <>
+                <div className="success-icon-wrap error">
+                  <RiCloseLine />
+                </div>
+                <div className="success-badge error">Verification_Failed</div>
+                <h1 className="success-title">Error_Encountered</h1>
+                <p className="success-desc">
+                  We couldn't verify the order transmission. If credits were deducted, please contact the support node immediately.
+                  {orderDetails?.details && <><br /><span style={{color: '#ef4444', marginTop: '0.5rem', display: 'block'}}>[ERR]: {orderDetails.details}</span></>}
+                </p>
+                <div className="success-actions">
+                  <Link to="/marketplace" className="cyber-btn interactive-ripple" style={{ background: 'var(--cyber-red)', textDecoration: 'none' }}>
+                    Return_to_Market
+                  </Link>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }

@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader.jsx'
 import { Link } from 'react-router-dom'
 import { userService } from '../services/api'
-import { RiEditLine, RiEyeLine, RiDeleteBin6Line, RiUploadCloud2Line, RiDownloadCloud2Line, RiStarLine, RiBarChartFill } from 'react-icons/ri'
+import { RiDownloadCloud2Line, RiTerminalBoxLine, RiHistoryLine, RiSearchLine } from 'react-icons/ri'
+import '../dashboard-redesign.css'
 
 export default function MyLibraryPage({ isAdmin = false, customStats }) {
   const [myAssets, setMyAssets] = useState([])
   const [orderHistory, setOrderHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('purchases')
-  const [activeCategory, setActiveCategory] = useState('All Categories')
 
   useEffect(() => {
     const fetchMyAssets = async () => {
@@ -40,153 +40,126 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
     window.open(fileUrl, '_blank')
   }
 
-  const stats = [
-    { label: 'Monthly Revenue', value: customStats ? `$${customStats.revenue}` : '$2,450.00', icon: <RiBarChartFill />, color: '#6366f1' },
-    { label: 'Total Downloads', value: customStats ? customStats.downloads : '18.2k', icon: <RiDownloadCloud2Line />, color: '#3b82f6' },
-    { label: 'Avg. Rating', value: customStats ? customStats.rating : '4.8', icon: <RiStarLine />, color: '#10b981' }
-  ]
-
-  if (loading) return <div className="loading-screen">Loading My Assets...</div>
+  if (loading) return <div className="loading-screen" style={{color: 'white', padding: '2rem'}}>Indexing Neural Library...</div>
 
   return (
-    <main className={isAdmin ? "admin-my-assets" : "market-home"}>
+    <div className="dashboard-layout">
+      {/* Background Layers */}
+      <div className="scanlines"></div>
+      <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
+      
       {!isAdmin && <AppHeader />}
       
-      <section className="my-assets-container" style={{ padding: '2rem' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <h1 
-              style={{ fontSize: '2.5rem', marginBottom: '0.5rem', cursor: 'pointer', opacity: activeTab === 'purchases' ? 1 : 0.4 }} 
-              onClick={() => setActiveTab('purchases')}
-            >
-              My Purchases
-            </h1>
-            <h1 
-              style={{ fontSize: '2.5rem', marginBottom: '0.5rem', cursor: 'pointer', opacity: activeTab === 'transactions' ? 1 : 0.4 }} 
-              onClick={() => setActiveTab('transactions')}
-            >
-              Transaction History
-            </h1>
+      <main className="dashboard-container">
+        
+        {/* Header Section */}
+        <header className="dashboard-header">
+          <div className="dashboard-title-wrap">
+            <h1 className="dashboard-title">My_Library</h1>
+            <p className="dashboard-subtitle">Personal Data Nodes & Acquisitions</p>
           </div>
-          <Link to="/marketplace" className="btn-solid" style={{ borderRadius: '0.75rem', padding: '0.8rem 1.5rem' }}>
-            <RiDownloadCloud2Line /> Browse More
-          </Link>
+          
+          <div className="dashboard-header-actions">
+            <Link to="/marketplace" className="cyber-btn interactive-ripple" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <RiSearchLine /> Explore_Market
+            </Link>
+          </div>
         </header>
 
-        <nav className="asset-filter-nav" style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem' }}>
-          {['All Categories', 'RPG', 'Sci-Fi', 'Pixel Art', 'Fantasy'].map(cat => (
-            <button 
-              key={cat} 
-              className={activeCategory === cat ? 'filter-chip active' : 'filter-chip'}
-              onClick={() => setActiveCategory(cat)}
-              style={{
-                padding: '0.6rem 1.2rem',
-                borderRadius: '0.75rem',
-                border: 'none',
-                background: activeCategory === cat ? '#1e293b' : '#fff',
-                color: activeCategory === cat ? '#fff' : '#64748b',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </nav>
+        {/* Tab System */}
+        <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--cyber-border)', marginBottom: '2rem' }}>
+          <button 
+            onClick={() => setActiveTab('purchases')}
+            style={{ 
+              background: 'none', border: 'none', 
+              paddingBottom: '1rem', cursor: 'pointer', 
+              color: activeTab === 'purchases' ? 'var(--cyber-cyan)' : '#64748b',
+              borderBottom: activeTab === 'purchases' ? '2px solid var(--cyber-cyan)' : '2px solid transparent',
+              fontFamily: 'var(--font-cyber-heading)', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em',
+              display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s'
+            }}
+          >
+            <RiTerminalBoxLine size={16} /> Data_Nodes
+          </button>
+          <button 
+            onClick={() => setActiveTab('transactions')}
+            style={{ 
+              background: 'none', border: 'none', 
+              paddingBottom: '1rem', cursor: 'pointer', 
+              color: activeTab === 'transactions' ? 'var(--cyber-magenta)' : '#64748b',
+              borderBottom: activeTab === 'transactions' ? '2px solid var(--cyber-magenta)' : '2px solid transparent',
+              fontFamily: 'var(--font-cyber-heading)', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em',
+              display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s'
+            }}
+          >
+            <RiHistoryLine size={16} /> Transaction_Log
+          </button>
+        </div>
 
+        {/* Tab Content */}
         {activeTab === 'purchases' ? (
-          <div className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-            <table className="asset-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <tr>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset Preview</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Title & Author</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Price Paid</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {myAssets.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No assets found.</td>
-                  </tr>
-                ) : (
-                  myAssets.map(asset => (
-                    <tr key={asset.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '1.5rem 2rem' }}>
-                        <img src={asset.coverImageUrl} style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
-                      </td>
-                      <td style={{ padding: '1.5rem 2rem' }}>
-                        <div style={{ fontWeight: 700, color: '#1e293b' }}>{asset.title}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>By {asset.author?.fullName || asset.author?.username || 'Unknown'}</div>
-                      </td>
-                      <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
-                        {asset.price === 0 ? 'Free' : `$${(asset.price * 1.05).toFixed(2)}`}
-                      </td>
-                      <td style={{ padding: '1.5rem 2rem' }}>
-                        <div style={{ display: 'flex', gap: '0.75rem', color: '#94a3b8' }}>
-                          <button onClick={() => handleDownload(asset.fileUrl)} className="btn-solid" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-                            <RiDownloadCloud2Line size={16} style={{ marginRight: '0.5rem' }} /> Download
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            <footer style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {myAssets.length} assets</span>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="page-btn">Previous</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">Next</button>
+          <div>
+            {myAssets.length === 0 ? (
+              <div className="cyber-card empty-state">
+                <RiTerminalBoxLine className="empty-state-icon" />
+                <p className="empty-state-text">No data nodes acquired. Your library is empty.</p>
               </div>
-            </footer>
+            ) : (
+              <div className="library-grid">
+                {myAssets.map(asset => (
+                  <div className="cyber-card library-card" key={asset.id}>
+                    <div className="library-card-thumb">
+                      <img src={asset.coverImageUrl || 'https://picsum.photos/seed/cyber/400/225'} alt={asset.title} />
+                    </div>
+                    <div className="library-card-body">
+                      <Link to={`/marketplace/${asset.id}`} className="library-card-title">{asset.title}</Link>
+                      <span className="library-card-meta">By {asset.author?.fullName || asset.author?.username || 'Unknown_Entity'}</span>
+                      <div className="library-card-actions">
+                        <button onClick={() => handleDownload(asset.fileUrl)} className="cyber-btn interactive-ripple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '9px', padding: '0.5rem' }}>
+                          <RiDownloadCloud2Line /> Download_Stream
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          <div className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-            <table className="asset-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+          <div className="table-container">
+            <table className="cyber-table">
+              <thead>
                 <tr>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Order ID</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Asset</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Date</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Amount</th>
-                  <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                  <th>Order_UID</th>
+                  <th>Asset_Node</th>
+                  <th>Timestamp</th>
+                  <th>Credits</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {orderHistory.length === 0 ? (
                   <tr>
-                    <td colSpan="5" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No transactions found.</td>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>No transaction records found.</td>
                   </tr>
                 ) : (
                   orderHistory.map(order => (
-                    <tr key={order.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '1.5rem 2rem', fontWeight: 600 }}>#{order.transactionId || order.id}</td>
-                      <td style={{ padding: '1.5rem 2rem' }}>
+                    <tr key={order.id}>
+                      <td style={{ fontWeight: 900 }}>#{order.transactionId || order.id}</td>
+                      <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          {order.asset && <img src={order.asset.coverImageUrl} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '0.5rem' }} />}
-                          <span style={{ fontWeight: 600 }}>{order.asset?.title || 'Unknown Asset'}</span>
+                          {order.asset && <img src={order.asset.coverImageUrl} className="table-thumbnail" alt="thumbnail" />}
+                          <span style={{ fontWeight: 700, color: 'var(--cyber-cyan)' }}>{order.asset?.title || 'Unknown_Node'}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '1.5rem 2rem', color: '#64748b' }}>
+                      <td style={{ color: '#64748b' }}>
                         {new Date(order.createdAt).toLocaleDateString()}
                       </td>
-                      <td style={{ padding: '1.5rem 2rem', fontWeight: 700 }}>
+                      <td style={{ fontWeight: 900, color: 'var(--cyber-green)' }}>
                         ${Number(order.amount).toFixed(2)}
                       </td>
-                      <td style={{ padding: '1.5rem 2rem' }}>
-                        <span style={{
-                          padding: '0.4rem 0.8rem',
-                          borderRadius: '2rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          background: order.status === 'completed' ? '#dcfce7' : order.status === 'pending' ? '#fef9c3' : '#fee2e2',
-                          color: order.status === 'completed' ? '#15803d' : order.status === 'pending' ? '#a16207' : '#b91c1c'
-                        }}>
+                      <td>
+                        <span className={`status-badge ${order.status === 'completed' ? 'status-success' : order.status === 'pending' ? 'status-pending' : 'status-danger'}`}>
                           {order.status?.toUpperCase()}
                         </span>
                       </td>
@@ -195,30 +168,9 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
                 )}
               </tbody>
             </table>
-            <footer style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {orderHistory.length} orders</span>
-            </footer>
           </div>
         )}
-
-
-      </section>
-      <style>{`
-        .page-btn {
-          border: 1px solid #e2e8f0;
-          background: #fff;
-          padding: 0.5rem 1rem;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          font-weight: 600;
-          color: #64748b;
-        }
-        .page-btn.active {
-          background: #1e293b;
-          color: #fff;
-          border-color: #1e293b;
-        }
-      `}</style>
-    </main>
+      </main>
+    </div>
   )
 }

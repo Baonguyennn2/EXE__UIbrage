@@ -15,6 +15,7 @@ import {
 } from 'react-icons/ri'
 import { adminService, notificationService, messageService, assetService, userService } from '../services/api'
 import LoadingScreen from '../components/LoadingScreen.jsx'
+import '../dashboard-redesign.css'
 
 export default function AdminDashboardPage({ variant = 'overview' }) {
   const [stats, setStats] = useState({ totalAssets: 0, revenue: 0, totalDownloads: 0, totalSales: 0, totalCreators: 0, pendingAssetsCount: 0, recentOrders: [] })
@@ -1033,8 +1034,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   if (loading) return <LoadingScreen message="Syncing Dashboard Data..." />
 
   return (
-    <main className="admin-shell" style={{ background: '#f8fafc', minHeight: '100vh' }}>
-      <header className="admin-topbar" style={{ background: '#232a3b', color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+    <div className="dashboard-layout">
+      <div className="scanlines"></div>
+      <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
+      
+      <main className="admin-shell dashboard-container" style={{ minHeight: '100vh', padding: 0, position: 'relative', zIndex: 10 }}>
+        <header className="admin-topbar" style={{ background: '#0a0a0f', color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--cyber-border)' }}>
         <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
@@ -1060,8 +1065,8 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </header>
 
       <section className="admin-layout" style={{ display: 'grid', minHeight: 'calc(100vh - 60px)' }}>
-        <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: '#232a3b', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)' }}>
-          <h4 style={{ color: '#475569', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Main Menu</h4>
+        <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: 'rgba(0,0,0,0.5)', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)', borderRight: '1px solid var(--cyber-border)' }}>
+          <h4 style={{ color: 'var(--cyber-cyan)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Admin_Node</h4>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
             <button onClick={() => navigate('/admin/dashboard')} className={`side-link ${variant === 'overview' ? 'active' : ''}`}><RiLayoutMasonryFill /> Dashboard</button>
             <button onClick={() => navigate('/admin/my-assets')} className={`side-link ${variant === 'library' ? 'active' : ''}`}><RiGalleryFill /> My Assets</button>
@@ -1122,6 +1127,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
-    </main>
+      </main>
+    </div>
   )
 }
