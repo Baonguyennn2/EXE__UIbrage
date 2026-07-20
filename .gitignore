@@ -36,3 +36,6 @@ Thumbs.db
 .claw/
 .clawd-todos.json
 .claw.json
+
+# Superdesign temp files
+.superdesign/tmp/
