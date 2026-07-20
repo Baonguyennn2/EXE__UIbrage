@@ -165,21 +165,28 @@ export default function HomepagePage() {
             </div>
             <div className="featured-carousel custom-scrollbar">
               {featuredAssets.map((asset, i) => (
-                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="featured-card">
-                  <div className="featured-card-img-wrapper">
-                    <img src={asset.coverImageUrl} alt={asset.title} className="featured-card-img" />
-                    <div className={`featured-card-badge ${i % 3 === 0 ? 'badge-cyan' : i % 3 === 1 ? 'badge-magenta' : 'badge-green'}`}>
-                      {asset.categoryData?.name || 'UI KIT'}
+                <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="cyber-card cyber-card-dynamic dynamic-card-link group" style={{ minWidth: '320px', padding: 0, display: 'flex', flexDirection: 'column' }}>
+                  <div className="dynamic-card-img-wrapper">
+                    <div className="dynamic-card-overlay" style={{ backgroundColor: i % 2 === 0 ? 'rgba(0, 212, 255, 0.1)' : 'rgba(255, 0, 255, 0.1)' }}></div>
+                    <img src={asset.coverImageUrl} alt={asset.title} className="dynamic-card-img" />
+                    <div className="dynamic-card-badge pulse-soft" style={{ color: i % 2 === 0 ? 'var(--cyber-accent-tertiary)' : 'var(--cyber-accent-secondary)', borderColor: i % 2 === 0 ? 'rgba(0, 212, 255, 0.5)' : 'rgba(255, 0, 255, 0.5)' }}>
+                      {asset.categoryData?.name || 'UI_KIT'} v.2
                     </div>
+                    <div className="dynamic-card-bottom-line"></div>
                   </div>
-                  <div className="featured-card-body">
-                    <div className="featured-card-title-row">
-                      <h3 className="featured-card-title">{asset.title}</h3>
-                      <span className="featured-card-price" style={{ color: 'var(--cyber-accent)' }}>{asset.price === 0 ? '$0.00' : `$${asset.price}`}</span>
+                  <div className="dynamic-card-body">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                      <h3 className="dynamic-card-title">{asset.title}</h3>
+                      <span style={{ color: 'var(--cyber-accent)', fontSize: '12px', fontWeight: 700 }}>{asset.price === 0 ? '$0.00' : `$${asset.price}`}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <span style={{ fontSize: '8px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--cyber-border)' }}>{asset.engine || 'Unity'}</span>
-                      <span style={{ fontSize: '8px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--cyber-border)' }}>4K</span>
+                    <div className="dynamic-card-desc-wrapper">
+                      <p className="dynamic-card-desc">
+                        {asset.description?.substring(0, 100) || "Advanced asset pack featuring modular nodes and multi-engine neural pipelines. Ready to deploy."}
+                      </p>
+                    </div>
+                    <div className="dynamic-card-footer">
+                      <span className="dynamic-card-author">BY <span style={{ color: '#64748b' }}>{asset.author?.username || 'CYBER_CORE'}</span></span>
+                      <span className="dynamic-card-engine">{asset.engine || 'UNITY'}</span>
                     </div>
                   </div>
                 </Link>

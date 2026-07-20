@@ -3911,7 +3911,7 @@
 .user-name {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-dark);
+  color: white;
 }
 
 .dropdown-header {
