@@ -158,7 +158,8 @@ export default function DetailPage() {
   if (!asset) return <div className="error-screen" style={{ color: 'white', padding: '2rem' }}>Asset not found. ERROR_404</div>
 
   const isOwner = currentUser && (asset.authorId === currentUser.id || hasPurchased)
-  const finalPrice = asset.price === 0 ? 0 : asset.price * 1.05
+  const numericPrice = Number(asset.price || 0)
+  const finalPrice = numericPrice === 0 ? 0 : numericPrice * 1.05
 
   // Collect images (cover + some mock placeholders to simulate the gallery if they don't have multiple)
   const images = [
@@ -471,7 +472,7 @@ export default function DetailPage() {
                     </div>
                     <div className="related-info">
                       <h5 className="related-title">{item.title}</h5>
-                      <p className="related-price">{item.price === 0 ? '$0.00' : `$${item.price.toFixed(2)}`}</p>
+                      <p className="related-price">{Number(item.price || 0) === 0 ? '$0.00' : `$${Number(item.price || 0).toFixed(2)}`}</p>
                       <span className={`related-badge ${i % 3 === 0 ? 'badge-unity' : i % 3 === 1 ? 'badge-unreal' : 'badge-godot'}`}>
                         {item.engine || 'UNITY'}
                       </span>
