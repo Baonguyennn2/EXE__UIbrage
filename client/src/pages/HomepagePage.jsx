@@ -46,7 +46,7 @@ export default function HomepagePage() {
   const heroAsset = featuredAssets[0]
 
   return (
-    <div className="homepage-container market-home">
+    <div className="homepage-container market-home cyber-scanlines">
       <AppHeader onSearch={(val) => navigate(`/marketplace?search=${encodeURIComponent(val)}`)} />
 
       <main className="main-layout">
@@ -97,14 +97,14 @@ export default function HomepagePage() {
             <section className="hero-banner">
               <div className="hero-banner__content">
                 <span className="featured-label">FEATURED ASSET</span>
-                <h1>{heroAsset.title}</h1>
+                <h1 className="cyber-glitch-text" data-text={heroAsset.title}>{heroAsset.title}</h1>
                 <p>{heroAsset.description?.substring(0, 160)}...</p>
                 <div className="hero-banner__footer">
                   <div className="price-info">
                     <small>PRICE</small>
                     <strong>{heroAsset.price === 0 ? 'FREE' : `$${heroAsset.price}`}</strong>
                   </div>
-                  <Link to={`/marketplace/assets/${heroAsset.id}`} className="btn-get-pack">Get Asset Pack</Link>
+                  <Link to={`/marketplace/assets/${heroAsset.id}`} className="cyber-btn cyber-btn-glitch">Get Asset Pack</Link>
                 </div>
               </div>
               <div className="hero-banner__image">
@@ -120,12 +120,12 @@ export default function HomepagePage() {
                 <RiFlashlightLine size={24} color="#6366f1" />
                 <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Featured UI Packs</h2>
               </div>
-              <Link to="/marketplace" className="view-all">View All</Link>
+              <Link to="/marketplace" className="cyber-btn-ghost" style={{ padding: '0.2rem 0.5rem', textDecoration: 'none' }}>[ View All ]</Link>
             </header>
             <div className="asset-grid">
               {featuredAssets.map((asset) => (
                 <Link key={asset.id} to={`/marketplace/assets/${asset.id}`} className="asset-card surface-card">
-                  <div className="asset-card__preview" style={{ height: '160px', background: `url(${asset.coverImageUrl}) center/cover`, borderRadius: '0.75rem 0.75rem 0 0', position: 'relative' }}>
+                  <div className="asset-card__preview" style={{ height: '160px', background: `url(${asset.coverImageUrl}) center/cover`, borderRadius: '0', position: 'relative', borderBottom: '1px solid var(--cyber-border)' }}>
                     <span className="asset-card__badge">
                       {asset.categoryData?.name || 'UI KIT'}
                     </span>
@@ -133,14 +133,14 @@ export default function HomepagePage() {
                   <div className="asset-card__body">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
                       <h3 style={{ margin: 0, fontSize: '0.95rem' }}>{asset.title}</h3>
-                      <span style={{ fontWeight: 700, fontSize: '0.95rem', color: asset.price === 0 ? '#10b981' : '#4f46e5' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.95rem', color: asset.price === 0 ? 'var(--cyber-accent)' : 'var(--cyber-accent-secondary)', textShadow: 'var(--neon-glow-primary-sm)' }}>
                         {asset.price === 0 ? 'FREE' : `$${asset.price}`}
                       </span>
                     </div>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>By {asset.author?.username}</p>
                     <div className="asset-card-tags" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem' }}>
-                      <span className="tag-pill-micro">UNITY</span>
-                      <span className="tag-pill-micro">4K</span>
+                      <span className="asset-card__tags"><span>UNITY</span></span>
+                      <span className="asset-card__tags"><span>4K</span></span>
                     </div>
                   </div>
                 </Link>

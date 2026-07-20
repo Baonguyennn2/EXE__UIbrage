@@ -68,7 +68,7 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="marketplace-container">
+    <div className="marketplace-container cyber-scanlines">
       <AppHeader onSearch={(val) => handleFilterChange('search', val)} />
 
       <main className="main-layout">
@@ -151,7 +151,7 @@ export default function MarketplacePage() {
 
         <section className="content-area">
           <header className="marketplace-header">
-            <h1>{filters.search ? `Results for "${filters.search}"` : 'Discover Assets'}</h1>
+            <h1 className="cyber-glitch-text" data-text={filters.search ? `Results for "${filters.search}"` : 'Discover Assets'} style={{ fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase' }}>{filters.search ? `Results for "${filters.search}"` : 'Discover Assets'}</h1>
             <p>Showing {assets.length} items</p>
           </header>
 

@@ -150,7 +150,7 @@ export default function DetailPage() {
   const finalPrice = asset.price === 0 ? 0 : asset.price * 1.05
 
   return (
-    <main className="market-home">
+    <main className="market-home cyber-scanlines">
       <AppHeader />
       
       <div className="detail-v2-container">
@@ -168,7 +168,7 @@ export default function DetailPage() {
           </header>
 
           <div className="detail-gallery-v2">
-             <img src={asset.coverImageUrl} alt={asset.title} className="detail-hero-img" style={{ width: '100%', borderRadius: '1rem', objectFit: 'cover', maxHeight: '500px' }} />
+             <img src={asset.coverImageUrl} alt={asset.title} className="detail-hero-img" style={{ width: '100%', borderRadius: '0', objectFit: 'cover', maxHeight: '500px', clipPath: 'polygon(0 15px, 15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px))' }} />
           </div>
 
           <article className="detail-v2-card">
@@ -193,7 +193,7 @@ export default function DetailPage() {
                 placeholder="Write your review..."
                 className="review-textarea"
                 required
-                style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginBottom: '1rem' }}
+                style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '0', border: '1px solid var(--cyber-border)', background: 'var(--cyber-bg)', color: 'var(--cyber-foreground)', marginBottom: '1rem', fontFamily: 'var(--font-cyber-mono)' }}
               />
               <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div className="rating-select-v2" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -208,7 +208,7 @@ export default function DetailPage() {
 
             <div className="comments-list" style={{ marginTop: '2rem' }}>
               {comments.map((c) => (
-                <div key={c._id || c.id} className="comment-item-v2" style={{ borderTop: '1px solid #f1f5f9', padding: '1.5rem 0' }}>
+                <div key={c._id || c.id} className="comment-item-v2" style={{ borderTop: '1px solid var(--cyber-border)', padding: '1.5rem 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <strong>{c.userName}</strong>
                     <StarRating rating={c.rating || 5} interactive={false} size={14} />
@@ -228,7 +228,7 @@ export default function DetailPage() {
             </div>
             
             {isOwner ? (
-              <button className="btn-solid" onClick={() => window.open(asset.fileUrl, '_blank')} style={{ background: '#10b981', borderColor: '#10b981' }}>
+              <button className="btn-solid" onClick={() => window.open(asset.fileUrl, '_blank')} style={{ background: 'var(--cyber-accent)', borderColor: 'var(--cyber-accent)', color: 'var(--cyber-bg)' }}>
                 <RiFileCopyLine /> Download Asset
               </button>
             ) : (
@@ -245,18 +245,18 @@ export default function DetailPage() {
               {isWishlisted ? <><RiHeartFill color="#ef4444" /> Saved to Wishlist</> : <><RiHeartLine /> Add to Wishlist</>}
             </button>
 
-            <div className="spec-list-v2" style={{ marginTop: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem' }}>
+            <div className="spec-list-v2" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--cyber-border)', paddingTop: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
-                <span style={{ color: '#64748b' }}>Supported Engines</span>
+                <span style={{ color: 'var(--cyber-muted-foreground)' }}>Supported Engines</span>
                 <strong>{asset.engine || 'Unity, Unreal'}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
-                <span style={{ color: '#64748b' }}>File Formats</span>
+                <span style={{ color: 'var(--cyber-muted-foreground)' }}>File Formats</span>
                 <strong>PSD, PNG, SVG</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                <span style={{ color: '#64748b' }}>License</span>
-                <Link to="#" style={{ color: '#6366f1', textDecoration: 'underline' }}>{asset.licenseType || 'Standard Commercial'}</Link>
+                <span style={{ color: 'var(--cyber-muted-foreground)' }}>License</span>
+                <Link to="#" style={{ color: 'var(--cyber-accent)', textDecoration: 'underline' }}>{asset.licenseType || 'Standard Commercial'}</Link>
               </div>
             </div>
           </section>
@@ -273,7 +273,7 @@ export default function DetailPage() {
                   </span>
                 </div>
              </div>
-             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.5rem 0' }}>
+             <p style={{ fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)', margin: '0.5rem 0' }}>
                {authorProfile?.bio || 'No bio provided.'}
              </p>
              {currentUser?.id !== asset.authorId && (
@@ -281,7 +281,7 @@ export default function DetailPage() {
                   className={`btn-follow ${isFollowing ? 'following' : ''}`}
                   onClick={handleToggleFollow}
                   disabled={followLoading}
-                  style={isFollowing ? { background: '#f1f5f9', color: '#0f172a', borderColor: '#e2e8f0' } : {}}
+                  style={isFollowing ? { background: 'var(--cyber-bg)', color: 'var(--cyber-foreground)', borderColor: 'var(--cyber-border)' } : {}}
                >
                  {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
                </button>
@@ -289,7 +289,7 @@ export default function DetailPage() {
           </section>
 
           <div className="recommended-section">
-            <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', color: '#64748b', marginBottom: '1rem' }}>You may also like</h4>
+            <h4 style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--cyber-muted-foreground)', marginBottom: '1rem', fontFamily: 'var(--font-cyber-mono)' }}>You may also like</h4>
             <div className="recommended-list">
               {recommended.map(item => (
                 <Link key={item.id} to={`/marketplace/assets/${item.id}`} className="recommended-item">

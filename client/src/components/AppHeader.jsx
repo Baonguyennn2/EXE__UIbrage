@@ -22,14 +22,8 @@ import { metadataService, notificationService } from '../services/api'
 
 function BrandTile() {
   return (
-    <div className="brand-logo">
-      <div className="logo-icon">
-        <div className="icon-grid">
-          <div /><div />
-          <div /><div />
-        </div>
-      </div>
-      <strong>UIbrage</strong>
+    <div className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <strong className="cyber-glitch-text" data-text="UIBRAGE" style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--cyber-accent)' }}>UIBRAGE</strong>
     </div>
   )
 }
@@ -125,12 +119,12 @@ export default function AppHeader({ onSearch }) {
           <RiMenuLine size={24} color="#1e293b" />
         </button>
 
-        <Link to="/" className="logo-link">
+        <Link to="/" className="logo-link" style={{ textDecoration: 'none' }}>
           <BrandTile />
         </Link>
 
-        <nav className="header-nav">
-          <Link to="/marketplace">Browse Assets</Link>
+        <nav className="header-nav" style={{ fontFamily: 'var(--font-cyber-mono)', textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
+          <Link to="/marketplace" style={{ color: 'var(--cyber-foreground)', textDecoration: 'none' }}>Browse</Link>
           
           <div className="dropdown-trigger" ref={categoryRef} onMouseEnter={() => setShowCategoryMenu(true)} onMouseLeave={() => setShowCategoryMenu(false)}>
             <button className="nav-dropdown-btn">Categories <RiArrowDownSLine /></button>
@@ -150,9 +144,8 @@ export default function AppHeader({ onSearch }) {
         </nav>
 
         <div className="header-search">
-          <div className="search-input-wrapper">
-            <span className="search-icon">⌕</span>
-            <input type="text" placeholder="Search game assets..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
+          <div className="cyber-input-wrapper">
+            <input type="text" className="cyber-input" placeholder="Search data streams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
           </div>
         </div>
 
@@ -216,8 +209,8 @@ export default function AppHeader({ onSearch }) {
             </>
           ) : (
             <>
-              <Link to="/auth/login" className="login-link">Login</Link>
-              <Link to="/auth/register" className="register-button">Register</Link>
+              <Link to="/auth/login" className="cyber-btn-ghost">Login</Link>
+              <Link to="/auth/register" className="cyber-btn cyber-btn-glitch">Register</Link>
             </>
           )}
         </div>
@@ -266,23 +259,42 @@ export default function AppHeader({ onSearch }) {
           position: absolute;
           top: -5px;
           right: -5px;
-          background: #ef4444;
+          background: var(--cyber-destructive);
           color: #fff;
           font-size: 0.7rem;
           padding: 0.1rem 0.4rem;
-          border-radius: 1rem;
-          border: 2px solid #fff;
+          border-radius: 0;
+          border: 1px solid var(--cyber-accent);
+          font-family: var(--font-cyber-mono);
         }
-        .notif-item.unread { background: #f0f7ff; }
-        .header-dropdown--notif {
+        .notif-item.unread { background: rgba(0, 255, 136, 0.1); }
+        .header-dropdown--notif, .header-dropdown--user, .header-dropdown--categories {
           position: absolute;
           top: 100%;
           right: 0;
-          background: #fff;
-          border-radius: 1rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          background: var(--cyber-card);
+          border-radius: 0;
+          box-shadow: var(--neon-glow-primary-sm);
           z-index: 100;
-          border: 1px solid #f1f5f9;
+          border: 1px solid var(--cyber-border);
+          color: var(--cyber-foreground);
+        }
+        .header-dropdown a {
+          color: var(--cyber-foreground) !important;
+          font-family: var(--font-cyber-mono);
+          text-transform: uppercase;
+        }
+        .header-dropdown a:hover {
+          color: var(--cyber-accent) !important;
+          background: rgba(0, 255, 136, 0.1) !important;
+        }
+        .header-nav a:hover, .nav-dropdown-btn:hover {
+          color: var(--cyber-accent) !important;
+          text-shadow: 0 0 5px var(--cyber-accent);
+        }
+        .nav-dropdown-btn {
+          color: var(--cyber-foreground);
+          background: none; border: none; font: inherit; cursor: pointer;
         }
       `}</style>
     </header>

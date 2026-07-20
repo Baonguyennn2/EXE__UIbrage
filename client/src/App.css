@@ -4,10 +4,7 @@
   position: relative;
   min-height: 100svh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(124, 58, 237, 0.13), transparent 34%),
-    radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.13), transparent 24%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  background: var(--cyber-bg);
 }
 
 .auth-shell__glow {
@@ -88,13 +85,11 @@
 .auth-card,
 .auth-side__panel {
   position: relative;
-  border-radius: 2rem;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(24px);
-  box-shadow:
-    0 28px 80px rgba(15, 23, 42, 0.12),
-    0 8px 24px rgba(15, 23, 42, 0.06);
+  border-radius: 0;
+  border: 1px solid var(--cyber-border);
+  background: var(--cyber-card);
+  clip-path: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
+  color: var(--cyber-foreground);
 }
 
 .auth-card {
@@ -125,7 +120,9 @@
   font-size: clamp(1.6rem, 3vw, 2.25rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
-  color: #0f172a;
+  color: var(--cyber-foreground);
+  font-family: var(--font-cyber-heading);
+  text-transform: uppercase;
 }
 
 .auth-card__subtitle {
@@ -146,33 +143,31 @@
   gap: 0.55rem;
   font-size: 0.94rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--cyber-foreground);
+  font-family: var(--font-cyber-mono);
 }
 
 .field input {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 1rem;
-  padding: 0.95rem 1rem;
-  font: inherit;
-  background: rgba(248, 250, 252, 0.95);
-  color: #0f172a;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
+  border: 1px solid var(--cyber-border);
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-cyber-mono);
+  background: var(--cyber-input);
+  color: var(--cyber-accent);
+  clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+  transition: var(--transition-cyber);
 }
 
 .field input::placeholder {
-  color: #94a3b8;
+  color: var(--cyber-muted-foreground);
 }
 
 .field input:focus {
   outline: none;
-  border-color: rgba(124, 58, 237, 0.7);
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+  border-color: var(--cyber-accent);
+  box-shadow: var(--neon-glow-primary-sm);
 }
 
 .auth-actions {
@@ -213,29 +208,29 @@
 
 .primary-button {
   margin-top: 0.45rem;
-  border: 0;
-  border-radius: 1rem;
-  padding: 0.98rem 1.25rem;
-  font: inherit;
+  border: 2px solid var(--cyber-accent);
+  border-radius: 0;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-cyber-mono);
+  text-transform: uppercase;
   font-weight: 700;
-  color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-  box-shadow: 0 18px 30px rgba(124, 58, 237, 0.28);
+  color: var(--cyber-bg);
+  background: var(--cyber-accent);
+  box-shadow: var(--neon-glow-primary);
+  clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
   cursor: pointer;
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    filter 160ms ease;
+  transition: var(--transition-cyber);
+  animation: rgbShift 3s infinite;
 }
 
 .primary-button:hover {
+  filter: brightness(1.2);
   transform: translateY(-1px);
-  box-shadow: 0 22px 34px rgba(124, 58, 237, 0.32);
 }
 
 .primary-button:focus-visible {
-  outline: 3px solid rgba(124, 58, 237, 0.22);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--neon-glow-primary-lg);
 }
 
 .auth-card__footer {
@@ -4011,17 +4006,19 @@
 
 /* Hero Banner */
 .hero-banner {
-  background: #312e81;
-  border-radius: 1.5rem;
+  background: rgba(28, 28, 46, 0.3);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  backdrop-filter: blur(8px);
   padding: 3rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   align-items: center;
-  color: white;
-  overflow: hidden;
+  color: var(--cyber-foreground);
   position: relative;
   margin-bottom: 3rem;
+  clip-path: polygon(0 20px, 20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px));
+  box-shadow: inset 0 0 20px rgba(0, 255, 136, 0.05), var(--neon-glow-primary-sm);
 }
 
 .featured-label {
@@ -4036,9 +4033,12 @@
 }
 
 .hero-banner h1 {
+  font-family: var(--font-cyber-heading);
+  text-transform: uppercase;
   font-size: 3rem;
   line-height: 1.1;
   margin-bottom: 1.5rem;
+  color: var(--cyber-foreground);
 }
 
 .hero-banner p {
@@ -4077,8 +4077,9 @@
 
 .hero-banner__image img {
   width: 100%;
-  border-radius: 1rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  clip-path: polygon(0 15px, 15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px));
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  filter: contrast(1.1) brightness(0.9);
 }
 
 /* Sections */
@@ -4194,16 +4195,16 @@
 .asset-card {
   text-decoration: none;
   color: inherit;
-  background: white;
-  border: 1px solid var(--border-light);
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  clip-path: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
+  transition: var(--transition-cyber);
 }
 
 .asset-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  border-color: var(--cyber-accent);
+  box-shadow: var(--neon-glow-primary-sm);
 }
 
 .asset-card__preview {
@@ -4270,13 +4271,14 @@
 }
 
 .asset-card__tags span {
+  font-family: var(--font-cyber-mono);
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--text-gray);
-  border: 1px solid var(--border-light);
+  color: var(--cyber-accent-tertiary);
+  border: 1px solid var(--cyber-border);
   padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  background: #f8fafc;
+  border-radius: 0;
+  background: rgba(0, 212, 255, 0.1);
 }
 
 /* Latest Grid */

@@ -2,11 +2,16 @@
 .profile-v2-container {
   max-width: 1300px;
   margin: 0 auto 4rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  clip-path: polygon(
+    0 10px, 10px 0,
+    calc(100% - 10px) 0, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 10px) 100%,
+    10px 100%, 0 calc(100% - 10px)
+  );
+  box-shadow: var(--neon-glow-primary-sm);
+  color: var(--cyber-foreground);
 }
 
 .profile-v2-nav {
@@ -28,21 +33,44 @@
 }
 
 .btn-solid {
-  background: #4338ca;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  background: var(--cyber-accent);
+  color: var(--cyber-bg);
+  border: 2px solid var(--cyber-accent);
+  border-radius: 0;
+  font-family: var(--font-cyber-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
+  padding: 0.5rem 1.5rem;
+  clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+  transition: var(--transition-cyber);
+}
+.btn-solid:hover {
+  box-shadow: var(--neon-glow-primary);
+  filter: brightness(1.2);
 }
 
 .btn-ghost {
-  background: #f1f5f9;
-  color: #0f172a;
-  border: none;
-  border-radius: 8px;
+  background: transparent;
+  color: var(--cyber-foreground);
+  border: 1px solid var(--cyber-border);
+  border-radius: 0;
+  font-family: var(--font-cyber-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
+  padding: 0.5rem 1.5rem;
+  clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+  transition: var(--transition-cyber);
+}
+.btn-ghost:hover {
+  border-color: var(--cyber-accent);
+  color: var(--cyber-accent);
+  box-shadow: var(--neon-glow-primary-sm);
 }
 
 .profile-v2-content {
@@ -122,10 +150,12 @@
 }
 
 .detail-v2-header h1 {
+  font-family: var(--font-cyber-heading);
+  text-transform: uppercase;
   font-size: 2.5rem;
   line-height: 1.2;
   margin: 0;
-  color: #0f172a;
+  color: var(--cyber-foreground);
 }
 
 .rating-summary {
@@ -139,17 +169,21 @@
 }
 
 .detail-v2-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
   padding: 2rem;
+  clip-path: polygon(0 15px, 15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px));
+  color: var(--cyber-foreground);
 }
 
 .detail-v2-card h3 {
   margin: 0 0 1.5rem;
   font-size: 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--cyber-border);
   padding-bottom: 1rem;
+  font-family: var(--font-cyber-heading);
+  text-transform: uppercase;
+  color: var(--cyber-accent);
 }
 
 .sidebar-v2-stack {
@@ -164,8 +198,9 @@
   align-items: center;
   font-size: 2rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--cyber-accent);
   margin-bottom: 1.5rem;
+  text-shadow: var(--neon-glow-primary-sm);
 }
 
 .price-card .price-display span {
