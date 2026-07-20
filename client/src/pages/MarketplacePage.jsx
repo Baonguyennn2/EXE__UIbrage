@@ -68,7 +68,7 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="marketplace-container cyber-scanlines">
+    <div className="marketplace-container">
       <AppHeader onSearch={(val) => handleFilterChange('search', val)} />
 
       <main className="main-layout">

@@ -173,7 +173,7 @@ export default function DetailPage() {
 
   return (
     <div className="detail-layout">
-      <div className="cyber-scanlines"></div>
+      
       <div className="cyber-grid-bg home-bg-gradient" style={{ opacity: 0.05 }}></div>
       <div className="home-bg-gradient"></div>
 

@@ -75,7 +75,7 @@ export default function CheckoutPage() {
   return (
     <div className="checkout-layout">
       {/* Background Layers */}
-      <div className="scanlines"></div>
+      
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
       <div className="fixed inset-0 pointer-events-none z-0" style={{ background: 'linear-gradient(to top, #0a0a0f, transparent)' }}></div>
 

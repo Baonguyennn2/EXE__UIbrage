@@ -60,7 +60,7 @@ export default function EarningsPage() {
 
   return (
     <div className="dashboard-layout">
-      <div className="scanlines"></div>
+      
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
       <AppHeader />
 

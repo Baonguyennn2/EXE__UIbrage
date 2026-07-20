@@ -101,7 +101,7 @@ export default function ProfileEditPage({ isAdminContext = false }) {
       
       {!isAdminContext && (
         <>
-          <div className="scanlines"></div>
+          
           <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
           <AppHeader />
         </>

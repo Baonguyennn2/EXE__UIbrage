@@ -45,7 +45,7 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
   return (
     <div className="dashboard-layout">
       {/* Background Layers */}
-      <div className="scanlines"></div>
+      
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
       
       {!isAdmin && <AppHeader />}

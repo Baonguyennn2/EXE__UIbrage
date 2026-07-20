@@ -1848,6 +1848,7 @@
   font-size: clamp(2rem, 4.2vw, 3.2rem);
   line-height: 1;
   letter-spacing: -0.04em;
+  color: #64748b;
 }
 
 .market-page__header p {

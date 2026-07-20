@@ -1035,7 +1035,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
   return (
     <div className="dashboard-layout">
-      <div className="scanlines"></div>
+      
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
       
       <main className="admin-shell dashboard-container" style={{ minHeight: '100vh', padding: 0, position: 'relative', zIndex: 10 }}>

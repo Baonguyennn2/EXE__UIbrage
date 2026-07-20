@@ -53,7 +53,7 @@ export default function HomepagePage() {
 
   return (
     <div className="home-layout">
-      <div className="cyber-scanlines"></div>
+      
       <div className="cyber-grid-bg home-bg-gradient" style={{ opacity: 0.1 }}></div>
       <div className="home-bg-gradient"></div>
 

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
-  RiUser3Line, 
-  RiLogoutBoxRLine, 
-  RiBookletLine, 
-  RiUploadCloud2Line, 
-  RiArrowDownSLine, 
+import {
+  RiUser3Line,
+  RiLogoutBoxRLine,
+  RiBookletLine,
+  RiUploadCloud2Line,
+  RiArrowDownSLine,
   RiSettings4Line,
   RiLayout4Line,
   RiMoneyDollarCircleLine,
@@ -38,7 +38,7 @@ export default function AppHeader({ onSearch }) {
   const [showNotifMenu, setShowNotifMenu] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const navigate = useNavigate()
-  
+
   const categoryRef = useRef(null)
   const userMenuRef = useRef(null)
   const notifRef = useRef(null)
@@ -61,10 +61,10 @@ export default function AppHeader({ onSearch }) {
     }
 
     const fetchNotifications = async () => {
-       try {
-         const res = await notificationService.getAll()
-         setNotifications(res.data)
-       } catch (e) {}
+      try {
+        const res = await notificationService.getAll()
+        setNotifications(res.data)
+      } catch (e) { }
     }
 
     loadUser()
@@ -125,7 +125,7 @@ export default function AppHeader({ onSearch }) {
 
         <nav className="header-nav" style={{ fontFamily: 'var(--font-cyber-mono)', textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
           <Link to="/marketplace" style={{ color: 'var(--cyber-foreground)', textDecoration: 'none' }}>Browse</Link>
-          
+
           <div className="dropdown-trigger" ref={categoryRef} onMouseEnter={() => setShowCategoryMenu(true)} onMouseLeave={() => setShowCategoryMenu(false)}>
             <button className="nav-dropdown-btn">Categories <RiArrowDownSLine /></button>
             {showCategoryMenu && (
@@ -145,7 +145,7 @@ export default function AppHeader({ onSearch }) {
 
         <div className="header-search">
           <div className="cyber-input-wrapper">
-            <input type="text" className="cyber-input" placeholder="Search data streams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
+            <input type="text" className="cyber-input" placeholder="  Search data streams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
           </div>
         </div>
 
@@ -157,18 +157,18 @@ export default function AppHeader({ onSearch }) {
                 {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
                 {showNotifMenu && (
                   <div className="header-dropdown header-dropdown--notif" style={{ width: '320px', right: 0, padding: '1rem' }}>
-                     <header style={{ padding: '0 0.5rem 1rem', borderBottom: '1px solid #f1f5f9', fontWeight: 700 }}>Notifications</header>
-                     <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                        {notifications.length === 0 ? <p style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No notifications</p> : (
-                          notifications.map(n => (
-                            <div key={n._id} className={`notif-item ${n.isRead ? '' : 'unread'}`} style={{ padding: '1rem 0.5rem', borderBottom: '1px solid #f8fafc' }}>
-                               <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{n.title}</div>
-                               <p style={{ margin: '0.25rem 0', fontSize: '0.8rem', color: '#64748b' }}>{n.message}</p>
-                               <small style={{ color: '#94a3b8' }}>{new Date(n.createdAt).toLocaleDateString()}</small>
-                            </div>
-                          ))
-                        )}
-                     </div>
+                    <header style={{ padding: '0 0.5rem 1rem', borderBottom: '1px solid #f1f5f9', fontWeight: 700 }}>Notifications</header>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      {notifications.length === 0 ? <p style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No notifications</p> : (
+                        notifications.map(n => (
+                          <div key={n._id} className={`notif-item ${n.isRead ? '' : 'unread'}`} style={{ padding: '1rem 0.5rem', borderBottom: '1px solid #f8fafc' }}>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{n.title}</div>
+                            <p style={{ margin: '0.25rem 0', fontSize: '0.8rem', color: '#64748b' }}>{n.message}</p>
+                            <small style={{ color: '#94a3b8' }}>{new Date(n.createdAt).toLocaleDateString()}</small>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -230,9 +230,9 @@ export default function AppHeader({ onSearch }) {
           <Link to="/" onClick={() => setIsDrawerOpen(false)}><RiHome4Line /> Home</Link>
           <Link to="/marketplace" onClick={() => setIsDrawerOpen(false)}><RiCompass3Line /> Browse Assets</Link>
           <Link to="/community" onClick={() => setIsDrawerOpen(false)}><RiCommunityLine /> Community</Link>
-          
+
           <div style={{ margin: '1rem 0', height: '1px', background: '#f1f5f9' }} />
-          
+
           {user ? (
             <>
               <Link to={`/profile/${user.username}`} onClick={() => setIsDrawerOpen(false)}><RiUser3Line /> My Profile</Link>
@@ -248,8 +248,8 @@ export default function AppHeader({ onSearch }) {
             </>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-               <Link to="/auth/login" className="btn-ghost" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Login</Link>
-               <Link to="/auth/register" className="btn-solid" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Register</Link>
+              <Link to="/auth/login" className="btn-ghost" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Login</Link>
+              <Link to="/auth/register" className="btn-solid" style={{ textAlign: 'center', width: '100%' }} onClick={() => setIsDrawerOpen(false)}>Register</Link>
             </div>
           )}
         </nav>
