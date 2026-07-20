@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
+import '../dashboard-redesign.css'
 import { messageService, userService } from '../services/api'
 import { useSocket } from '../services/SocketContext'
 import {
@@ -372,7 +373,7 @@ export default function MessagePage() {
   if (loading) return <div className="loading-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#64748b' }}>Loading Messages...</div>
 
   return (
-    <main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f0f2f5' }}>
+    <div className="dashboard-layout"><div className="scanlines"></div><div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>\n    <main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 10, position: 'relative' }}>
       <AppHeader />
 
       <div style={{
@@ -390,7 +391,7 @@ export default function MessagePage() {
         <aside style={{
           width: '360px',
           minWidth: '360px',
-          background: '#fff',
+          background: 'var(--cyber-panel)',
           display: 'flex',
           flexDirection: 'column',
           borderRight: '1px solid #e0e0e0',
@@ -405,7 +406,7 @@ export default function MessagePage() {
             borderBottom: '1px solid #f0f0f0'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: '#1a1a2e' }}>Đoạn chat</h2>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: 'white' }}>Đoạn chat</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{
                   width: 8, height: 8, borderRadius: '50%',
@@ -420,7 +421,7 @@ export default function MessagePage() {
             {/* Search */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: '#f0f2f5', borderRadius: '24px',
+              background: 'var(--cyber-panel)', borderRadius: '24px',
               padding: '0.5rem 1rem'
             }}>
               <RiSearchLine size={18} color="#94a3b8" />
@@ -431,7 +432,7 @@ export default function MessagePage() {
                 placeholder="Tìm kiếm đoạn chat..."
                 style={{
                   border: 'none', background: 'transparent', outline: 'none',
-                  width: '100%', fontSize: '0.85rem', color: '#1a1a2e'
+                  width: '100%', fontSize: '0.85rem', color: 'white'
                 }}
               />
               {searchQuery && (
@@ -465,9 +466,9 @@ export default function MessagePage() {
                     display: 'flex',
                     gap: '0.85rem',
                     cursor: 'pointer',
-                    background: isActive ? '#e8f0fe' : 'transparent',
+                    background: isActive ? 'rgba(0, 212, 255, 0.1)' : 'transparent',
                     transition: 'background 0.15s',
-                    borderLeft: isActive ? '3px solid #4f46e5' : '3px solid transparent'
+                    borderLeft: isActive ? '3px solid var(--cyber-cyan)' : '3px solid transparent'
                   }}
                   onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#f5f5f5' }}
                   onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
@@ -489,7 +490,7 @@ export default function MessagePage() {
                   </div>
                   <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                      <span style={{ fontWeight: 700, color: '#1a1a2e', fontSize: '0.95rem' }}>
+                      <span style={{ fontWeight: 700, color: 'white', fontSize: '0.95rem' }}>
                         {conv.otherUser?.username || 'Unknown'}
                       </span>
                       <span style={{ fontSize: '0.7rem', color: '#94a3b8', flexShrink: 0 }}>
@@ -519,7 +520,7 @@ export default function MessagePage() {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          background: '#fff',
+          background: 'var(--cyber-panel)',
           borderTopRightRadius: '12px',
           borderBottomRightRadius: '12px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
@@ -531,7 +532,7 @@ export default function MessagePage() {
               {/* Chat header */}
               <div style={{
                 padding: '0.85rem 1.5rem',
-                background: '#fff',
+                background: 'var(--cyber-panel)',
                 borderBottom: '1px solid #f0f0f0',
                 display: 'flex',
                 alignItems: 'center',
@@ -555,7 +556,7 @@ export default function MessagePage() {
                     )}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a2e' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'white' }}>
                       {activeConversation.otherUser?.username}
                     </div>
                     <span style={{ fontSize: '0.75rem', color: onlineUsers[activeConversation.otherUser?.id] ? '#22c55e' : '#94a3b8' }}>
@@ -574,7 +575,7 @@ export default function MessagePage() {
                   overflowY: 'auto',
                   overflowX: 'hidden',
                   padding: '1.25rem 1.5rem',
-                  background: '#fafafa',
+                  background: 'transparent',
                   display: 'flex',
                   flexDirection: 'column'
                 }}
@@ -602,7 +603,7 @@ export default function MessagePage() {
                           fontWeight: 600
                         }}>
                           <span style={{
-                            background: '#e8e8e8', padding: '0.25rem 0.75rem',
+                            background: 'rgba(0,0,0,0.5)', padding: '0.25rem 0.75rem',
                             borderRadius: '12px'
                           }}>
                             {formatDateSeparator(msg.createdAt)}
@@ -645,8 +646,8 @@ export default function MessagePage() {
                               borderRadius: isMine
                                 ? '18px 18px 4px 18px'
                                 : '18px 18px 18px 4px',
-                              background: isMine ? '#4f46e5' : '#fff',
-                              color: isMine ? '#fff' : '#1a1a2e',
+                              background: isMine ? 'var(--cyber-cyan)' : 'var(--cyber-panel)',
+                              color: isMine ? 'black' : 'white',
                               boxShadow: isMine
                                 ? '0 2px 8px rgba(79,70,229,0.15)'
                                 : '0 1px 4px rgba(0,0,0,0.06)',
@@ -692,7 +693,7 @@ export default function MessagePage() {
                   }}>
                     <div style={{
                       display: 'flex', gap: '4px', padding: '0.6rem 1rem',
-                      background: '#fff', borderRadius: '18px',
+                      background: 'var(--cyber-panel)', borderRadius: '18px',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                       alignItems: 'center'
                     }}>
@@ -727,7 +728,7 @@ export default function MessagePage() {
               {/* Input area */}
               <div style={{
                 padding: '0.75rem 1.5rem 1rem',
-                background: '#fff',
+                background: 'var(--cyber-panel)',
                 borderTop: '1px solid #f0f0f0',
                 flexShrink: 0
               }}>
@@ -741,7 +742,7 @@ export default function MessagePage() {
                       position: 'absolute',
                       bottom: '100%',
                       left: 0,
-                      background: '#fff',
+                      background: 'var(--cyber-panel)',
                       border: '1px solid #e0e0e0',
                       borderRadius: '12px',
                       padding: '0.75rem',
@@ -764,7 +765,7 @@ export default function MessagePage() {
                             transition: 'background 0.15s',
                             lineHeight: 1
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = '#f0f0f0'}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--cyber-border)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           {emoji}
@@ -784,14 +785,14 @@ export default function MessagePage() {
                     disabled={uploadingImage}
                     style={{
                       width: '40px', height: '40px', borderRadius: '50%',
-                      border: 'none', background: '#f0f0f0',
+                      border: 'none', background: 'var(--cyber-border)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: uploadingImage ? 'not-allowed' : 'pointer',
                       color: '#64748b', flexShrink: 0, transition: 'all 0.15s'
                     }}
                     title="Gửi ảnh"
-                    onMouseEnter={e => { if (!uploadingImage) e.currentTarget.style.background = '#e0e0e0' }}
-                    onMouseLeave={e => { if (!uploadingImage) e.currentTarget.style.background = '#f0f0f0' }}
+                    onMouseEnter={e => { if (!uploadingImage) e.currentTarget.style.background = 'var(--cyber-border)' }}
+                    onMouseLeave={e => { if (!uploadingImage) e.currentTarget.style.background = 'var(--cyber-border)' }}
                   >
                     <RiImageAddFill size={20} />
                   </button>
@@ -809,14 +810,14 @@ export default function MessagePage() {
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     style={{
                       width: '40px', height: '40px', borderRadius: '50%',
-                      border: 'none', background: '#f0f0f0',
+                      border: 'none', background: 'var(--cyber-border)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: 'pointer', color: '#64748b', flexShrink: 0,
                       transition: 'all 0.15s'
                     }}
                     title="Biểu tượng cảm xúc"
-                    onMouseEnter={e => e.currentTarget.style.background = '#e0e0e0'}
-                    onMouseLeave={e => e.currentTarget.style.background = '#f0f0f0'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--cyber-border)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--cyber-border)'}
                   >
                     <RiEmotionHappyLine size={20} />
                   </button>
@@ -826,7 +827,7 @@ export default function MessagePage() {
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
-                    background: '#f0f2f5',
+                    background: 'var(--cyber-panel)',
                     borderRadius: '24px',
                     padding: '0 1.25rem',
                     minHeight: '44px'
@@ -843,7 +844,7 @@ export default function MessagePage() {
                         background: 'transparent',
                         outline: 'none',
                         fontSize: '0.95rem',
-                        color: '#1a1a2e',
+                        color: 'white',
                         padding: '0.5rem 0'
                       }}
                     />
@@ -856,8 +857,8 @@ export default function MessagePage() {
                     style={{
                       width: '44px', height: '44px', borderRadius: '50%',
                       border: 'none',
-                      background: newMessage.trim() ? '#4f46e5' : '#e0e0e0',
-                      color: '#fff',
+                      background: newMessage.trim() ? '#4f46e5' : 'var(--cyber-border)',
+                      color: 'var(--cyber-panel)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: (!newMessage.trim() || uploadingImage) ? 'not-allowed' : 'pointer',
                       flexShrink: 0, transition: 'all 0.15s'
@@ -879,11 +880,11 @@ export default function MessagePage() {
             <div style={{
               flex: 1, display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', color: '#94a3b8',
-              background: '#fafafa', gap: '1rem'
+              background: 'transparent', gap: '1rem'
             }}>
               <div style={{
                 width: '80px', height: '80px', borderRadius: '50%',
-                background: '#e8e8e8', display: 'flex', alignItems: 'center',
+                background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <RiCustomerService2Fill size={40} style={{ opacity: 0.3, color: '#64748b' }} />
@@ -895,7 +896,7 @@ export default function MessagePage() {
                 onClick={contactAdmin}
                 disabled={contactingAdmin}
                 style={{
-                  background: '#4f46e5', color: '#fff',
+                  background: '#4f46e5', color: 'var(--cyber-panel)',
                   border: 'none', borderRadius: '24px',
                   padding: '0.75rem 2rem', fontWeight: 700,
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
@@ -919,5 +920,6 @@ export default function MessagePage() {
         }
       `}</style>
     </main>
+    </div>
   )
 }
