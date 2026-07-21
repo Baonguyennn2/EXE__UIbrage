@@ -115,7 +115,8 @@
 }
 
 .mini-hero-image-col {
-  width: 33.333%;
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
   border-right: 1px solid var(--cyber-border);
   position: relative;
 }
