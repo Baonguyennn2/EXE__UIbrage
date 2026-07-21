@@ -481,7 +481,7 @@ export default function MessagePage() {
                     transition: 'background 0.15s',
                     borderLeft: isActive ? '3px solid var(--cyber-cyan)' : '3px solid transparent'
                   }}
-                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#f5f5f5' }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(47, 93, 69, 0.89)' }}
                   onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
                 >
                   <div style={{ position: 'relative', flexShrink: 0 }}>

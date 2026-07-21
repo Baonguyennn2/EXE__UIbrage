@@ -256,15 +256,6 @@
   align-items: center;
 }
 
-.cyber-input-wrapper::before {
-  content: ">";
-  position: absolute;
-  left: 1rem;
-  color: var(--cyber-accent);
-  font-family: var(--font-cyber-mono);
-  font-weight: bold;
-}
-
 .cyber-input {
   width: 100%;
   background: var(--cyber-input);

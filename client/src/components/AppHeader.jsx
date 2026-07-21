@@ -145,7 +145,7 @@ export default function AppHeader({ onSearch }) {
 
         <div className="header-search">
           <div className="cyber-input-wrapper">
-            <input type="text" className="cyber-input" placeholder="  Search data streams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
+            <input type="text" className="cyber-input" placeholder="> Search data streams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} />
           </div>
         </div>
 

@@ -52,11 +52,11 @@ export default function LoginPage({ variant = 'v1' }) {
   }
 
   return (
-    <main className={`auth-figma auth-figma--login ${isCompact ? 'auth-figma--compact' : ''}`}>
-      <section className="auth-figma__canvas">
+    <main className={`auth-figma auth-figma--login ${isCompact ? 'auth-figma--compact' : ''}`} style={{ background: 'var(--cyber-bg)' }}>
+      <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
+      <section className="auth-figma__canvas" style={{ background: 'transparent', border: 'none', position: 'relative', zIndex: 10 }}>
         <header className="auth-figma__brand">
-          <span className="auth-figma__brand-tile">▦</span>
-          <strong>Ulbrage</strong>
+          <strong className="cyber-glitch-text" data-text="UIBRAGE" style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '2.5rem', letterSpacing: '0.1em', color: 'var(--cyber-accent)' }}>UIBRAGE</strong>
         </header>
 
         {notification && (
@@ -69,19 +69,21 @@ export default function LoginPage({ variant = 'v1' }) {
           </div>
         )}
 
-        <section className="auth-figma__card">
-          <header>
-            <h1>Log in to your Ulbrage account</h1>
-            <p>Welcome back! Please enter your details.</p>
+        <section className="auth-figma__card cyber-card" style={{ background: 'rgba(5, 5, 10, 0.7)', border: '1px solid var(--cyber-border)', padding: '2.5rem' }}>
+          <header style={{ marginBottom: '2rem' }}>
+            <h1 className="cyber-glitch-text" data-text="LOGIN_TO_SYSTEM" style={{ fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase', color: '#fff', fontSize: '1.5rem', marginBottom: '0.5rem' }}>LOGIN_TO_SYSTEM</h1>
+            <p style={{ color: 'var(--cyber-accent-secondary)', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem' }}>// ENTER_YOUR_CREDENTIALS</p>
           </header>
 
           <form className="auth-figma__form" onSubmit={handleSubmit}>
-            <label>
-              Username or Email
-              <div className="auth-figma__input-wrap">
-                <span><MdOutlineEmail /></span>
+            <label style={{ display: 'block', marginBottom: '1.25rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: 'var(--cyber-accent)' }}>USERNAME_OR_EMAIL</span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <MdOutlineEmail size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
                 <input
                   type="email"
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem' }}
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -90,15 +92,17 @@ export default function LoginPage({ variant = 'v1' }) {
               </div>
             </label>
 
-            <label>
-              <div className="auth-figma__label-row">
-                <span>Password</span>
-                <Link to="/auth/forgot-password">Forgot password?</Link>
+            <label style={{ display: 'block', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: 'var(--cyber-accent)' }}>PASSWORD</span>
+                <Link to="/auth/forgot-password" style={{ fontFamily: 'var(--font-cyber-mono)', fontSize: '0.8rem', color: 'var(--cyber-accent-secondary)' }}>Forgot password?</Link>
               </div>
-              <div className="auth-figma__input-wrap">
-                <span><RiLock2Line /></span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <RiLock2Line size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
                 <input
                   type="password"
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem' }}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -107,37 +111,36 @@ export default function LoginPage({ variant = 'v1' }) {
               </div>
             </label>
 
-            <button type="submit" className="auth-figma__submit" disabled={loading}>
-              {loading ? 'Logging in...' : 'Log in'}
+            <button type="submit" className="cyber-btn" disabled={loading} style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
+              {loading ? 'AUTHENTICATING...' : 'INITIALIZE_LOGIN'}
             </button>
           </form>
 
-          <div className="auth-figma__divider">
-            <span>OR LOG IN WITH ANOTHER SERVICE</span>
+          <div style={{ margin: '2rem 0', position: 'relative', textAlign: 'center' }}>
+            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--cyber-border)', zIndex: 1 }}></div>
+            <span style={{ position: 'relative', zIndex: 2, background: 'rgba(5, 5, 10, 0.95)', padding: '0 1rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.75rem', color: '#64748b' }}>OR_CONNECT_VIA</span>
           </div>
 
-          <div className="auth-figma__socials">
-            <button type="button" className="auth-figma__social-btn" onClick={handleFacebookLogin}>
-              <FaFacebookF />
-              Facebook
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button type="button" className="cyber-btn-outline" onClick={handleFacebookLogin} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', clipPath: 'none' }}>
+              <FaFacebookF /> FACEBOOK
             </button>
-            <button type="button" className="auth-figma__social-btn" onClick={handleGoogleLogin}>
-              <FcGoogle />
-              Google
+            <button type="button" className="cyber-btn-outline" onClick={handleGoogleLogin} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', clipPath: 'none' }}>
+              <FcGoogle /> GOOGLE
             </button>
           </div>
 
-          <footer className="auth-figma__footer">
-            Don&apos;t have an account? <Link to="/auth/register">Create account</Link>
+          <footer style={{ marginTop: '2.5rem', textAlign: 'center', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: '#94a3b8' }}>
+            NEW_TO_SYSTEM? <Link to="/auth/register" style={{ color: 'var(--cyber-accent)', marginLeft: '0.5rem' }}>CREATE_ACCOUNT</Link>
           </footer>
         </section>
 
-        <nav className="auth-figma__meta-links">
-          <a href="#">About</a>
-          <a href="#">FAQ</a>
-          <a href="#">Blog</a>
-          <a href="#">Contact</a>
-          <a href="#">Terms of Service</a>
+        <nav style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.8rem', color: 'var(--cyber-muted-foreground)', marginTop: '2rem' }}>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>ABOUT</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>FAQ</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>BLOG</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>CONTACT</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS_OF_SERVICE</a>
         </nav>
       </section>
     </main>
