@@ -116,7 +116,7 @@ export default function AppHeader({ onSearch }) {
     <header className="site-header">
       <div className="header-inner">
         <button className="mobile-toggle" onClick={() => setIsDrawerOpen(true)} style={{ marginRight: '0.5rem' }}>
-          <RiMenuLine size={24} color="#1e293b" />
+          <RiMenuLine size={24} color="#00ff0c" />
         </button>
 
         <Link to="/" className="logo-link" style={{ textDecoration: 'none' }}>

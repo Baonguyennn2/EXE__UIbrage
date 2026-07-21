@@ -6,6 +6,8 @@ import LoadingScreen from '../components/LoadingScreen.jsx'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { RiChat3Line, RiEyeLine, RiArrowLeftLine, RiSendPlane2Line } from 'react-icons/ri'
+import '../dashboard-redesign.css'
+import '../homepage-redesign.css'
 
 export default function PostDetailPage() {
   const { id } = useParams()
@@ -61,83 +63,90 @@ export default function PostDetailPage() {
   if (!post) return <div className="error-screen">Post not found</div>
 
   return (
-    <main className="market-home">
+    <div className="dashboard-layout">
+      <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
       <AppHeader />
       
-      <div className="post-detail-container" style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1rem' }}>
-        <button className="btn-back" onClick={() => navigate('/community')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: '1.5rem', fontWeight: 600 }}>
-          <RiArrowLeftLine /> Back to Community
+      <main className="dashboard-main" style={{ maxWidth: '900px', margin: '0 auto', width: '100%', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
+        <button className="cyber-btn-outline" onClick={() => navigate('/community')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none' }}>
+          <RiArrowLeftLine /> BACK_TO_NETWORK
         </button>
 
-        <article className="post-detail-main surface-card" style={{ padding: '2.5rem', borderRadius: '1rem', background: '#fff', border: '1px solid #e2e8f0' }}>
+        <article className="cyber-card" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--cyber-accent-tertiary)' }}></div>
+          
           {post.coverImageUrl && (
-            <img src={post.coverImageUrl} alt={post.title} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '0.75rem', marginBottom: '2rem' }} />
+            <img src={post.coverImageUrl} alt={post.title} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '4px', marginBottom: '2rem', border: '1px solid var(--cyber-border)' }} />
           )}
 
-          <header className="post-header" style={{ marginBottom: '2rem' }}>
+          <header style={{ marginBottom: '2rem', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              <div className="author-avatar-big" style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 700 }}>
-                {post.author?.avatarUrl ? <img src={post.author.avatarUrl} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : (post.author?.username?.[0]?.toUpperCase() || 'U')}
+              <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'rgba(0,212,255,0.1)', border: '1px solid var(--cyber-accent-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 700, color: 'var(--cyber-accent-tertiary)' }}>
+                {post.author?.avatarUrl ? <img src={post.author.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (post.author?.username?.[0]?.toUpperCase() || 'U')}
               </div>
               <div>
-                <h4 style={{ margin: 0 }}>{post.author?.username}</h4>
-                <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Posted on {new Date(post.createdAt).toLocaleDateString()}</span>
+                <h4 style={{ margin: 0, color: 'var(--cyber-foreground)' }}>@{post.author?.username}</h4>
+                <span style={{ fontSize: '0.85rem', color: '#64748b', fontFamily: 'var(--font-cyber-mono)' }}>POSTED_ON {new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
-            <h1 style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem' }}>{post.title}</h1>
-            <div className="post-meta-row" style={{ display: 'flex', gap: '1.5rem', color: '#64748b', fontSize: '0.9rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiChat3Line /> {post.comments?.length || 0} Comments</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiEyeLine /> {post.viewCount || 0} Views</span>
+            <h1 className="cyber-glitch-text" data-text={post.title} style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem', fontFamily: 'var(--font-cyber-heading)', color: '#fff', textTransform: 'uppercase' }}>{post.title}</h1>
+            
+            <div style={{ display: 'flex', gap: '1.5rem', color: '#64748b', fontSize: '0.9rem', fontFamily: 'var(--font-cyber-mono)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiChat3Line color="var(--cyber-accent)" /> {post.comments?.length || 0} COMMENTS</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiEyeLine color="var(--cyber-accent-tertiary)" /> {post.viewCount || 0} VIEWS</span>
             </div>
           </header>
 
-          <div className="post-content markdown-content" style={{ fontSize: '1.1rem', lineHeight: 1.7, color: '#334155' }}>
+          <div className="post-content markdown-content" style={{ fontSize: '1.1rem', lineHeight: 1.7, color: 'var(--cyber-foreground)' }}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {post.content}
             </ReactMarkdown>
           </div>
 
-          <div className="post-tags" style={{ marginTop: '3rem', display: 'flex', gap: '0.75rem' }}>
+          <div style={{ marginTop: '3rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             {post.tags?.split(',').map(tag => (
-              <span key={tag} style={{ background: '#f1f5f9', color: '#64748b', padding: '0.4rem 0.8rem', borderRadius: '2rem', fontSize: '0.85rem', fontWeight: 600 }}>#{tag.trim()}</span>
+              <span key={tag} className="cyber-btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', minHeight: 'auto', clipPath: 'none' }}>
+                #{tag.trim()}
+              </span>
             ))}
           </div>
         </article>
 
-        <section className="post-comments-section" style={{ marginTop: '3rem' }}>
-          <h3>Comments ({post.comments?.length || 0})</h3>
+        <section style={{ marginTop: '3rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-cyber-mono)', color: 'var(--cyber-accent-secondary)', textTransform: 'uppercase', marginBottom: '1.5rem' }}>// COMMENTS ({post.comments?.length || 0})</h3>
           
-          <form onSubmit={handleAddComment} className="comment-form-v2" style={{ background: '#fff', padding: '1.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', marginTop: '1.5rem' }}>
+          <form onSubmit={handleAddComment} className="cyber-card" style={{ padding: '1.5rem', marginTop: '1.5rem', borderLeft: '2px solid var(--cyber-accent)' }}>
             <textarea 
+              className="cyber-input"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add to the discussion..."
-              style={{ width: '100%', minHeight: '100px', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', marginBottom: '1rem', resize: 'vertical' }}
+              placeholder="ADD_TO_DATA_STREAM..."
+              style={{ width: '100%', minHeight: '100px', padding: '1rem', marginBottom: '1rem', resize: 'vertical' }}
               required
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" className="btn-solid" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <RiSendPlane2Line /> {isSubmitting ? 'Sending...' : 'Post Comment'}
+              <button type="submit" className="cyber-btn" disabled={isSubmitting} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.5rem', minHeight: 'auto' }}>
+                <RiSendPlane2Line /> {isSubmitting ? 'TRANSMITTING...' : 'POST_COMMENT'}
               </button>
             </div>
           </form>
 
-          <div className="comments-list" style={{ marginTop: '2rem', display: 'grid', gap: '1rem' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {post.comments?.map((comment) => (
-              <div key={comment.id} className="comment-item surface-card" style={{ padding: '1.5rem', background: '#fff', borderRadius: '1rem', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                  <div className="author-avatar-small" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
-                    {comment.user?.avatarUrl ? <img src={comment.user.avatarUrl} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : (comment.user?.username?.[0]?.toUpperCase() || 'U')}
+              <div key={comment.id} className="cyber-card" style={{ padding: '1.5rem', background: 'rgba(5,5,10,0.5)', borderLeft: '1px solid var(--cyber-border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: 'rgba(255,0,255,0.1)', border: '1px solid var(--cyber-accent-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'var(--cyber-accent-secondary)' }}>
+                    {comment.user?.avatarUrl ? <img src={comment.user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (comment.user?.username?.[0]?.toUpperCase() || 'U')}
                   </div>
-                  <strong style={{ fontSize: '0.95rem' }}>{comment.user?.username || comment.userName}</strong>
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>• {new Date(comment.createdAt).toLocaleDateString()}</span>
+                  <strong style={{ fontSize: '0.95rem', color: 'var(--cyber-foreground)' }}>@{comment.user?.username || comment.userName}</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'var(--font-cyber-mono)' }}>• {new Date(comment.createdAt).toLocaleDateString()}</span>
                 </div>
-                <p style={{ margin: 0, color: '#334155' }}>{comment.content}</p>
+                <p style={{ margin: 0, color: 'var(--cyber-foreground)', lineHeight: 1.6 }}>{comment.content}</p>
               </div>
             ))}
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
