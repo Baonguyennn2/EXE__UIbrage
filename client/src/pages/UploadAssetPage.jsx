@@ -9,6 +9,8 @@ import {
   RiBold, RiItalic, RiH1, RiH2, RiH3, RiDoubleQuotesL, RiLink, RiListUnordered, RiListOrdered, RiCodeLine,
   RiSave3Line
 } from 'react-icons/ri'
+import '../dashboard-redesign.css'
+import '../homepage-redesign.css'
 
 export default function UploadAssetPage({ isAdmin = false, variant = 'create' }) {
   const navigate = useNavigate()

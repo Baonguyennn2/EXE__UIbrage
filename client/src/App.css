@@ -3846,7 +3846,16 @@
   padding: 0.5rem 0;
   min-width: 200px;
   z-index: 200;
-  margin-top: 0.5rem;
+  margin-top: 0;
+}
+
+.header-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
 }
 
 .header-dropdown--categories {

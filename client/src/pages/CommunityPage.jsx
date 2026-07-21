@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
 import { postService, metadataService } from '../services/api'
 import { RiChat3Line, RiEyeLine, RiAddLine, RiSearchLine, RiFireLine } from 'react-icons/ri'
+import '../dashboard-redesign.css'
+import '../homepage-redesign.css'
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState([])
