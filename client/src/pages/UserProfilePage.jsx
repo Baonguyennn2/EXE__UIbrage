@@ -200,27 +200,50 @@ export default function UserProfilePage() {
           </aside>
 
           <section className="profile-v2-main-list">
-             {assets.length === 0 ? (
-               <div className="detail-v2-card" style={{ textAlign: 'center', padding: '4rem' }}>
-                  <p>No assets uploaded yet.</p>
-               </div>
-             ) : (
-               assets.map(asset => (
-                 <article key={asset.id} className="detail-v2-card" style={{ padding: 0, overflow: 'hidden' }}>
-                    <Link to={`/marketplace/assets/${asset.id}`}>
-                      <img src={asset.coverImageUrl} style={{ width: '100%', height: '320px', objectFit: 'cover' }} />
-                    </Link>
-                    <div style={{ padding: '1.5rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <Link to={`/marketplace/assets/${asset.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          <h2 style={{ margin: 0, fontSize: '1.5rem', fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase' }}>{asset.title}</h2>
-                        </Link>
-                        <strong style={{ fontSize: '1.5rem', color: 'var(--cyber-accent)' }}>${asset.price}</strong>
+             {activeTab === 'assets' && (
+               assets.length === 0 ? (
+                 <div className="detail-v2-card" style={{ textAlign: 'center', padding: '4rem' }}>
+                    <p>No assets uploaded yet.</p>
+                 </div>
+               ) : (
+                 assets.map(asset => (
+                   <article key={asset.id} className="detail-v2-card" style={{ padding: 0, overflow: 'hidden' }}>
+                      <Link to={`/marketplace/assets/${asset.id}`}>
+                        <img src={asset.coverImageUrl} style={{ width: '100%', height: '320px', objectFit: 'cover' }} />
+                      </Link>
+                      <div style={{ padding: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                          <Link to={`/marketplace/assets/${asset.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem', fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase' }}>{asset.title}</h2>
+                          </Link>
+                          <strong style={{ fontSize: '1.5rem', color: 'var(--cyber-accent)' }}>${asset.price}</strong>
+                        </div>
+                        <p style={{ color: 'var(--cyber-muted-foreground)', margin: '0.5rem 0', fontFamily: 'var(--font-cyber-mono)' }}>{asset.description?.substring(0, 160)}...</p>
                       </div>
-                      <p style={{ color: 'var(--cyber-muted-foreground)', margin: '0.5rem 0', fontFamily: 'var(--font-cyber-mono)' }}>{asset.description?.substring(0, 160)}...</p>
-                    </div>
-                 </article>
-               ))
+                   </article>
+                 ))
+               )
+             )}
+
+             {activeTab === 'about' && (
+               <div className="detail-v2-card" style={{ padding: '2rem' }}>
+                 <h2 style={{ fontFamily: 'var(--font-cyber-heading)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>ABOUT_CREATOR</h2>
+                 <p style={{ color: 'var(--cyber-foreground)', lineHeight: 1.6 }}>
+                   {profileUser.bio || 'NO_EXTENDED_BIO_DATA_FOUND.'}
+                 </p>
+                 <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--cyber-border)' }}>
+                    <p style={{ color: 'var(--cyber-muted-foreground)', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem' }}>
+                      // SYSTEM_LOG: USER_JOINED {new Date(profileUser.createdAt).toLocaleDateString()}
+                    </p>
+                 </div>
+               </div>
+             )}
+
+             {activeTab === 'reviews' && (
+               <div className="detail-v2-card" style={{ padding: '4rem', textAlign: 'center' }}>
+                 <h2 style={{ fontFamily: 'var(--font-cyber-heading)', color: 'var(--cyber-muted-foreground)', marginBottom: '1rem' }}>NO_REVIEWS_FOUND</h2>
+                 <p style={{ color: 'var(--cyber-muted-foreground)', fontFamily: 'var(--font-cyber-mono)' }}>This creator has not received any reviews yet.</p>
+               </div>
              )}
           </section>
         </div>
