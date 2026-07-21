@@ -68,7 +68,7 @@ export default function MessagePage() {
     } catch (e) {
       console.error('Error parsing user data', e)
     }
-    
+
     if (!savedUser) {
       navigate('/auth/login')
       return
@@ -76,12 +76,12 @@ export default function MessagePage() {
     setUser(savedUser)
     // Gán ngay vào ref để các effect khác dùng được
     userRef.current = savedUser
-    
+
     // Đảm bảo socket join room của user
     if (socket && isConnected) {
       socket.emit('join', savedUser.id)
     }
-    
+
     fetchConversations()
     setLoading(false)
   }, [socket, isConnected])
@@ -309,7 +309,7 @@ export default function MessagePage() {
   }
 
   // Simple emoji list
-  const EMOJIS = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','❤️','🧡','💛','💚','💙','💜','🖤','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','👍','👎','👊','✊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','👂','👃','👣','👀','👁️']
+  const EMOJIS = ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '🥰', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩', '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '😴', '😌', '😛', '😜', '😝', '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '☹️', '🙁', '😖', '😞', '😟', '😤', '😢', '😭', '😦', '😧', '😨', '😩', '🤯', '😬', '😰', '😱', '🥵', '🥶', '😳', '🤪', '😵', '😡', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '👍', '👎', '👊', '✊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '👂', '👃', '👣', '👀', '👁️']
 
   const insertEmoji = (emoji) => {
     setNewMessage(prev => prev + emoji)
@@ -326,7 +326,7 @@ export default function MessagePage() {
         setContactingAdmin(false)
         return
       }
-      
+
       // Get admin contact info and send auto-message
       const res = await userService.getAdminContact()
       if (res.data && res.data.id) {
@@ -335,7 +335,7 @@ export default function MessagePage() {
           text: 'Hello, I need help from the admin.'
         }
         await messageService.sendMessage(msgData)
-        
+
         // Refresh conversations and open admin chat
         await fetchConversations()
         const updatedConv = (await messageService.getConversations()).data
@@ -660,8 +660,8 @@ export default function MessagePage() {
                               background: isMine ? 'var(--cyber-cyan)' : 'var(--cyber-panel)',
                               color: isMine ? 'black' : 'white',
                               boxShadow: isMine
-                                ? '0 2px 8px rgba(79,70,229,0.15)'
-                                : '0 1px 4px rgba(0,0,0,0.06)',
+                                ? 'rgb(0 255 136) 0px 2px 8px'
+                                : '0 1px 4px rgba(255, 255, 255, 0.06)',
                               opacity: msg.sending ? 0.7 : 1,
                               border: msg.error ? '1px solid #ef4444' : 'none',
                               fontSize: '0.92rem',

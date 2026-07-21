@@ -12,9 +12,23 @@ export default function HomepagePage() {
   const [latestAssets, setLatestAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [categories, setCategories] = useState([])
-  const [activeStyle, setActiveStyle] = useState('scifi')
-  const [activeGenre, setActiveGenre] = useState('')
-  const [activeEngine, setActiveEngine] = useState('all')
+  const [tags, setTags] = useState([])
+
+  const uiStyles = ['Fantasy', 'Sci-Fi', 'Pixel Art', 'Minimalist']
+  const gameGenres = ['RPG', 'Platformer', 'Strategy', 'Casual']
+  const engines = ['Unity', 'Unreal Engine', 'Godot']
+  
+  const [filters, setFilters] = useState({
+    categoryId: '',
+    tagId: '',
+    engine: '',
+    search: '',
+    priceRange: ''
+  })
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -22,15 +36,20 @@ export default function HomepagePage() {
     const fetchData = async () => {
       setLoading(true)
       try {
-        const [assetsRes, catsRes] = await Promise.all([
-          assetService.getAll(null, { signal: controller.signal }),
-          metadataService.getCategories({ signal: controller.signal })
+        const apiParams = { ...filters }
+        if (filters.priceRange === 'free') apiParams.maxPrice = 0
+        
+        const [assetsRes, catsRes, tagsRes] = await Promise.all([
+          assetService.getAll(apiParams, { signal: controller.signal }),
+          metadataService.getCategories({ signal: controller.signal }),
+          metadataService.getTags({ signal: controller.signal })
         ])
         
         const allAssets = assetsRes.data
         setFeaturedAssets(allAssets.slice(0, 4))
         setLatestAssets(allAssets.slice(0, 8))
         setCategories(catsRes.data)
+        setTags(tagsRes.data)
         setLoading(false)
       } catch (error) {
         if (error.name !== 'CanceledError') {
@@ -42,7 +61,7 @@ export default function HomepagePage() {
 
     fetchData()
     return () => controller.abort()
-  }, [])
+  }, [filters])
 
   if (loading) return <LoadingScreen message="Loading Marketplace..." />
 
@@ -61,54 +80,101 @@ export default function HomepagePage() {
 
       <main className="home-container">
         {/* Sidebar */}
-        <aside className="home-sidebar">
+        <aside className="home-sidebar" style={{ position: 'sticky', top: '2rem' }}>
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">SYSTEM_FILTERS</h3>
             <button 
-              onClick={() => navigate('/marketplace?sort=popular')} 
+              onClick={() => handleFilterChange('search', '')} 
               className="cyber-btn" 
               style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'flex-start', background: '#1c1c2e', border: 'none', borderLeft: '4px solid #f97316', color: '#fff', padding: '0.75rem', clipPath: 'none' }}
             >
               <RiFireFill style={{ color: '#f97316' }} className="flicker" />
-              <span>POPULAR TAGS</span>
+              <span>RESET_ALL</span>
             </button>
           </div>
 
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">// UI Style</h3>
             <div>
-              <button onClick={() => setActiveStyle('fantasy')} className={`sidebar-link-v2 ${activeStyle === 'fantasy' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>FANTASY_CORE</button>
-              <button onClick={() => setActiveStyle('scifi')} className={`sidebar-link-v2 ${activeStyle === 'scifi' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>SCI-FI_NEON</button>
-              <button onClick={() => setActiveStyle('pixel')} className={`sidebar-link-v2 ${activeStyle === 'pixel' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>PIXEL_GLITCH</button>
-              <button onClick={() => setActiveStyle('minimal')} className={`sidebar-link-v2 ${activeStyle === 'minimal' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>MINIMAL_GRID</button>
+              {uiStyles.map(style => {
+                const matchedCat = categories.find(c => c.name.toLowerCase() === style.toLowerCase())
+                const isActive = matchedCat ? filters.categoryId == matchedCat.id : filters.search === style
+                
+                return (
+                  <button 
+                    key={style}
+                    className={`sidebar-link-v2 ${isActive ? 'active' : ''}`}
+                    style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+                    onClick={() => {
+                      if (matchedCat) {
+                        handleFilterChange('categoryId', isActive ? '' : matchedCat.id)
+                      } else {
+                        handleFilterChange('search', isActive ? '' : style)
+                      }
+                    }}
+                  >
+                    {style.toUpperCase().replace(' ', '_')}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">// Game Genre</h3>
             <div>
-              <button onClick={() => setActiveGenre('rpg')} className={`sidebar-link-v2 ${activeGenre === 'rpg' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>RPG_TACTICAL</button>
-              <button onClick={() => setActiveGenre('cyber')} className={`sidebar-link-v2 ${activeGenre === 'cyber' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>CYBER_PLATFORMER</button>
-              <button onClick={() => setActiveGenre('strat')} className={`sidebar-link-v2 ${activeGenre === 'strat' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>STRATEGY_VOID</button>
-              <button onClick={() => setActiveGenre('casual')} className={`sidebar-link-v2 ${activeGenre === 'casual' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>CASUAL_FLOW</button>
+              {gameGenres.map(genre => {
+                const matchedTag = tags.find(t => t.name.toLowerCase() === genre.toLowerCase())
+                const isActive = matchedTag ? filters.tagId == matchedTag.id : filters.search === genre
+                
+                return (
+                  <button 
+                    key={genre}
+                    className={`sidebar-link-v2 ${isActive ? 'active' : ''}`}
+                    style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+                    onClick={() => {
+                      if (matchedTag) {
+                        handleFilterChange('tagId', isActive ? '' : matchedTag.id)
+                      } else {
+                        handleFilterChange('search', isActive ? '' : genre)
+                      }
+                    }}
+                  >
+                    {genre.toUpperCase().replace(' ', '_')}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">// Neural Engine</h3>
             <div>
-              <button onClick={() => setActiveEngine('all')} className={`sidebar-link-v2 ${activeEngine === 'all' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>ALL_ENGINES</button>
-              <button onClick={() => setActiveEngine('unity')} className={`sidebar-link-v2 ${activeEngine === 'unity' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>UNITY_C#</button>
-              <button onClick={() => setActiveEngine('unreal')} className={`sidebar-link-v2 ${activeEngine === 'unreal' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>UNREAL_BP</button>
-              <button onClick={() => setActiveEngine('godot')} className={`sidebar-link-v2 ${activeEngine === 'godot' ? 'active' : ''}`} style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}>GODOT_GD</button>
+              <button 
+                className={`sidebar-link-v2 ${filters.engine === '' ? 'active' : ''}`} 
+                onClick={() => handleFilterChange('engine', '')}
+                style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+              >
+                ALL_ENGINES
+              </button>
+              {engines.map(engine => (
+                <button 
+                  key={engine}
+                  className={`sidebar-link-v2 ${filters.engine === engine ? 'active' : ''}`}
+                  onClick={() => handleFilterChange('engine', engine)}
+                  style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+                >
+                  {engine.toUpperCase().replace(' ', '_')}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">// Credits</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => navigate('/marketplace?price=0')} className="cyber-btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: '#12121a' }}>FREE</button>
-              <button onClick={() => navigate('/marketplace?price_gt=0')} className="cyber-btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: '#12121a' }}>PAID</button>
+              <button onClick={() => handleFilterChange('priceRange', 'free')} className={`cyber-btn-outline ${filters.priceRange === 'free' ? 'active' : ''}`} style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: filters.priceRange === 'free' ? 'var(--cyber-accent-tertiary)' : '#12121a', color: filters.priceRange === 'free' ? '#000' : '' }}>FREE</button>
+              <button onClick={() => handleFilterChange('priceRange', 'paid')} className={`cyber-btn-outline ${filters.priceRange === 'paid' ? 'active' : ''}`} style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: filters.priceRange === 'paid' ? 'var(--cyber-accent-tertiary)' : '#12121a', color: filters.priceRange === 'paid' ? '#000' : '' }}>PAID</button>
             </div>
           </div>
         </aside>

@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { RiFireFill } from 'react-icons/ri'
 import AppHeader from '../components/AppHeader.jsx'
 import { assetService, metadataService } from '../services/api'
 import '../dashboard-redesign.css'
@@ -78,18 +79,23 @@ export default function MarketplacePage() {
 
         <div className="main-layout" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', flex: 1 }}>
           
-          <aside className="cyber-card" style={{ padding: '2rem', alignSelf: 'start', display: 'flex', flexDirection: 'column', gap: '2.5rem', top: '2rem', position: 'sticky' }}>
+          <aside className="home-sidebar" style={{ position: 'sticky', top: '2rem' }}>
             
-            <div className="filter-group">
-              <h3 className="filter-label" style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', marginBottom: '1rem', letterSpacing: '0.1em', fontWeight: 900 }}>[SYSTEM_FILTERS]</h3>
-              <button className="cyber-btn-outline interactive-ripple" style={{ width: '100%', fontSize: '11px', minHeight: 'auto', padding: '0.5rem' }} onClick={() => handleFilterChange('search', '')}>
-                RESET_ALL
+            <div className="home-sidebar-section">
+              <h3 className="home-sidebar-title">SYSTEM_FILTERS</h3>
+              <button 
+                onClick={() => handleFilterChange('search', '')}
+                className="cyber-btn" 
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'flex-start', background: '#1c1c2e', border: 'none', borderLeft: '4px solid #f97316', color: '#fff', padding: '0.75rem', clipPath: 'none' }}
+              >
+                <RiFireFill style={{ color: '#f97316' }} className="flicker" />
+                <span>RESET_ALL</span>
               </button>
             </div>
 
-            <div className="filter-group">
-              <h3 className="filter-label" style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', marginBottom: '1rem', letterSpacing: '0.1em', fontWeight: 900 }}>[UI_STYLE]</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="home-sidebar-section">
+              <h3 className="home-sidebar-title">// UI Style</h3>
+              <div>
                 {uiStyles.map(style => {
                   const matchedCat = categories.find(c => c.name.toLowerCase() === style.toLowerCase())
                   const isActive = matchedCat ? filters.categoryId == matchedCat.id : filters.search === style
@@ -97,13 +103,8 @@ export default function MarketplacePage() {
                   return (
                     <button 
                       key={style}
-                      className={`cyber-btn-ghost ${isActive ? 'active' : ''}`}
-                      style={{ 
-                        width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                        borderLeft: isActive ? '3px solid var(--cyber-accent)' : '3px solid transparent', 
-                        color: isActive ? 'var(--cyber-accent)' : '#94a3b8',
-                        background: isActive ? 'rgba(0, 212, 255, 0.05)' : 'transparent'
-                      }}
+                      className={`sidebar-link-v2 ${isActive ? 'active' : ''}`}
+                      style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
                       onClick={() => {
                         if (matchedCat) {
                           handleFilterChange('categoryId', isActive ? '' : matchedCat.id)
@@ -112,16 +113,16 @@ export default function MarketplacePage() {
                         }
                       }}
                     >
-                      {'>'} {style.toUpperCase()}
+                      {style.toUpperCase().replace(' ', '_')}
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            <div className="filter-group">
-              <h3 className="filter-label" style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', marginBottom: '1rem', letterSpacing: '0.1em', fontWeight: 900 }}>[GAME_GENRE]</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="home-sidebar-section">
+              <h3 className="home-sidebar-title">// Game Genre</h3>
+              <div>
                 {gameGenres.map(genre => {
                   const matchedTag = tags.find(t => t.name.toLowerCase() === genre.toLowerCase())
                   const isActive = matchedTag ? filters.tagId == matchedTag.id : filters.search === genre
@@ -129,13 +130,8 @@ export default function MarketplacePage() {
                   return (
                     <button 
                       key={genre}
-                      className={`cyber-btn-ghost ${isActive ? 'active' : ''}`}
-                      style={{ 
-                        width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                        borderLeft: isActive ? '3px solid var(--cyber-accent-secondary)' : '3px solid transparent', 
-                        color: isActive ? 'var(--cyber-accent-secondary)' : '#94a3b8',
-                        background: isActive ? 'rgba(255, 0, 255, 0.05)' : 'transparent'
-                      }}
+                      className={`sidebar-link-v2 ${isActive ? 'active' : ''}`}
+                      style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
                       onClick={() => {
                         if (matchedTag) {
                           handleFilterChange('tagId', isActive ? '' : matchedTag.id)
@@ -144,73 +140,41 @@ export default function MarketplacePage() {
                         }
                       }}
                     >
-                      {'>'} {genre.toUpperCase()}
+                      {genre.toUpperCase().replace(' ', '_')}
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            <div className="filter-group">
-              <h3 className="filter-label" style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', marginBottom: '1rem', letterSpacing: '0.1em', fontWeight: 900 }}>[ENGINE]</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="home-sidebar-section">
+              <h3 className="home-sidebar-title">// Neural Engine</h3>
+              <div>
                 <button 
-                  className={`cyber-btn-ghost ${filters.engine === '' ? 'active' : ''}`} 
+                  className={`sidebar-link-v2 ${filters.engine === '' ? 'active' : ''}`} 
                   onClick={() => handleFilterChange('engine', '')}
-                  style={{ 
-                    width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                    borderLeft: filters.engine === '' ? '3px solid var(--cyber-accent)' : '3px solid transparent', 
-                    color: filters.engine === '' ? 'var(--cyber-accent)' : '#94a3b8',
-                    background: filters.engine === '' ? 'rgba(0, 212, 255, 0.05)' : 'transparent'
-                  }}
+                  style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
                 >
-                  {'>'} ALL_ENGINES
+                  ALL_ENGINES
                 </button>
                 {engines.map(engine => (
                   <button 
                     key={engine}
-                    className={`cyber-btn-ghost ${filters.engine === engine ? 'active' : ''}`}
+                    className={`sidebar-link-v2 ${filters.engine === engine ? 'active' : ''}`}
                     onClick={() => handleFilterChange('engine', engine)}
-                    style={{ 
-                      width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                      borderLeft: filters.engine === engine ? '3px solid var(--cyber-accent)' : '3px solid transparent', 
-                      color: filters.engine === engine ? 'var(--cyber-accent)' : '#94a3b8',
-                      background: filters.engine === engine ? 'rgba(0, 212, 255, 0.05)' : 'transparent'
-                    }}
+                    style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
                   >
-                    {'>'} {engine.toUpperCase().replace(' ', '_')}
+                    {engine.toUpperCase().replace(' ', '_')}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="filter-group">
-              <h3 className="filter-label" style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', marginBottom: '1rem', letterSpacing: '0.1em', fontWeight: 900 }}>[PRICE]</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <button 
-                  className={`cyber-btn-ghost ${filters.priceRange === 'free' ? 'active' : ''}`} 
-                  onClick={() => handleFilterChange('priceRange', 'free')}
-                  style={{ 
-                    width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                    borderLeft: filters.priceRange === 'free' ? '3px solid #22c55e' : '3px solid transparent', 
-                    color: filters.priceRange === 'free' ? '#22c55e' : '#94a3b8',
-                    background: filters.priceRange === 'free' ? 'rgba(34, 197, 94, 0.05)' : 'transparent'
-                  }}
-                >
-                  {'>'} FREE_ACCESS
-                </button>
-                <button 
-                  className={`cyber-btn-ghost ${filters.priceRange === 'paid' ? 'active' : ''}`} 
-                  onClick={() => handleFilterChange('priceRange', 'paid')}
-                  style={{ 
-                    width: '100%', textAlign: 'left', display: 'block', padding: '0.5rem 1rem', fontSize: '12px', 
-                    borderLeft: filters.priceRange === 'paid' ? '3px solid var(--cyber-accent-tertiary)' : '3px solid transparent', 
-                    color: filters.priceRange === 'paid' ? 'var(--cyber-accent-tertiary)' : '#94a3b8',
-                    background: filters.priceRange === 'paid' ? 'rgba(255, 255, 0, 0.05)' : 'transparent'
-                  }}
-                >
-                  {'>'} PREMIUM_CREDITS
-                </button>
+            <div className="home-sidebar-section">
+              <h3 className="home-sidebar-title">// Credits</h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => handleFilterChange('priceRange', 'free')} className="cyber-btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: filters.priceRange === 'free' ? 'var(--cyber-accent-tertiary)' : '#12121a', color: filters.priceRange === 'free' ? '#000' : '' }}>FREE</button>
+                <button onClick={() => handleFilterChange('priceRange', 'paid')} className="cyber-btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none', background: filters.priceRange === 'paid' ? 'var(--cyber-accent-tertiary)' : '#12121a', color: filters.priceRange === 'paid' ? '#000' : '' }}>PAID</button>
               </div>
             </div>
           </aside>
