@@ -384,7 +384,7 @@ export default function MessagePage() {
   if (loading) return <div className="loading-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#64748b' }}>Loading Messages...</div>
 
   return (
-    <div className="dashboard-layout"><div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>\n    <main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 10, position: 'relative' }}>
+    <div className="dashboard-layout"><div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div><main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 10, position: 'relative' }}>
       <AppHeader />
 
       <div style={{

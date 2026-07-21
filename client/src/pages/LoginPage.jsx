@@ -21,10 +21,10 @@ export default function LoginPage({ variant = 'v1' }) {
     try {
       const response = await authService.login(email, password)
       const { token, user } = response.data
-      
+
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
-      
+
       setNotification({ type: 'success', message: 'Logged in successfully!' })
       setTimeout(() => {
         if (user.role === 'admin') {
@@ -122,10 +122,10 @@ export default function LoginPage({ variant = 'v1' }) {
           </div>
 
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <button type="button" className="cyber-btn-outline" onClick={handleFacebookLogin} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', clipPath: 'none' }}>
+            <button type="button" className="cyber-btn-outline" onClick={handleFacebookLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
               <FaFacebookF /> FACEBOOK
             </button>
-            <button type="button" className="cyber-btn-outline" onClick={handleGoogleLogin} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', clipPath: 'none' }}>
+            <button type="button" className="cyber-btn-outline" onClick={handleGoogleLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
               <FcGoogle /> GOOGLE
             </button>
           </div>
