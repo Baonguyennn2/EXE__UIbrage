@@ -1,0 +1,436 @@
+/* ==========================================================================
+   RESPONSIVE.CSS - Global responsive overrides for all customer pages
+   Import this file LAST in main.jsx to ensure highest specificity.
+   Breakpoints: 1100px (tablet-landscape), 768px (tablet), 480px (mobile)
+   ========================================================================== */
+
+/* ==========================================================================
+   1. HOMEPAGE & MARKETPLACE - Sidebar + Main Area
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .home-container {
+    flex-direction: column;
+  }
+
+  .home-sidebar {
+    display: none;
+  }
+
+  .home-main-area {
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Marketplace inline grid override */
+  .marketplace-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .marketplace-grid .home-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-main-area {
+    padding: 1.5rem 1rem;
+  }
+
+  .discover-header h1 {
+    font-size: 1.6rem !important;
+  }
+
+  .home-hero-card {
+    flex-direction: column;
+  }
+
+  .home-hero-card .hero-card-img {
+    width: 100%;
+    height: 200px;
+  }
+
+  .home-hero-card .hero-card-body {
+    padding: 1.5rem;
+  }
+
+  .hero-card-body h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-main-area {
+    padding: 1rem 0.75rem;
+  }
+
+  .discover-header h1 {
+    font-size: 1.2rem !important;
+  }
+
+  .home-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ==========================================================================
+   2. COMMUNITY PAGE - 2-column grid (main + sidebar)
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .community-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .community-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .community-grid {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .community-grid header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start !important;
+  }
+
+  .community-grid .cyber-glitch-text {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .community-grid {
+    padding: 1rem 0.75rem !important;
+  }
+}
+
+/* ==========================================================================
+   3. POST DETAIL & CREATE POST - Single column with max-width
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .dashboard-main .cyber-card {
+    padding: 1.5rem !important;
+  }
+
+  .dashboard-main .cyber-glitch-text {
+    font-size: 1.5rem !important;
+  }
+
+  .dashboard-main h1.cyber-glitch-text {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main {
+    padding: 1rem 0.5rem !important;
+  }
+
+  .dashboard-main .cyber-card {
+    padding: 1rem !important;
+  }
+}
+
+/* ==========================================================================
+   4. DETAIL PAGE (Asset Detail) - Already has responsive in detail-redesign
+   Fine-tuning for smaller screens
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .detail-main-container {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .asset-title {
+    font-size: 1.5rem !important;
+  }
+
+  .breadcrumb-current {
+    display: none;
+  }
+
+  .asset-author-row {
+    flex-wrap: wrap;
+    gap: 0.75rem !important;
+  }
+
+  .divider-vert {
+    display: none;
+  }
+
+  .tab-content-body {
+    padding: 1.5rem !important;
+  }
+
+  .asset-info-col {
+    padding: 1.5rem !important;
+  }
+
+  .price-main {
+    font-size: 2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-main-container {
+    padding: 1rem 0.5rem !important;
+  }
+
+  .thumbnail-grid {
+    gap: 0.5rem !important;
+  }
+
+  .thumbnail-item {
+    height: 50px !important;
+  }
+}
+
+/* ==========================================================================
+   5. CHECKOUT PAGE - Already has grid responsive in checkout-redesign
+   Fine-tuning
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .checkout-main-container {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .checkout-header-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .checkout-title {
+    font-size: 1.5rem !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-main-container {
+    padding: 1rem 0.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   6. EARNINGS PAGE - Metrics grid + payout section
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 2rem 1rem !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .metric-value {
+    font-size: 1.5rem !important;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem !important;
+  }
+
+  .payout-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 1.5rem 0.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   7. PROFILE EDIT PAGE - Form grid already responsive, fine-tune
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .profile-info-bar {
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center;
+    padding: 0 1.5rem 1.5rem !important;
+    gap: 1rem !important;
+  }
+
+  .profile-info-bar h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   8. USER PROFILE PAGE - Cover + info bar + asset grid
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .profile-v2-info-bar {
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center;
+    padding: 0 1rem 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .profile-v2-info-bar h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .profile-v2-info-bar p {
+    font-size: 0.85rem !important;
+  }
+
+  .profile-v2-cover {
+    height: 200px !important;
+  }
+
+  .profile-v2-avatar,
+  .profile-v2-avatar-wrap img,
+  .profile-v2-avatar-wrap div {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .profile-v2-actions {
+    justify-content: center !important;
+    width: 100%;
+  }
+
+  .profile-tab-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-v2-info-bar {
+    padding: 0 0.75rem 0.75rem !important;
+  }
+
+  .profile-v2-cover {
+    height: 150px !important;
+  }
+}
+
+/* ==========================================================================
+   9. WISHLIST PAGE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .market-page {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .market-page__header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .wishlist-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .market-page {
+    padding: 1rem 0.5rem !important;
+  }
+}
+
+/* ==========================================================================
+   10. MESSAGE PAGE - Sidebar + Chat area
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .msg-layout-wrapper {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  .msg-sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    max-height: 300px;
+    border-right: none !important;
+    border-bottom: 1px solid var(--cyber-border) !important;
+    border-radius: 0 !important;
+  }
+
+  .msg-chat-area {
+    height: calc(100vh - 370px) !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   11. LOGIN / REGISTER / AUTH PAGES - Minor cyberpunk override fine-tuning
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .auth-figma__card.cyber-card {
+    padding: 1.5rem !important;
+  }
+
+  .auth-figma__card .cyber-glitch-text {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* ==========================================================================
+   12. GLOBAL OVERRIDES - Toast, Header, etc.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .toast-container {
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+
+  .toast-message {
+    min-width: unset !important;
+    width: 100%;
+  }
+}
+
+/* Asset / Card grids used across multiple pages */
+@media (max-width: 768px) {
+  .asset-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .asset-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ManageAssets and MyLibrary grids */
+@media (max-width: 768px) {
+  .library-card__grid,
+  .manage-asset-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Upload Asset page form grid */
+@media (max-width: 768px) {
+  .upload-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

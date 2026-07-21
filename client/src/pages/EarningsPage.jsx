@@ -111,7 +111,7 @@ export default function EarningsPage() {
           </div>
         </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem' }}>
+        <div className="payout-grid" style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '3rem', marginTop: '3rem' }}>
           
           {/* Main Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>

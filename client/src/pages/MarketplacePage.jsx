@@ -77,7 +77,7 @@ export default function MarketplacePage() {
       <main className="marketplace-container" style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <AppHeader onSearch={(val) => handleFilterChange('search', val)} />
 
-        <div className="main-layout" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', flex: 1 }}>
+        <div className="main-layout marketplace-grid" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', flex: 1 }}>
           
           <aside className="home-sidebar" style={{ position: 'sticky', top: '2rem' }}>
             

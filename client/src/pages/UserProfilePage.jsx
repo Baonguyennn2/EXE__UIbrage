@@ -173,7 +173,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Content Layout */}
-        <div className="profile-v2-content" style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '2rem', padding: '2rem 3rem' }}>
+        <div className="profile-v2-content profile-tab-grid" style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '2rem', padding: '2rem 3rem' }}>
           <aside className="profile-v2-sidebar">
             <section className="detail-v2-card intro-card">
               <h3>Intro</h3>

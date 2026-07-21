@@ -387,7 +387,7 @@ export default function MessagePage() {
     <div className="dashboard-layout"><div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div><main className="market-home" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 10, position: 'relative' }}>
       <AppHeader />
 
-      <div style={{
+      <div className="msg-layout-wrapper" style={{
         flex: 1,
         display: 'flex',
         maxWidth: '1400px',
@@ -399,7 +399,7 @@ export default function MessagePage() {
         overflow: 'hidden'
       }}>
         {/* ===== SIDEBAR: Danh sách hội thoại ===== */}
-        <aside style={{
+        <aside className="msg-sidebar" style={{
           width: '360px',
           minWidth: '360px',
           background: 'var(--cyber-card)',
@@ -526,8 +526,8 @@ export default function MessagePage() {
           </div>
         </aside>
 
-        {/* ===== CHAT AREA: Khung chat chính ===== */}
-        <section style={{
+        {/* ===== MAIN CHAT AREA ===== */}
+        <section className="msg-chat-area" style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
