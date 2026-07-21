@@ -56,7 +56,7 @@ export default function CommunityPage() {
       <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
       <AppHeader />
 
-      <main className="dashboard-main" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '3rem', alignItems: 'flex-start', maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
+      <main className="dashboard-main" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '3rem', alignItems: 'flex-start', maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
 
         {/* Main Content Area */}
         <section style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
