@@ -658,7 +658,7 @@ export default function MessagePage() {
                                 ? '18px 18px 4px 18px'
                                 : '18px 18px 18px 4px',
                               background: isMine ? 'var(--cyber-accent-tertiary)' : 'var(--cyber-panel)',
-                              color: isMine ? 'black' : 'white',
+                              color: isMine ? 'white' : 'white',
                               boxShadow: isMine
                                 ? 'rgb(0 255 136) 0px 2px 8px'
                                 : '0 1px 4px rgba(255, 255, 255, 0.06)',
