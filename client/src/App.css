@@ -4166,6 +4166,7 @@
     text-decoration: none;
     font-size: 1.1rem;
     font-weight: 500;
+    font-family: var(--font-cyber-mono, monospace);
   }
 
   .mobile-nav-links a:hover {
@@ -4464,17 +4465,19 @@
 }
 
 .toast-message {
-  background: white;
-  color: #0f172a;
+  background: rgba(5, 5, 10, 0.95);
+  color: var(--cyber-foreground, #fff);
   padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  border: 1px solid var(--cyber-border);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
   min-width: 300px;
   animation: toast-in 0.3s ease-out forwards;
-  border-left: 4px solid #6366f1;
+  border-left: 4px solid var(--cyber-accent);
+  font-family: var(--font-cyber-mono, monospace);
 }
 
 .toast--success {

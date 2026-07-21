@@ -112,7 +112,7 @@ export default function LoginPage({ variant = 'v1' }) {
             </label>
 
             <button type="submit" className="cyber-btn" disabled={loading} style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
-              {loading ? 'AUTHENTICATING...' : 'INITIALIZE_LOGIN'}
+              {loading ? 'AUTHENTICATING...' : 'LOGIN'}
             </button>
           </form>
 
@@ -121,7 +121,7 @@ export default function LoginPage({ variant = 'v1' }) {
             <span style={{ position: 'relative', zIndex: 2, background: 'rgba(5, 5, 10, 0.95)', padding: '0 1rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.75rem', color: '#64748b' }}>OR_CONNECT_VIA</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <button type="button" className="cyber-btn-outline" onClick={handleFacebookLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
               <FaFacebookF /> FACEBOOK
             </button>
