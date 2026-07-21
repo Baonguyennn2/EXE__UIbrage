@@ -66,22 +66,21 @@ export default function WishlistPage() {
                     <Link to={`/marketplace/assets/${asset.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                       <h4 style={{ margin: '0 0 0.5rem' }}>{asset.title}</h4>
                     </Link>
-                    <button 
+                    <button
                       onClick={() => handleRemove(asset.id)}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
                     >
                       <RiDeleteBinLine size={20} />
                     </button>
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 1rem' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#white', margin: '0 0 1rem' }}>
                     By {asset.author?.username}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <strong style={{ fontSize: '1.25rem' }}>${asset.price}</strong>
-                    <button 
-                      className="btn-solid" 
+                    <button
+                      className="btn-solid"
                       onClick={() => navigate('/marketplace/checkout', { state: { asset } })}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
                     >
                       <RiShoppingBag3Line /> Checkout
                     </button>

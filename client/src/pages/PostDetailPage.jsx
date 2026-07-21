@@ -35,13 +35,13 @@ export default function PostDetailPage() {
   const handleAddComment = async (e) => {
     e.preventDefault()
     if (!newComment.trim()) return
-    
+
     const token = localStorage.getItem('token')
     if (!token) {
       navigate('/auth/login')
       return
     }
-    
+
     setIsSubmitting(true)
     try {
       await postService.addComment(id, { content: newComment })
@@ -66,15 +66,15 @@ export default function PostDetailPage() {
     <div className="dashboard-layout">
       <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
       <AppHeader />
-      
+
       <main className="dashboard-main" style={{ maxWidth: '900px', margin: '0 auto', width: '100%', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
-        <button className="cyber-btn-outline" onClick={() => navigate('/community')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none' }}>
+        <button className="cyber-btn-outline" onClick={() => navigate('/community')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
           <RiArrowLeftLine /> BACK_TO_NETWORK
         </button>
 
         <article className="cyber-card" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--cyber-accent-tertiary)' }}></div>
-          
+
           {post.coverImageUrl && (
             <img src={post.coverImageUrl} alt={post.title} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '4px', marginBottom: '2rem', border: '1px solid var(--cyber-border)' }} />
           )}
@@ -90,7 +90,7 @@ export default function PostDetailPage() {
               </div>
             </div>
             <h1 className="cyber-glitch-text" data-text={post.title} style={{ fontSize: '2.5rem', lineHeight: 1.2, marginBottom: '1rem', fontFamily: 'var(--font-cyber-heading)', color: '#fff', textTransform: 'uppercase' }}>{post.title}</h1>
-            
+
             <div style={{ display: 'flex', gap: '1.5rem', color: '#64748b', fontSize: '0.9rem', fontFamily: 'var(--font-cyber-mono)' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiChat3Line color="var(--cyber-accent)" /> {post.comments?.length || 0} COMMENTS</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><RiEyeLine color="var(--cyber-accent-tertiary)" /> {post.viewCount || 0} VIEWS</span>
@@ -114,9 +114,9 @@ export default function PostDetailPage() {
 
         <section style={{ marginTop: '3rem' }}>
           <h3 style={{ fontFamily: 'var(--font-cyber-mono)', color: 'var(--cyber-accent-secondary)', textTransform: 'uppercase', marginBottom: '1.5rem' }}>// COMMENTS ({post.comments?.length || 0})</h3>
-          
+
           <form onSubmit={handleAddComment} className="cyber-card" style={{ padding: '1.5rem', marginTop: '1.5rem', borderLeft: '2px solid var(--cyber-accent)' }}>
-            <textarea 
+            <textarea
               className="cyber-input"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}

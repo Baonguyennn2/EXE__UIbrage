@@ -793,11 +793,6 @@
   cursor: pointer;
 }
 
-.btn-solid {
-  border: 0;
-  color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-}
 
 .btn-ghost {
   border: 1px solid rgba(124, 58, 237, 0.35);
@@ -1848,12 +1843,12 @@
   font-size: clamp(2rem, 4.2vw, 3.2rem);
   line-height: 1;
   letter-spacing: -0.04em;
-  color: #64748b;
+  color: white;
 }
 
 .market-page__header p {
   margin: 0.75rem 0 0;
-  color: #64748b;
+  color: white;
   max-width: 70ch;
 }
 
