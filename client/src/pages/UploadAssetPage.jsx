@@ -159,17 +159,25 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
   ).slice(0, 15)
 
   return (
-    <div className={isAdmin ? "" : "upload-page-v3"}>
-      {!isAdmin && <AppHeader />}
+    <div className={isAdmin ? "" : "dashboard-layout"}>
+      {!isAdmin && (
+        <>
+          <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
+          <AppHeader />
+        </>
+      )}
       
-      <main className={isAdmin ? "" : "upload-container-v3"}>
-        <h1 className="upload-title-v3">{variant === 'edit' ? 'Edit Asset' : 'Upload New Asset'}</h1>
-        
-        <div className="upload-card-v3">
-          <div className="form-section-v3">
-            <label className="label-v3">ASSET NAME</label>
+      <main className={isAdmin ? "" : "dashboard-main"} style={{ position: 'relative', zIndex: 10, flex: 1, padding: isAdmin ? '0' : '2rem', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ maxWidth: '1000px', width: '100%', display: 'flex', flexDirection: 'column' }}>
+          <h1 style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '2rem', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cyber-foreground)' }}>
+            [SYSTEM_ACCESS]: {variant === 'edit' ? 'EDIT_ASSET' : 'UPLOAD_NEW_ASSET'}
+          </h1>
+          
+          <div className="cyber-card" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[ASSET_NAME]</label>
             <input 
-              className="input-v3"
+              className="cyber-input"
               type="text" 
               name="title"
               placeholder="e.g. Cyberpunk Interface Kit v2.0"
@@ -178,130 +186,136 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
             />
           </div>
 
-          <div className="form-section-v3">
-            <label className="label-v3">DESCRIPTION (MARKDOWN SUPPORTED)</label>
-            
-            <div className="markdown-toolbar">
-              <button type="button" className="toolbar-btn" title="Bold" onClick={() => insertMarkdown('**', '**')}><RiBold /></button>
-              <button type="button" className="toolbar-btn" title="Italic" onClick={() => insertMarkdown('_', '_')}><RiItalic /></button>
-              <button type="button" className="toolbar-btn" title="H1" onClick={() => insertMarkdown('# ', '')}><RiH1 /></button>
-              <button type="button" className="toolbar-btn" title="H2" onClick={() => insertMarkdown('## ', '')}><RiH2 /></button>
-              <button type="button" className="toolbar-btn" title="H3" onClick={() => insertMarkdown('### ', '')}><RiH3 /></button>
-              <div style={{ width: 1, height: 20, background: '#e2e8f0', margin: '0 4px' }} />
-              <button type="button" className="toolbar-btn" title="Quote" onClick={() => insertMarkdown('> ', '')}><RiDoubleQuotesL /></button>
-              <button type="button" className="toolbar-btn" title="Code" onClick={() => insertMarkdown('```\n', '\n```')}><RiCodeLine /></button>
-              <button type="button" className="toolbar-btn" title="Link" onClick={() => insertMarkdown('[', '](url)')}><RiLink /></button>
-              <button type="button" className="toolbar-btn" title="Unordered List" onClick={() => insertMarkdown('- ', '')}><RiListUnordered /></button>
-              <button type="button" className="toolbar-btn" title="Ordered List" onClick={() => insertMarkdown('1. ', '')}><RiListOrdered /></button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[DESCRIPTION] (MARKDOWN SUPPORTED)</label>
+            <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--cyber-card)', padding: '0.5rem', border: '1px solid var(--cyber-border)', borderBottom: 'none', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Bold" onClick={() => insertMarkdown('**', '**')}><RiBold size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Italic" onClick={() => insertMarkdown('_', '_')}><RiItalic size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="H1" onClick={() => insertMarkdown('# ', '')}><RiH1 size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="H2" onClick={() => insertMarkdown('## ', '')}><RiH2 size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="H3" onClick={() => insertMarkdown('### ', '')}><RiH3 size={16} /></button>
+              <div style={{ width: 1, height: 20, background: 'var(--cyber-border)', margin: '0 4px', alignSelf: 'center' }} />
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Quote" onClick={() => insertMarkdown('> ', '')}><RiDoubleQuotesL size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Code" onClick={() => insertMarkdown('```\n', '\n```')}><RiCodeLine size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Link" onClick={() => insertMarkdown('[', '](url)')}><RiLink size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Unordered List" onClick={() => insertMarkdown('- ', '')}><RiListUnordered size={16} /></button>
+              <button type="button" className="cyber-btn-ghost" style={{ padding: '0.4rem' }} title="Ordered List" onClick={() => insertMarkdown('1. ', '')}><RiListOrdered size={16} /></button>
             </div>
 
             <textarea 
               id="descriptionArea"
-              className="textarea-v3"
+              className="cyber-input"
               rows={12} 
               name="description"
               placeholder="Explain what makes your asset special..."
               value={formData.description}
               onChange={handleInputChange}
-              style={{ borderRadius: '0 0 0.75rem 0.75rem' }}
+              style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, minHeight: '300px' }}
             />
           </div>
 
-          <div className="upload-row-v3">
-            <div className="upload-box-v3">
-              <label className="label-v3">PREVIEW IMAGE {variant === 'edit' && '(LEAVE BLANK TO KEEP CURRENT)'}</label>
-              <div className="drop-zone-v3">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[PREVIEW_IMAGE] {variant === 'edit' && '(OPTIONAL)'}</label>
+              <div style={{ flex: 1, border: '2px dashed var(--cyber-border)', borderRadius: '8px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', cursor: 'pointer', transition: 'all 0.2s', ':hover': { borderColor: 'var(--cyber-accent)' } }} onClick={() => document.getElementById('coverInput').click()}>
                 <input type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} hidden id="coverInput" />
-                <label htmlFor="coverInput" className="drop-content-v3">
-                  <RiImageAddLine className="icon-v3" />
-                  <p className="truncate-text">{coverImage ? coverImage.name : (variant === 'edit' ? 'Keep current image' : 'Drop cover image here')}</p>
-                </label>
+                <RiImageAddLine size={32} color="var(--cyber-accent)" />
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center' }}>
+                  {coverImage ? coverImage.name : (variant === 'edit' ? 'Keep current image' : 'Drop cover image here')}
+                </p>
               </div>
             </div>
 
-            <div className="upload-box-v3">
-              <label className="label-v3">ASSET FILE (ZIP) {variant === 'edit' && '(LEAVE BLANK TO KEEP CURRENT)'}</label>
-              <div className="drop-zone-v3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[SOURCE_FILE_.ZIP] {variant === 'edit' && '(OPTIONAL)'}</label>
+              <div style={{ flex: 1, border: '2px dashed var(--cyber-border)', borderRadius: '8px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', cursor: 'pointer', transition: 'all 0.2s', ':hover': { borderColor: 'var(--cyber-accent-secondary)' } }} onClick={() => document.getElementById('fileInput').click()}>
                 <input type="file" accept=".zip,.rar" onChange={(e) => setAssetFile(e.target.files[0])} hidden id="fileInput" />
-                <label htmlFor="fileInput" className="drop-content-v3">
-                  <RiFileZipLine className="icon-v3" />
-                  <p className="truncate-text">{assetFile ? assetFile.name : (variant === 'edit' ? 'Keep current ZIP' : 'Upload source files')}</p>
-                </label>
+                <RiFileZipLine size={32} color="var(--cyber-accent-secondary)" />
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center' }}>
+                  {assetFile ? assetFile.name : (variant === 'edit' ? 'Keep current ZIP' : 'Upload source files')}
+                </p>
               </div>
               {variant === 'edit' && existingAsset?.fileUrl && (
                 <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                  <button type="button" className="btn-ghost" onClick={() => window.open(existingAsset.fileUrl, '_blank')} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
-                    Download Current ZIP
+                  <button type="button" className="cyber-btn-outline" onClick={() => window.open(existingAsset.fileUrl, '_blank')} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                    DOWNLOAD_CURRENT_ZIP
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="upload-row-v3">
-            <div className="pricing-section-v3">
-              <label className="label-v3">PRICING</label>
-              <div className="price-control-v3">
-                <div className="price-input-v3">
-                  <span>$</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[PRICING]</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>$</span>
                   <input 
+                    className="cyber-input"
                     type="number" 
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
                     placeholder="0.00"
                     disabled={formData.isFree}
+                    style={{ paddingLeft: '2.5rem' }}
                   />
                 </div>
-                <div className="toggle-v3">
-                  <button type="button" className={!formData.isFree ? 'active' : ''} onClick={() => setFormData(p => ({ ...p, isFree: false }))}>PAID</button>
-                  <button type="button" className={formData.isFree ? 'active' : ''} onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))}>FREE</button>
+                <div style={{ display: 'flex', background: 'var(--cyber-input)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <button type="button" className={`cyber-btn-ghost ${!formData.isFree ? 'active' : ''}`} onClick={() => setFormData(p => ({ ...p, isFree: false }))} style={{ borderRadius: 0, padding: '0.5rem 1rem' }}>PAID</button>
+                  <button type="button" className={`cyber-btn-ghost ${formData.isFree ? 'active' : ''}`} onClick={() => setFormData(p => ({ ...p, isFree: true, price: '' }))} style={{ borderRadius: 0, padding: '0.5rem 1rem' }}>FREE</button>
                 </div>
               </div>
               
               {!formData.isFree && formData.price > 0 && (
-                <div className="pricing-breakdown" style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>Your Earnings (Base Price):</span>
-                    <strong>${parseFloat(formData.price).toFixed(2)}</strong>
+                <div className="cyber-table" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--cyber-border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#94a3b8' }}>
+                    <span>Your Earnings:</span>
+                    <strong style={{ color: 'var(--cyber-accent)' }}>${parseFloat(formData.price).toFixed(2)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>Platform Commission (5%):</span>
-                    <strong>+${(parseFloat(formData.price) * 0.05).toFixed(2)}</strong>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#94a3b8' }}>
+                    <span>Platform Fee (5%):</span>
+                    <strong style={{ color: 'var(--cyber-destructive)' }}>+${(parseFloat(formData.price) * 0.05).toFixed(2)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #e2e8f0', color: '#1e293b', fontWeight: 'bold' }}>
-                    <span>Final Marketplace Price (Buyer Pays):</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--cyber-border)', color: 'var(--cyber-foreground)' }}>
+                    <span>Final Marketplace Price:</span>
                     <span>${(parseFloat(formData.price) * 1.05).toFixed(2)}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="tags-section-v3">
-              <label className="label-v3">TAGS</label>
-              <div className="tag-input-wrapper-v3">
-                <div className="selected-tags-v3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ color: 'var(--cyber-accent-tertiary)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em' }}>[SYSTEM_TAGS]</label>
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   {selectedTags.map(id => {
                     const tag = allTags.find(t => t.id === id)
                     return tag ? (
-                      <span key={tag.uniqueId} className="tag-pill-v3">
-                        {tag.name} <RiCloseLine onClick={() => toggleTag(id)} />
+                      <span key={tag.uniqueId} className="tag-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {tag.name} <RiCloseLine style={{ cursor: 'pointer' }} onClick={() => toggleTag(id)} />
                       </span>
                     ) : null
                   })}
                 </div>
                 <input 
+                  className="cyber-input"
                   type="text" 
-                  placeholder="Add tag..." 
+                  placeholder="Type to search tags..." 
                   value={tagSearch}
                   onChange={(e) => setTagSearch(e.target.value)}
                   onFocus={() => setShowTagDropdown(true)}
                   onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
                 />
                 {showTagDropdown && filteredTags.length > 0 && (
-                  <div className="tag-results-v3">
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--cyber-panel)', border: '1px solid var(--cyber-border)', zIndex: 50, maxHeight: '200px', overflowY: 'auto' }}>
                     {filteredTags.map(tag => (
-                      <div key={tag.uniqueId} onClick={() => { toggleTag(tag.id); setTagSearch(''); setShowTagDropdown(false); }}>
+                      <div 
+                        key={tag.uniqueId} 
+                        style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid var(--cyber-border)' }}
+                        onClick={() => { toggleTag(tag.id); setTagSearch(''); setShowTagDropdown(false); }}
+                      >
                         {tag.name}
                       </div>
                     ))}
@@ -312,36 +326,40 @@ export default function UploadAssetPage({ isAdmin = false, variant = 'create' })
           </div>
 
           {loading && variant === 'create' && (
-            <div className="upload-progress-container-v3">
-              <div className="progress-bar-v3">
-                <div className="progress-fill-v3" style={{ width: `${uploadProgress}%` }}></div>
+            <div style={{ background: 'var(--cyber-input)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ width: '100%', height: '4px', background: 'var(--cyber-border)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'var(--cyber-accent)', transition: 'width 0.2s' }}></div>
               </div>
-              <span>{uploadProgress}% Uploading...</span>
+              <span style={{ color: 'var(--cyber-accent)', fontSize: '0.85rem' }}>[UPLOADING_DATA]... {uploadProgress}%</span>
             </div>
           )}
 
-          <div className="form-actions-v3">
-            <button className="btn-cancel-v3" onClick={() => navigate(-1)}>Cancel</button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '1px solid var(--cyber-border)', paddingTop: '2rem' }}>
+            <button className="cyber-btn-ghost" onClick={() => navigate(-1)}>CANCEL_SEQ</button>
             <button 
-              className="btn-publish-v3" 
+              className="cyber-btn interactive-ripple" 
               onClick={handlePublish}
               disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              {loading ? (variant === 'edit' ? 'Saving...' : 'Publishing...') : (variant === 'edit' ? 'Save Changes' : 'Publish Asset')}
+              <RiSave3Line /> {loading ? (variant === 'edit' ? 'SAVING...' : 'PUBLISHING...') : (variant === 'edit' ? 'SAVE_CHANGES' : 'PUBLISH_ASSET')}
             </button>
           </div>
+        </div>
         </div>
       </main>
 
       {showSuccessModal && (
-        <div className="modal-overlay">
-          <div className="success-modal">
-            <div className="success-icon-bg"><RiCheckLine /></div>
-            <h2>Upload Successful!</h2>
-            <p>Your asset has been published successfully.</p>
-            <div className="modal-actions">
-              <button className="btn-solid" onClick={() => navigate('/marketplace')}>Go to Marketplace</button>
-              <button className="btn-ghost" onClick={() => setShowSuccessModal(false)}>Upload Another</button>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="cyber-card" style={{ padding: '3rem', textAlign: 'center', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+            <div style={{ width: '64px', height: '64px', background: 'rgba(0,255,136,0.1)', color: 'var(--cyber-accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid var(--cyber-accent)' }}>
+              <RiCheckLine />
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-cyber-heading)', letterSpacing: '0.1em' }}>UPLOAD_SUCCESS</h2>
+            <p style={{ color: '#94a3b8' }}>Your data packet has been integrated into the central network.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
+              <button className="cyber-btn" onClick={() => navigate('/marketplace')}>VIEW_MARKETPLACE</button>
+              <button className="cyber-btn-outline" onClick={() => setShowSuccessModal(false)}>UPLOAD_ANOTHER</button>
             </div>
           </div>
         </div>
