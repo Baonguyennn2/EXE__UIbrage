@@ -24,6 +24,8 @@ export default function MarketplacePage() {
     search: new URLSearchParams(location.search).get('search') || '', 
     priceRange: new URLSearchParams(location.search).get('priceRange') || '' 
   })
+  
+  const [activeMobileTab, setActiveMobileTab] = useState('feed')
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -79,7 +81,22 @@ export default function MarketplacePage() {
 
         <div className="main-layout marketplace-grid" style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', flex: 1 }}>
           
-          <aside className="home-sidebar" style={{ position: 'sticky', top: '2rem' }}>
+          <div className="mobile-tab-nav" style={{ gridColumn: '1 / -1' }}>
+            <button 
+              className={`mobile-tab-btn ${activeMobileTab === 'feed' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('feed')}
+            >
+              ASSET_FEED
+            </button>
+            <button 
+              className={`mobile-tab-btn ${activeMobileTab === 'sidebar' ? 'active' : ''}`}
+              onClick={() => setActiveMobileTab('sidebar')}
+            >
+              SYSTEM_FILTERS
+            </button>
+          </div>
+          
+          <aside className={`home-sidebar ${activeMobileTab !== 'sidebar' ? 'mobile-hidden' : ''}`} style={{ position: 'sticky', top: '2rem' }}>
             
             <div className="home-sidebar-section">
               <h3 className="home-sidebar-title">SYSTEM_FILTERS</h3>
@@ -179,7 +196,7 @@ export default function MarketplacePage() {
             </div>
           </aside>
 
-          <section className="content-area">
+          <section className={`content-area ${activeMobileTab !== 'feed' ? 'mobile-hidden' : ''}`}>
             <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1.5rem' }}>
               <div>
                 <h1 className="cyber-glitch-text" data-text={filters.search ? `RESULTS_FOR: "${filters.search}"` : 'DATA_MARKETPLACE'} style={{ fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase', fontSize: '2.2rem', margin: '0 0 0.5rem 0', color: '#fff' }}>

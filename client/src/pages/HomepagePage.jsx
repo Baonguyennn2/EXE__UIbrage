@@ -25,6 +25,8 @@ export default function HomepagePage() {
     search: '',
     priceRange: ''
   })
+  
+  const [activeMobileTab, setActiveMobileTab] = useState('feed')
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -79,8 +81,23 @@ export default function HomepagePage() {
       <AppHeader onSearch={handleSearch} />
 
       <main className="home-container">
+        <div className="mobile-tab-nav" style={{ width: '100%' }}>
+          <button 
+            className={`mobile-tab-btn ${activeMobileTab === 'feed' ? 'active' : ''}`}
+            onClick={() => setActiveMobileTab('feed')}
+          >
+            ASSET_FEED
+          </button>
+          <button 
+            className={`mobile-tab-btn ${activeMobileTab === 'sidebar' ? 'active' : ''}`}
+            onClick={() => setActiveMobileTab('sidebar')}
+          >
+            SYSTEM_FILTERS
+          </button>
+        </div>
+      
         {/* Sidebar */}
-        <aside className="home-sidebar" style={{ position: 'sticky', top: '2rem' }}>
+        <aside className={`home-sidebar ${activeMobileTab !== 'sidebar' ? 'mobile-hidden' : ''}`} style={{ position: 'sticky', top: '2rem' }}>
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title">SYSTEM_FILTERS</h3>
             <button 
@@ -180,7 +197,7 @@ export default function HomepagePage() {
         </aside>
 
         {/* Main Content Area */}
-        <section className="home-main-area">
+        <section className={`home-main-area ${activeMobileTab !== 'feed' ? 'mobile-hidden' : ''}`}>
           <header className="discover-header">
             <h1 className="discover-title">DISCOVER_ASSETS</h1>
             <p className="discover-status">

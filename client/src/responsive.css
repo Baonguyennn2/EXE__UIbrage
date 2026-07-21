@@ -5,7 +5,53 @@
    ========================================================================== */
 
 /* ==========================================================================
-   1. HOMEPAGE & MARKETPLACE - Sidebar + Main Area
+   1. MOBILE TAB COMPONENT & UTILITIES
+   ========================================================================== */
+
+.mobile-tab-nav {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .mobile-tab-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: #05050a;
+    padding: 0.5rem;
+    border: 1px solid var(--cyber-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .mobile-tab-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #64748b;
+    font-family: var(--font-cyber-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .mobile-tab-btn.active {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--cyber-accent-tertiary);
+    color: var(--cyber-accent-tertiary);
+    box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1);
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   2. HOMEPAGE & MARKETPLACE - Sidebar + Main Area
    ========================================================================== */
 
 @media (max-width: 1100px) {
@@ -14,7 +60,13 @@
   }
 
   .home-sidebar {
-    display: none;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--cyber-border);
+    position: static !important;
+    padding: 1.5rem !important;
   }
 
   .home-main-area {
@@ -25,10 +77,6 @@
   /* Marketplace inline grid override */
   .marketplace-grid {
     grid-template-columns: 1fr !important;
-  }
-
-  .marketplace-grid .home-sidebar {
-    display: none;
   }
 }
 
@@ -41,20 +89,25 @@
     font-size: 1.6rem !important;
   }
 
-  .home-hero-card {
+  .mini-hero-card {
     flex-direction: column;
   }
 
-  .home-hero-card .hero-card-img {
-    width: 100%;
+  .mini-hero-image-col {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid var(--cyber-border);
+  }
+
+  .mini-hero-image-wrapper {
     height: 200px;
   }
 
-  .home-hero-card .hero-card-body {
+  .mini-hero-content {
     padding: 1.5rem;
   }
 
-  .hero-card-body h2 {
+  .mini-hero-title {
     font-size: 1.5rem !important;
   }
 }
@@ -84,7 +137,10 @@
   }
 
   .community-sidebar {
-    display: none;
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--cyber-border);
+    padding-top: 2rem;
   }
 }
 
@@ -331,6 +387,12 @@
 /* ==========================================================================
    9. WISHLIST PAGE
    ========================================================================== */
+
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
 
 @media (max-width: 768px) {
   .market-page {

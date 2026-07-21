@@ -9,6 +9,7 @@ import '../homepage-redesign.css'
 export default function CommunityPage() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeMobileTab, setActiveMobileTab] = useState('feed')
   const [searchTerm, setSearchTerm] = useState('')
   const [trendingTags, setTrendingTags] = useState([])
   const [featuredTopics, setFeaturedTopics] = useState([])
@@ -58,8 +59,23 @@ export default function CommunityPage() {
 
       <main className="dashboard-main community-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '3rem', alignItems: 'flex-start', maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
 
+        <div className="mobile-tab-nav" style={{ gridColumn: '1 / -1' }}>
+          <button 
+            className={`mobile-tab-btn ${activeMobileTab === 'feed' ? 'active' : ''}`}
+            onClick={() => setActiveMobileTab('feed')}
+          >
+            DISCUSSIONS
+          </button>
+          <button 
+            className={`mobile-tab-btn ${activeMobileTab === 'sidebar' ? 'active' : ''}`}
+            onClick={() => setActiveMobileTab('sidebar')}
+          >
+            TOP_SIGNALS
+          </button>
+        </div>
+
         {/* Main Content Area */}
-        <section style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <section className={`${activeMobileTab !== 'feed' ? 'mobile-hidden' : ''}`} style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
           <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1.5rem' }}>
             <div>
@@ -145,7 +161,7 @@ export default function CommunityPage() {
         </section>
 
         {/* Sidebar */}
-        <aside className="home-sidebar community-sidebar" style={{ borderLeft: '1px solid var(--cyber-border)', borderRight: 'none' }}>
+        <aside className={`home-sidebar community-sidebar ${activeMobileTab !== 'sidebar' ? 'mobile-hidden' : ''}`} style={{ borderLeft: '1px solid var(--cyber-border)', borderRight: 'none' }}>
           <div className="home-sidebar-section">
             <h3 className="home-sidebar-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f59e0b' }}>
               <RiFireLine /> // TOP_SIGNALS
