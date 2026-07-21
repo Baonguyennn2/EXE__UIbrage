@@ -402,7 +402,7 @@ export default function MessagePage() {
         <aside style={{
           width: '360px',
           minWidth: '360px',
-          background: 'var(--cyber-panel)',
+          background: 'var(--cyber-card)',
           display: 'flex',
           flexDirection: 'column',
           borderRight: '1px solid #e0e0e0',
@@ -432,7 +432,7 @@ export default function MessagePage() {
             {/* Search */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'var(--cyber-panel)', borderRadius: '24px',
+              background: 'var(--cyber-card)', borderRadius: '24px',
               padding: '0.5rem 1rem'
             }}>
               <RiSearchLine size={18} color="#94a3b8" />
@@ -531,7 +531,7 @@ export default function MessagePage() {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          background: 'var(--cyber-panel)',
+          background: 'var(--cyber-card)',
           borderTopRightRadius: '12px',
           borderBottomRightRadius: '12px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
@@ -543,7 +543,7 @@ export default function MessagePage() {
               {/* Chat header */}
               <div style={{
                 padding: '0.85rem 1.5rem',
-                background: 'var(--cyber-panel)',
+                background: 'var(--cyber-card)',
                 borderBottom: '1px solid #f0f0f0',
                 display: 'flex',
                 alignItems: 'center',
@@ -657,7 +657,7 @@ export default function MessagePage() {
                               borderRadius: isMine
                                 ? '18px 18px 4px 18px'
                                 : '18px 18px 18px 4px',
-                              background: isMine ? 'var(--cyber-accent)' : 'var(--cyber-panel)',
+                              background: isMine ? 'var(--cyber-accent)' : 'var(--cyber-card)',
                               color: isMine ? 'white' : 'white',
                               boxShadow: isMine
                                 ? 'rgb(0 255 136) 0px 2px 8px'
@@ -704,7 +704,7 @@ export default function MessagePage() {
                   }}>
                     <div style={{
                       display: 'flex', gap: '4px', padding: '0.6rem 1rem',
-                      background: 'var(--cyber-panel)', borderRadius: '18px',
+                      background: 'var(--cyber-card)', borderRadius: '18px',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                       alignItems: 'center'
                     }}>
@@ -739,7 +739,7 @@ export default function MessagePage() {
               {/* Input area */}
               <div style={{
                 padding: '0.75rem 1.5rem 1rem',
-                background: 'var(--cyber-panel)',
+                background: 'var(--cyber-card)',
                 borderTop: '1px solid #f0f0f0',
                 flexShrink: 0
               }}>
@@ -753,7 +753,7 @@ export default function MessagePage() {
                       position: 'absolute',
                       bottom: '100%',
                       left: 0,
-                      background: 'var(--cyber-panel)',
+                      background: 'var(--cyber-card)',
                       border: '1px solid #e0e0e0',
                       borderRadius: '12px',
                       padding: '0.75rem',
@@ -838,7 +838,7 @@ export default function MessagePage() {
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
-                    background: 'var(--cyber-panel)',
+                    background: 'var(--cyber-card)',
                     borderRadius: '24px',
                     padding: '0 1.25rem',
                     minHeight: '44px'
@@ -869,7 +869,7 @@ export default function MessagePage() {
                       width: '44px', height: '44px', borderRadius: '50%',
                       border: 'none',
                       background: newMessage.trim() ? '#4f46e5' : 'var(--cyber-border)',
-                      color: 'var(--cyber-panel)',
+                      color: 'var(--cyber-card)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: (!newMessage.trim() || uploadingImage) ? 'not-allowed' : 'pointer',
                       flexShrink: 0, transition: 'all 0.15s'
