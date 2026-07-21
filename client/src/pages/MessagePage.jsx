@@ -657,7 +657,7 @@ export default function MessagePage() {
                               borderRadius: isMine
                                 ? '18px 18px 4px 18px'
                                 : '18px 18px 18px 4px',
-                              background: isMine ? 'var(--cyber-accent-tertiary)' : 'var(--cyber-panel)',
+                              background: isMine ? 'var(--cyber-accent)' : 'var(--cyber-panel)',
                               color: isMine ? 'white' : 'white',
                               boxShadow: isMine
                                 ? 'rgb(0 255 136) 0px 2px 8px'
