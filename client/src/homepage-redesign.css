@@ -212,6 +212,7 @@
   display: flex;
   gap: 1rem;
   padding-top: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .tag-pill {
