@@ -21,14 +21,14 @@ export default function CommunityPage() {
         postService.getAll(params),
         metadataService.getTags()
       ])
-      
+
       setPosts(postsRes.data)
       setTrendingTags(tagsRes.data.slice(0, 8))
-      
+
       // For featured topics, take top 3 most viewed posts or most commented
       const sortedByViews = [...postsRes.data].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
       setFeaturedTopics(sortedByViews.slice(0, 3))
-      
+
       setLoading(false)
     } catch (error) {
       console.error('Error fetching community data:', error)
@@ -57,10 +57,10 @@ export default function CommunityPage() {
       <AppHeader />
 
       <main className="dashboard-main" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '3rem', alignItems: 'flex-start', maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
-        
+
         {/* Main Content Area */}
         <section style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          
+
           <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1.5rem' }}>
             <div>
               <h1 className="cyber-glitch-text" data-text="SYSTEM_COMMUNITY" style={{ fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase', fontSize: '2.2rem', margin: '0 0 0.5rem 0', color: '#fff' }}>
@@ -70,22 +70,22 @@ export default function CommunityPage() {
                 <span className="flicker">[STATUS: SECURE]</span> ACTIVE_DISCUSSIONS: {posts.length}
               </p>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <div style={{ position: 'relative' }}>
                 <RiSearchLine style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-accent-tertiary)' }} />
-                <input 
+                <input
                   className="cyber-input"
                   style={{ paddingLeft: '2.5rem', width: '250px', height: '40px' }}
-                  type="search" 
-                  placeholder="SEARCH_DISCUSSIONS..." 
+                  type="search"
+                  placeholder="SEARCH_DISCUSSIONS..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={handleSearch}
                 />
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="cyber-btn"
                 onClick={() => navigate('/community/create')}
                 title="Start a Discussion"
@@ -108,7 +108,7 @@ export default function CommunityPage() {
               posts.map((post) => (
                 <article key={post.id} className="cyber-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--cyber-accent-tertiary)' }}></div>
-                  
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: 'rgba(0,212,255,0.1)', border: '1px solid var(--cyber-accent-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 700, color: 'var(--cyber-accent-tertiary)' }}>
@@ -128,9 +128,9 @@ export default function CommunityPage() {
                   <Link to={`/community/posts/${post.id}`} style={{ textDecoration: 'none' }}>
                     <h2 style={{ fontSize: '1.25rem', color: 'var(--cyber-foreground)', margin: '0.5rem 0', fontWeight: 600 }}>{post.title}</h2>
                   </Link>
-                  
+
                   <p style={{ color: '#94a3b8', lineHeight: 1.6, margin: 0, fontSize: '0.9rem' }}>{post.content?.substring(0, 200)}...</p>
-                  
+
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                     {post.tags?.split(',').map((tag) => (
                       <span key={tag} onClick={() => handleTagClick(tag.trim())} className="cyber-btn-outline" style={{ cursor: 'pointer', padding: '0.2rem 0.6rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none' }}>
@@ -152,9 +152,9 @@ export default function CommunityPage() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {featuredTopics.length > 0 ? featuredTopics.map(topic => (
-                <Link 
-                  key={topic.id} 
-                  to={`/community/posts/${topic.id}`} 
+                <Link
+                  key={topic.id}
+                  to={`/community/posts/${topic.id}`}
                   className="sidebar-link-v2"
                   style={{ background: 'none', borderRight: 'none', borderTop: 'none', borderBottom: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0.75rem' }}
                 >
@@ -174,8 +174,8 @@ export default function CommunityPage() {
             <h3 className="home-sidebar-title">// NETWORK_NODES</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', padding: '0 0.75rem' }}>
               {trendingTags.map(tag => (
-                <span 
-                  key={tag.id} 
+                <span
+                  key={tag.id}
                   onClick={() => handleTagClick(tag)}
                   className="cyber-btn-outline"
                   style={{ cursor: 'pointer', padding: '0.25rem 0.75rem', fontSize: '10px', minHeight: 'auto', clipPath: 'none' }}
