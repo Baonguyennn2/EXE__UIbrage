@@ -35,7 +35,7 @@ const updateProfile = async (req, res) => {
     }
 
     await User.update(updateData, { where: { id } });
-    const updatedUser = await User.findByPk(id, { attributes: { exclude: ['passwordHash'] } });
+    const updatedUser = await User.findByPk(id);
     res.json(updatedUser);
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -313,9 +313,8 @@ const toggleFollow = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ 
+const user = await User.findOne({
       where: { username },
-      attributes: { exclude: ['passwordHash'] }
     });
     
     if (!user) return res.status(404).json({ message: 'User not found' });

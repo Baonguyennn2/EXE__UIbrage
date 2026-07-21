@@ -56,11 +56,11 @@ const getCreators = async (req, res) => {
     // Find all non-admin users who have uploaded at least one asset
     const creatorsWithStats = await User.findAll({
       where: { role: { [Op.ne]: 'admin' } },
-      attributes: { exclude: ['passwordHash'] },
+attributes: { exclude: [] },
       include: [
-        { 
-          model: Asset, 
-          as: 'Assets', 
+        {
+          model: Asset,
+          as: 'Assets',
           attributes: ['id', 'price', 'downloads'] 
         }
       ]
