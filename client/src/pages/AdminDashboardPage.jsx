@@ -58,7 +58,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   useEffect(() => { adminUserRef.current = adminUser }, [adminUser])
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'))
+    let user = null
+    try {
+      const userData = localStorage.getItem('user')
+      user = userData ? JSON.parse(userData) : null
+    } catch (e) {
+      console.error('Error parsing user', e)
+    }
     if (!user || user.role !== 'admin') {
        navigate('/auth/login')
        return
@@ -115,7 +121,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const user = JSON.parse(localStorage.getItem('user'))
+      const currentUser = adminUser || JSON.parse(localStorage.getItem('user') || 'null')
       
       const [statsRes, creatorsRes, pendingRes, notifyRes, convRes, allAssetsRes, myAssetsRes, withdrawalsRes, commissionRes] = await Promise.all([
         adminService.getStats(),
@@ -124,7 +130,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         notificationService.getAll(),
         messageService.getConversations(),
         assetService.getAll({ isAdmin: 'true' }), // All assets (admin view)
-        assetService.getAll({ authorId: user.id }), // Admin's own assets
+        assetService.getAll({ authorId: currentUser?.id }), // Admin's own assets
         adminService.getWithdrawals({ status: 'all' }),
         adminService.getCommission()
       ])

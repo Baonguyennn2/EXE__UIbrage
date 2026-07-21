@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
+// Define Follower table first
 const Follower = sequelize.define('Follower', {
   id: {
     type: DataTypes.INTEGER,
@@ -10,18 +10,10 @@ const Follower = sequelize.define('Follower', {
   followerId: {
     type: DataTypes.STRING, // User who follows
     allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
   },
   followingId: {
     type: DataTypes.STRING, // User being followed
     allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
   }
 }, {
   timestamps: true,
@@ -33,4 +25,5 @@ const Follower = sequelize.define('Follower', {
   ]
 });
 
+// Associations defined in index.js
 module.exports = Follower;

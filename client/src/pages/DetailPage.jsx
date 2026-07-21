@@ -137,6 +137,12 @@ export default function DetailPage() {
     e.preventDefault()
     if (!newComment.trim()) return
     
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/auth/login')
+      return
+    }
+    
     setSubmitting(true)
     try {
       const response = await commentService.add({
@@ -148,7 +154,11 @@ export default function DetailPage() {
       setNewComment('')
     } catch (error) {
       console.error('Error adding comment:', error)
-      alert('Failed to add comment. Please log in first.')
+      if (error.response?.status === 401) {
+        navigate('/auth/login')
+      } else {
+        alert('Failed to add comment. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -330,6 +340,7 @@ export default function DetailPage() {
               <button className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`} onClick={() => setActiveTab('description')}>Description</button>
               <button className={`tab-btn ${activeTab === 'specs' ? 'active' : ''}`} onClick={() => setActiveTab('specs')}>Specifications</button>
               <button className={`tab-btn ${activeTab === 'changelog' ? 'active' : ''}`} onClick={() => setActiveTab('changelog')}>Changelog</button>
+              <button className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`} onClick={() => setActiveTab('reviews')}>Reviews</button>
             </div>
 
             {activeTab === 'description' && (
@@ -359,57 +370,121 @@ export default function DetailPage() {
             {activeTab === 'specs' && <div className="desc-content">Specifications data unavailable.</div>}
             {activeTab === 'changelog' && <div className="desc-content">v1.0.0 - Initial encrypted deployment.</div>}
 
-            <div className="reviews-section">
-              <div className="reviews-header">
-                <h2 className="reviews-title">Neural_Feedback // <span>Reviews</span></h2>
-              </div>
+            {(activeTab === 'description' || activeTab === 'specs' || activeTab === 'changelog') && (
+              <div className="reviews-section">
+                <div className="reviews-header">
+                  <h2 className="reviews-title">Neural_Feedback // <span>Reviews</span></h2>
+                </div>
 
-              <div className="review-form-container">
-                <form onSubmit={handleAddComment}>
-                  <textarea 
-                    className="review-form-textarea"
-                    placeholder="ENTER_LOG_DATA..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    required
-                  />
-                  <div className="review-form-footer">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span style={{ fontSize: '10px', color: '#64748b', fontFamily: 'var(--font-cyber-mono)', textTransform: 'uppercase' }}>Rating:</span>
-                      <StarRating rating={rating} setRating={setRating} />
+                <div className="review-form-container">
+                  <form onSubmit={handleAddComment}>
+                    <textarea 
+                      className="review-form-textarea"
+                      placeholder="ENTER_LOG_DATA..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      required
+                    />
+                    <div className="review-form-footer">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ fontSize: '10px', color: '#64748b', fontFamily: 'var(--font-cyber-mono)', textTransform: 'uppercase' }}>Rating:</span>
+                        <StarRating rating={rating} setRating={setRating} />
+                      </div>
+                      <button type="submit" className="cyber-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '10px', minHeight: 'auto', border: '1px solid var(--cyber-border)', color: 'white', background: 'transparent', cursor: 'pointer' }} disabled={submitting}>
+                        {submitting ? 'TRANSMITTING...' : 'SUBMIT_LOG'}
+                      </button>
                     </div>
-                    <button type="submit" className="cyber-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '10px', minHeight: 'auto', border: '1px solid var(--cyber-border)', color: 'white', background: 'transparent', cursor: 'pointer' }} disabled={submitting}>
-                      {submitting ? 'TRANSMITTING...' : 'SUBMIT_LOG'}
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  </form>
+                </div>
 
-              <div className="reviews-list">
-                {comments.length === 0 && <p style={{ color: '#64748b', fontSize: '0.75rem', fontFamily: 'var(--font-cyber-mono)' }}>No neural feedback found.</p>}
-                {comments.map((c, i) => (
-                  <div key={c._id || c.id || i} className="review-card">
-                    <div className="review-card-header">
-                      <div className="reviewer-info">
-                        <div className="reviewer-avatar">
-                          <RiTerminalBoxLine color={i % 2 === 0 ? '#00ff88' : '#f0f'} />
+                <div className="reviews-list">
+                  {comments.length === 0 && <p style={{ color: '#64748b', fontSize: '0.75rem', fontFamily: 'var(--font-cyber-mono)' }}>No neural feedback found.</p>}
+                  {comments.map((c, i) => (
+                    <div key={c._id || c.id || i} className="review-card">
+                      <div className="review-card-header">
+                        <div className="reviewer-info">
+                          <div className="reviewer-avatar">
+                            {c.userAvatar ? (
+                              <img src={c.userAvatar} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                              <RiTerminalBoxLine color={i % 2 === 0 ? '#00ff88' : '#f0f'} />
+                            )}
+                          </div>
+                          <div>
+                            <p className="reviewer-name">{c.userName || 'USER_NULL'}</p>
+                            <p className="review-date">{new Date(c.createdAt).toLocaleDateString()}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="reviewer-name">{c.userName || 'USER_NULL_92'}</p>
-                          <p className="review-date">2077.05.12 // 09:42:15</p>
+                        <div className="rating-group" style={{ gap: 0 }}>
+                          <StarRating rating={c.rating || 5} interactive={false} size={12} />
                         </div>
                       </div>
-                      <div className="rating-group" style={{ gap: 0 }}>
-                        <StarRating rating={c.rating || 5} interactive={false} size={12} />
-                      </div>
+                      <p className="review-text">
+                        {c.content}
+                      </p>
                     </div>
-                    <p className="review-text">
-                      {c.content}
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="reviews-section">
+                <div className="reviews-header">
+                  <h2 className="reviews-title">Neural_Feedback // <span>Reviews</span></h2>
+                </div>
+
+                <div className="review-form-container">
+                  <form onSubmit={handleAddComment}>
+                    <textarea 
+                      className="review-form-textarea"
+                      placeholder="ENTER_LOG_DATA..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      required
+                    />
+                    <div className="review-form-footer">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <span style={{ fontSize: '10px', color: '#64748b', fontFamily: 'var(--font-cyber-mono)', textTransform: 'uppercase' }}>Rating:</span>
+                        <StarRating rating={rating} setRating={setRating} />
+                      </div>
+                      <button type="submit" className="cyber-btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '10px', minHeight: 'auto', border: '1px solid var(--cyber-border)', color: 'white', background: 'transparent', cursor: 'pointer' }} disabled={submitting}>
+                        {submitting ? 'TRANSMITTING...' : 'SUBMIT_LOG'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="reviews-list">
+                  {comments.length === 0 && <p style={{ color: '#64748b', fontSize: '0.75rem', fontFamily: 'var(--font-cyber-mono)' }}>No neural feedback found.</p>}
+                  {comments.map((c, i) => (
+                    <div key={c._id || c.id || i} className="review-card">
+                      <div className="review-card-header">
+                        <div className="reviewer-info">
+                          <div className="reviewer-avatar">
+                            {c.userAvatar ? (
+                              <img src={c.userAvatar} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                              <RiTerminalBoxLine color={i % 2 === 0 ? '#00ff88' : '#f0f'} />
+                            )}
+                          </div>
+                          <div>
+                            <p className="reviewer-name">{c.userName || 'USER_NULL'}</p>
+                            <p className="review-date">{new Date(c.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="rating-group" style={{ gap: 0 }}>
+                          <StarRating rating={c.rating || 5} interactive={false} size={12} />
+                        </div>
+                      </div>
+                      <p className="review-text">
+                        {c.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar Col: Creator & Related */}

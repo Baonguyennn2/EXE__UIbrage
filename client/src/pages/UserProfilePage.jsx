@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
 import LoadingScreen from '../components/LoadingScreen.jsx'
 import { assetService, userService } from '../services/api'
 import { 
   RiMapPin2Line, 
   RiCalendarLine, 
-  RiUserFollowLine, 
+  RiUserFollowLine,
+  RiUserUnfollowLine,
   RiBriefcaseLine,
   RiGlobalLine,
   RiFacebookBoxFill,
@@ -16,10 +17,14 @@ import {
 
 export default function UserProfilePage() {
   const { username } = useParams()
+  const navigate = useNavigate()
   const [profileUser, setProfileUser] = useState(null)
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('assets')
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
+  const [currentUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'))
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -31,6 +36,16 @@ export default function UserProfilePage() {
         const assetsRes = await assetService.getAll({ authorId: userRes.data.id })
         setAssets(assetsRes.data)
         
+        // Check if current user is following this profile
+        if (currentUser && currentUser.id !== userRes.data.id) {
+          try {
+            const followRes = await userService.checkIsFollowing(userRes.data.id)
+            setIsFollowing(followRes.data.isFollowing)
+          } catch (e) {
+            console.error('Failed to check follow status:', e)
+          }
+        }
+        
         setLoading(false)
       } catch (error) {
         console.error('Error fetching profile:', error)
@@ -38,7 +53,37 @@ export default function UserProfilePage() {
       }
     }
     fetchProfile()
-  }, [username])
+  }, [username, currentUser])
+
+  const handleToggleFollow = async () => {
+    if (!currentUser) {
+      navigate('/auth/login')
+      return
+    }
+    
+    setFollowLoading(true)
+    try {
+      const res = await userService.toggleFollow(profileUser.id)
+      setIsFollowing(res.data.isFollowing)
+      setProfileUser(prev => ({
+        ...prev,
+        followerCount: res.data.isFollowing ? (prev.followerCount || 0) + 1 : (prev.followerCount || 1) - 1
+      }))
+    } catch (error) {
+      console.error('Error toggling follow:', error)
+      alert('Failed to update follow status.')
+    } finally {
+      setFollowLoading(false)
+    }
+  }
+
+  const handleMessage = () => {
+    if (!currentUser) {
+      navigate('/auth/login')
+      return
+    }
+    navigate('/messages')
+  }
 
   if (loading) return <LoadingScreen message="Loading Profile..." />
   if (!profileUser) return <div className="error-screen">User not found</div>
@@ -89,8 +134,34 @@ export default function UserProfilePage() {
             </div>
             
             <div className="profile-v2-actions" style={{ paddingBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button className="btn-solid" style={{ padding: '0.75rem 2rem' }}><RiUserFollowLine /> Follow</button>
-              <button className="btn-ghost" style={{ padding: '0.75rem 1.5rem' }}>Message</button>
+              {currentUser && currentUser.id !== profileUser.id && (
+                <>
+                  <button 
+                    className="btn-solid" 
+                    style={{ padding: '0.75rem 2rem' }}
+                    onClick={handleToggleFollow}
+                    disabled={followLoading}
+                  >
+                    {isFollowing ? <><RiUserUnfollowLine /> Unfollow</> : <><RiUserFollowLine /> Follow</>}
+                  </button>
+                  <button 
+                    className="btn-ghost" 
+                    style={{ padding: '0.75rem 1.5rem' }}
+                    onClick={handleMessage}
+                  >
+                    Message
+                  </button>
+                </>
+              )}
+              {currentUser && currentUser.id === profileUser.id && (
+                <button 
+                  className="btn-ghost" 
+                  style={{ padding: '0.75rem 1.5rem' }}
+                  onClick={() => navigate('/profile/edit')}
+                >
+                  Edit Profile
+                </button>
+              )}
             </div>
           </div>
 

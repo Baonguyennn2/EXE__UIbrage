@@ -40,6 +40,12 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const { conversationId, receiverId, text, image } = req.body;
+    
+    // Validate: must have either text or image
+    if ((!text || text.trim() === '') && !image) {
+      return res.status(400).json({ message: 'Message must have text or image' });
+    }
+    
     let actualConvId = conversationId;
 
     if (!actualConvId) {
@@ -67,7 +73,7 @@ const sendMessage = async (req, res) => {
 
     await Conversation.findByIdAndUpdate(actualConvId, {
       lastMessage: text || '[Hình ảnh]',
-      lastMessageAt: Date.now()
+      lastMessageAt: new Date()
     });
 
     res.status(201).json(message);

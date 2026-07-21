@@ -14,7 +14,20 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
   useEffect(() => {
     const fetchMyAssets = async () => {
       try {
-        const user = JSON.parse(localStorage.getItem('user'))
+        const userData = localStorage.getItem('user')
+        if (!userData) {
+          setLoading(false)
+          return
+        }
+        let user = null
+        try {
+          user = JSON.parse(userData)
+        } catch (e) {
+          console.error('Error parsing user', e)
+          setLoading(false)
+          return
+        }
+        
         if (user) {
           const [purchasesRes, ordersRes] = await Promise.all([
             userService.getPurchases(),
@@ -112,7 +125,7 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
                       <img src={asset.coverImageUrl || 'https://picsum.photos/seed/cyber/400/225'} alt={asset.title} />
                     </div>
                     <div className="library-card-body">
-                      <Link to={`/marketplace/${asset.id}`} className="library-card-title">{asset.title}</Link>
+                      <Link to={`/marketplace/assets/${asset.id}`} className="library-card-title">{asset.title}</Link>
                       <span className="library-card-meta">By {asset.author?.fullName || asset.author?.username || 'Unknown_Entity'}</span>
                       <div className="library-card-actions">
                         <button onClick={() => handleDownload(asset.fileUrl)} className="cyber-btn interactive-ripple" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '9px', padding: '0.5rem' }}>

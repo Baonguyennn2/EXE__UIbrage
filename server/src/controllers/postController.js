@@ -143,11 +143,17 @@ const addComment = async (req, res) => {
     const { content } = req.body;
     const { postId } = req.params;
 
+    // Lookup user from database to get username
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'username', 'fullName', 'avatarUrl']
+    });
+
     const comment = await CommunityComment.create({
       content,
       postId,
       userId: req.user.id,
-      userName: req.user.username
+      userName: user?.fullName || user?.username || 'USER_NULL',
+      userAvatar: user?.avatarUrl || null
     });
 
     res.status(201).json(comment);

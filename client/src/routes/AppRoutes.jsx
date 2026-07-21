@@ -35,10 +35,19 @@ function LegacyFrameRoute() {
 }
 
 export default function AppRoutes() {
+  const user = (() => {
+    try {
+      const u = localStorage.getItem('user')
+      return u ? JSON.parse(u) : null
+    } catch {
+      return null
+    }
+  })()
+
   return (
     <Routes>
       <Route path="/" element={
-        localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).role === 'admin' 
+        user?.role === 'admin' 
         ? <Navigate to="/admin/dashboard" replace /> 
         : <HomepagePage />
       } />

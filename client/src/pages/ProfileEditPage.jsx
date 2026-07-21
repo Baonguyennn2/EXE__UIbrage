@@ -32,33 +32,55 @@ export default function ProfileEditPage({ isAdminContext = false }) {
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const [showCoverModal, setShowCoverModal] = useState(false)
+  const [activeFileType, setActiveFileType] = useState(null)
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user') || 'null')
-    if (savedUser) {
-      setUser(savedUser)
-      setFormData({
-        fullName: savedUser.fullName || '',
-        username: savedUser.username || '',
-        email: savedUser.email || '',
-        bio: savedUser.bio || '',
-        jobTitle: savedUser.jobTitle || '',
-        location: savedUser.location || '',
-        website: savedUser.website || '',
-        facebookUrl: savedUser.facebookUrl || '',
-        twitterUrl: savedUser.twitterUrl || '',
-        githubUrl: savedUser.githubUrl || '',
-        coverPosition: savedUser.coverPosition || 50,
-        coverZoom: savedUser.coverZoom || 100
-      })
+    if (!savedUser) {
+      // Redirect to login if not authenticated
+      window.location.href = '/auth/login'
+      return
     }
+    setUser(savedUser)
+    setFormData({
+      fullName: savedUser.fullName || '',
+      username: savedUser.username || '',
+      email: savedUser.email || '',
+      bio: savedUser.bio || '',
+      jobTitle: savedUser.jobTitle || '',
+      location: savedUser.location || '',
+      website: savedUser.website || '',
+      facebookUrl: savedUser.facebookUrl || '',
+      twitterUrl: savedUser.twitterUrl || '',
+      githubUrl: savedUser.githubUrl || '',
+      coverPosition: savedUser.coverPosition || 50,
+      coverZoom: savedUser.coverZoom || 100
+    })
   }, [])
 
-  const handleFileChange = (e, setter, previewSetter) => {
+  const handleFileChange = (e, fileType) => {
     if (e.target.files && e.target.files[0]) {
-      setter(e.target.files[0])
-      previewSetter(URL.createObjectURL(e.target.files[0]))
-      if (setter === setCoverFile) {
+      const file = e.target.files[0]
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB')
+        return
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file')
+        return
+      }
+      
+      if (fileType === 'avatar') {
+        setAvatarFile(file)
+        setAvatarPreview(URL.createObjectURL(file))
+      } else if (fileType === 'cover') {
+        setCoverFile(file)
+        setCoverPreview(URL.createObjectURL(file))
+        setActiveFileType('cover')
         setShowCoverModal(true)
       }
     }
@@ -70,8 +92,9 @@ export default function ProfileEditPage({ isAdminContext = false }) {
     
     try {
       const data = new FormData()
+      // Include username in the update
       Object.keys(formData).forEach(key => {
-        if (key !== 'email' && key !== 'username') {
+        if (key !== 'email') {
            data.append(key, formData[key])
         }
       })
@@ -144,7 +167,7 @@ export default function ProfileEditPage({ isAdminContext = false }) {
             }}>
               
               <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem' }}>
-                <input type="file" accept="image/*" hidden id="coverUpload" onChange={(e) => handleFileChange(e, setCoverFile, setCoverPreview)} />
+                <input type="file" accept="image/*" hidden id="coverUpload" onChange={(e) => handleFileChange(e, 'cover')} />
                 <label htmlFor="coverUpload" style={{ 
                   background: 'rgba(0,0,0,0.8)', color: 'var(--cyber-cyan)', width: '40px', height: '40px', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -186,7 +209,7 @@ export default function ProfileEditPage({ isAdminContext = false }) {
                   {!(avatarPreview || user.avatarUrl) && formData.username?.[0]?.toUpperCase()}
                 </div>
                 
-                <input type="file" accept="image/*" hidden id="avatarUpload" onChange={(e) => handleFileChange(e, setAvatarFile, setAvatarPreview)} />
+                <input type="file" accept="image/*" hidden id="avatarUpload" onChange={(e) => handleFileChange(e, 'avatar')} />
                 <label htmlFor="avatarUpload" style={{ 
                   position: 'absolute', bottom: '-0.5rem', right: '-0.5rem', 
                   background: 'var(--cyber-cyan)', color: 'black', 
@@ -218,10 +241,18 @@ export default function ProfileEditPage({ isAdminContext = false }) {
             <div className="profile-form-grid">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label className="cyber-label">Username</label>
+                  <div style={{ position: 'relative' }}>
+                    <RiUser3Fill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="@gameder_pro" />
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label className="cyber-label">Alias</label>
                   <div style={{ position: 'relative' }}>
                     <RiUser3Fill style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
+                    <input type="text" className="cyber-input" style={{ paddingLeft: '2.5rem' }} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} placeholder="Display Name" />
                   </div>
                 </div>
                 

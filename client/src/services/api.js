@@ -44,6 +44,7 @@ export const assetService = {
   }),
   update: (id, data) => api.put(`/assets/${id}`, data),
   delete: (id) => api.delete(`/assets/${id}`),
+  deleteAsset: (id) => api.delete(`/assets/${id}`),
 };
 
 export const adminService = {

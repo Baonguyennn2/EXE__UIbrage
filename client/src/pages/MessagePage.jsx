@@ -61,7 +61,14 @@ export default function MessagePage() {
 
   // Init - rejoin socket room để đảm bảo
   useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem('user'))
+    let savedUser = null
+    try {
+      const userData = localStorage.getItem('user')
+      savedUser = userData ? JSON.parse(userData) : null
+    } catch (e) {
+      console.error('Error parsing user data', e)
+    }
+    
     if (!savedUser) {
       navigate('/auth/login')
       return
@@ -312,25 +319,29 @@ export default function MessagePage() {
   const contactAdmin = async () => {
     try {
       setContactingAdmin(true)
+      // Check if already has conversation with admin
       const existing = conversations.find(c => c.otherUser?.role === 'admin')
       if (existing) {
         fetchMessages(existing)
         setContactingAdmin(false)
         return
       }
+      
+      // Get admin contact info and send auto-message
       const res = await userService.getAdminContact()
       if (res.data && res.data.id) {
         const msgData = {
           receiverId: res.data.id,
           text: 'Hello, I need help from the admin.'
         }
-        const msgRes = await messageService.sendMessage(msgData)
-        if (msgRes.data && msgRes.data.conversationId) {
-          setNewMessage('')
-          await fetchConversations()
-          const updatedConv = (await messageService.getConversations()).data
-          const adminConv = updatedConv.find(c => c.otherUser?.id === res.data.id)
-          if (adminConv) fetchMessages(adminConv)
+        await messageService.sendMessage(msgData)
+        
+        // Refresh conversations and open admin chat
+        await fetchConversations()
+        const updatedConv = (await messageService.getConversations()).data
+        const adminConv = updatedConv.find(c => c.otherUser?.id === res.data.id)
+        if (adminConv) {
+          fetchMessages(adminConv)
         }
       }
       setContactingAdmin(false)
@@ -590,7 +601,7 @@ export default function MessagePage() {
                 )}
 
                 {messages.map((msg, i) => {
-                  const isMine = msg.senderId === user.id
+                  const isMine = String(msg.senderId) === String(user?.id)
                   const showDate = i === 0 ||
                     new Date(msg.createdAt).toDateString() !== new Date(messages[i - 1]?.createdAt).toDateString()
 
@@ -896,7 +907,7 @@ export default function MessagePage() {
                 onClick={contactAdmin}
                 disabled={contactingAdmin}
                 style={{
-                  background: '#4f46e5', color: 'var(--cyber-panel)',
+                  background: '#4f46e5', color: 'white',
                   border: 'none', borderRadius: '24px',
                   padding: '0.75rem 2rem', fontWeight: 700,
                   display: 'flex', alignItems: 'center', gap: '0.5rem',

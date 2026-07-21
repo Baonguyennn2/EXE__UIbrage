@@ -34,14 +34,24 @@ export default function PostDetailPage() {
     e.preventDefault()
     if (!newComment.trim()) return
     
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/auth/login')
+      return
+    }
+    
     setIsSubmitting(true)
     try {
       await postService.addComment(id, { content: newComment })
       setNewComment('')
-      fetchPost() // Refresh post to show new comment
+      fetchPost()
     } catch (error) {
       console.error('Error adding comment:', error)
-      alert('Failed to add comment. Please log in first.')
+      if (error.response?.status === 401) {
+        navigate('/auth/login')
+      } else {
+        alert('Failed to add comment. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }

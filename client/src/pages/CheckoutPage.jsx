@@ -28,11 +28,17 @@ export default function CheckoutPage() {
     if (isCanceled) {
       alert('Payment was canceled. You can try again when you are ready.')
     }
+  }, [isCanceled])
 
+  // Redirect to marketplace if no asset
+  useEffect(() => {
     if (!asset && !isCanceled) {
-      // navigate('/marketplace')
+      const timeout = setTimeout(() => {
+        navigate('/marketplace')
+      }, 2000)
+      return () => clearTimeout(timeout)
     }
-  }, [asset, navigate, isCanceled])
+  }, [asset, isCanceled, navigate])
 
   const [formData, setFormData] = useState({
     fullName: '',

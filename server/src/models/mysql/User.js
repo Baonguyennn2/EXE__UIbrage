@@ -1,6 +1,3 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../../config/database');
-
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.STRING, // Cognito Sub (UUID)
@@ -18,6 +15,10 @@ const User = sequelize.define('User', {
     validate: {
       isEmail: true,
     },
+  },
+  passwordHash: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   fullName: {
     type: DataTypes.STRING,

@@ -1,16 +1,15 @@
-const { User, Asset, RevenueLedger, WithdrawalRequest, Order } = require('../models/mysql');
+const { User, Asset, RevenueLedger, WithdrawalRequest, Order, Follower } = require('../models/mysql');
 const Notification = require('../models/mongodb/Notification');
 const sequelize = require('../config/database');
 const { getCreatorFinancials, roundMoney } = require('../utils/finance');
 
 const updateProfile = async (req, res) => {
-  // ... (keep existing code)
   try {
     const { id } = req.user;
     const updateData = {};
-    const fields = ['fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl', 'profileFrame', 'coverPosition', 'coverZoom'];
+    const allowedFields = ['username', 'fullName', 'bio', 'jobTitle', 'location', 'website', 'facebookUrl', 'twitterUrl', 'githubUrl', 'profileFrame', 'coverPosition', 'coverZoom'];
     
-    fields.forEach(field => {
+    allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
         updateData[field] = req.body[field];
       }
@@ -21,10 +20,25 @@ const updateProfile = async (req, res) => {
       if (req.files.coverImage) updateData.coverImageUrl = req.files.coverImage[0].path;
     }
 
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
+    // Check if username is being changed and if it's already taken
+    if (updateData.username) {
+      const existing = await User.findOne({ 
+        where: { username: updateData.username, id: { [require('sequelize').Op.ne]: id } }
+      });
+      if (existing) {
+        return res.status(400).json({ message: 'Username is already taken' });
+      }
+    }
+
     await User.update(updateData, { where: { id } });
     const updatedUser = await User.findByPk(id, { attributes: { exclude: ['passwordHash'] } });
     res.json(updatedUser);
   } catch (error) {
+    console.error('Error updating profile:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -245,8 +259,15 @@ const checkIsFollowing = async (req, res) => {
 
     if (!targetUser) return res.status(404).json({ message: 'User not found' });
 
-    const isFollowing = await currentUser.hasFollowing(targetUser);
-    res.json({ isFollowing });
+    // Check using Sequelize association - Users follow other Users through Follower table
+    const following = await Follower.findOne({
+      where: {
+        followerId: currentUserId,
+        followingId: targetUserId
+      }
+    });
+    
+    res.json({ isFollowing: !!following });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -266,13 +287,22 @@ const toggleFollow = async (req, res) => {
 
     if (!targetUser) return res.status(404).json({ message: 'User not found' });
 
-    const isFollowing = await currentUser.hasFollowing(targetUser);
+    // Check if already following
+    const existingFollow = await Follower.findOne({
+      where: {
+        followerId: currentUserId,
+        followingId: targetUserId
+      }
+    });
 
-    if (isFollowing) {
-      await currentUser.removeFollowing(targetUser);
+    if (existingFollow) {
+      await existingFollow.destroy();
       res.json({ message: 'Unfollowed successfully', isFollowing: false });
     } else {
-      await currentUser.addFollowing(targetUser);
+      await Follower.create({
+        followerId: currentUserId,
+        followingId: targetUserId
+      });
       res.json({ message: 'Followed successfully', isFollowing: true });
     }
   } catch (error) {
@@ -290,8 +320,9 @@ const getUserProfile = async (req, res) => {
     
     if (!user) return res.status(404).json({ message: 'User not found' });
     
-    const followerCount = await user.countFollowers();
-    const followingCount = await user.countFollowing();
+    // Use Follower model directly for consistency
+    const followerCount = await Follower.count({ where: { followingId: user.id } });
+    const followingCount = await Follower.count({ where: { followerId: user.id } });
     const assetCount = await Asset.count({ where: { authorId: user.id } });
     
     const profileData = user.toJSON();

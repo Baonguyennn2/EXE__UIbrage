@@ -13,14 +13,25 @@ export default function ManageAssetsPage() {
   useEffect(() => {
     const fetchMyAssets = async () => {
       try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}')
-        if (!user.id) return navigate('/auth/login')
+        const userData = localStorage.getItem('user')
+        if (!userData) {
+          navigate('/auth/login')
+          return
+        }
+        const user = JSON.parse(userData)
+        if (!user.id) {
+          navigate('/auth/login')
+          return
+        }
         
         const res = await assetService.getAll({ authorId: user.id })
         setAssets(res.data)
-        setLoading(false)
       } catch (error) {
         console.error('Error fetching assets:', error)
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+        navigate('/auth/login')
+      } finally {
         setLoading(false)
       }
     }
@@ -99,7 +110,7 @@ export default function ManageAssetsPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                        <Link to={`/marketplace/${asset.id}`} className="btn-ghost-cyber" style={{ padding: '0.5rem', display: 'flex', alignItems: 'center' }} title="Inspect Node">
+                        <Link to={`/marketplace/assets/${asset.id}`} className="btn-ghost-cyber" style={{ padding: '0.5rem', display: 'flex', alignItems: 'center' }} title="Inspect Node">
                           <RiEyeLine />
                         </Link>
                         <button className="btn-ghost-cyber" onClick={() => navigate(`/assets/edit/${asset.id}`)} style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', borderColor: 'var(--cyber-magenta)', color: 'var(--cyber-magenta)' }} title="Reconfigure">
