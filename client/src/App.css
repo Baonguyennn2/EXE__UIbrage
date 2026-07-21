@@ -3852,10 +3852,10 @@
 .header-dropdown::before {
   content: '';
   position: absolute;
-  top: -10px;
+  top: -40px;
   left: 0;
   right: 0;
-  height: 10px;
+  height: 40px;
 }
 
 .header-dropdown--categories {
