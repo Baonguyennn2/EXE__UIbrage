@@ -54,10 +54,10 @@ export default function CommunityPage() {
       <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
       <AppHeader />
 
-      <main className="dashboard-main" style={{ flexDirection: 'row', alignItems: 'flex-start', padding: 0 }}>
+      <main className="dashboard-main" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '3rem', alignItems: 'flex-start', maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '2rem 1.5rem', position: 'relative', zIndex: 10 }}>
         
         {/* Main Content Area */}
-        <section style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', minWidth: 0, maxWidth: '800px', margin: '0 auto' }}>
+        <section style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           
           <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '1.5rem' }}>
             <div>
