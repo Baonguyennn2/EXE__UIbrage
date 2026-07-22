@@ -10,6 +10,7 @@ const Tag = require('./Tag');
 const Post = require('./Post');
 const PostComment = require('./PostComment');
 const Follower = require('./Follower');
+const Manual = require('./Manual');
 
 User.hasMany(Asset, { as: 'Assets', foreignKey: 'authorId' });
 Asset.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
@@ -73,4 +74,5 @@ module.exports = {
   Post,
   PostComment,
   Follower,
+  Manual,
 };

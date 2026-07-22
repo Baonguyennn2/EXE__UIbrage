@@ -4,6 +4,7 @@ import { useSocket } from '../services/SocketContext'
 import MyLibraryPage from './MyLibraryPage.jsx'
 import UploadAssetPage from './UploadAssetPage.jsx'
 import ProfileEditPage from './ProfileEditPage.jsx'
+import AdminManuals from '../components/AdminManuals.jsx'
 import {
   RiLayoutMasonryFill, RiGalleryFill, RiUploadCloud2Fill, RiGroupFill,
   RiShieldCheckFill, RiMessage3Fill, RiNotification3Line, RiLogoutBoxRLine,
@@ -1124,6 +1125,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               <button onClick={() => navigate('/admin/asset-approval')} className={`side-link ${variant === 'moderation' ? 'active' : ''}`}><RiShieldCheckFill /> Asset Approval</button>
               <button onClick={() => navigate('/admin/withdrawals')} className={`side-link ${variant === 'withdrawals' ? 'active' : ''}`}><RiBankCardLine /> Withdrawals</button>
               <button onClick={() => navigate('/admin/all-assets')} className={`side-link ${variant === 'all-assets' ? 'active' : ''}`}><RiStackFill /> All User Assets</button>
+              <button onClick={() => navigate('/admin/manuals')} className={`side-link ${variant === 'manuals' ? 'active' : ''}`}><RiFileList3Line /> Manuals</button>
               <button onClick={() => navigate('/admin/messages')} className={`side-link ${variant === 'messages' ? 'active' : ''}`}>
                 <RiMessage3Fill /> Messages {unreadMessages > 0 && <span className="badge">{unreadMessages}</span>}
               </button>
@@ -1142,6 +1144,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               {variant === 'withdrawals' && renderWithdrawals()}
               {variant === 'all-assets' && renderAllAssets()}
               {variant === 'messages' && renderMessages()}
+              {variant === 'manuals' && <AdminManuals />}
               {variant === 'library' && <MyLibraryPage isAdmin={true} customStats={myAssetStats} />}
               {variant === 'upload' && <UploadAssetPage isAdmin={true} />}
               {variant === 'settings' && <ProfileEditPage isAdminContext={true} />}
