@@ -28,10 +28,10 @@ export default function AdminManuals() {
       setLoading(true);
       const [manualsRes, catRes] = await Promise.all([
         axios.get(`${API_URL}/manuals`),
-        axios.get(`${API_URL}/manuals/categories`)
+        metadataService.getCategories()
       ]);
       setManuals(manualsRes.data);
-      setCategories(catRes.data);
+      setCategories(catRes.data.map(c => c.name));
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
