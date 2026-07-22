@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { RiDeleteBin6Line, RiEdit2Line, RiAddLine, RiLink, RiFile2Line } from 'react-icons/ri';
+import { RiDeleteBin6Line, RiEdit2Line, RiAddLine, RiLink, RiFile2Line, RiArrowDownSLine } from 'react-icons/ri';
+import { metadataService } from '../services/api';
 
 const API_URL = 'http://localhost:5000/api'; // Or use an environment variable
 
@@ -24,12 +25,12 @@ export default function AdminManuals() {
       setLoading(true);
       const [manualsRes, catRes] = await Promise.all([
         axios.get(`${API_URL}/manuals`),
-        axios.get(`${API_URL}/manuals/categories`)
+        metadataService.getCategories()
       ]);
       setManuals(manualsRes.data);
       setCategories(catRes.data);
       if (catRes.data.length > 0 && !formData.category) {
-        setFormData(prev => ({ ...prev, category: catRes.data[0] }));
+        setFormData(prev => ({ ...prev, category: catRes.data[0].name }));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -75,7 +76,7 @@ export default function AdminManuals() {
       }
       setShowModal(false);
       fetchData();
-      setFormData({ title: '', category: categories.length > 0 ? categories[0] : '', type: 'link', content_url: '' });
+      setFormData({ title: '', category: categories.length > 0 ? categories[0].name : '', type: 'link', content_url: '' });
       setFile(null);
       setEditingId(null);
     } catch (error) {
@@ -171,32 +172,17 @@ export default function AdminManuals() {
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category</label>
                 <div style={{ position: 'relative' }}>
-                  <input 
+                  <select 
                     name="category" 
                     value={formData.category} 
                     onChange={handleInputChange} 
-                    onFocus={() => setShowCatDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowCatDropdown(false), 200)}
-                    placeholder="Type or select a category" 
                     required 
                     className="cyber-input"
-                    style={{ width: '100%', padding: '0.75rem 1rem' }} 
-                  />
-                  {showCatDropdown && categories.length > 0 && (
-                    <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)' }}>
-                      {categories.filter(c => c.toLowerCase().includes(formData.category.toLowerCase())).map(c => (
-                        <div 
-                          key={c}
-                          onClick={() => { setFormData(prev => ({ ...prev, category: c })); setShowCatDropdown(false); }}
-                          style={{ padding: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.9rem', color: 'var(--cyber-foreground)', borderBottom: '1px solid rgba(0,212,255,0.1)' }}
-                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,212,255,0.1)'}
-                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                        >
-                          {c}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    style={{ width: '100%', padding: '0.75rem 1rem', appearance: 'none', cursor: 'pointer' }} 
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                  <RiArrowDownSLine style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--cyber-accent)' }} size={20} />
                 </div>
               </div>
 

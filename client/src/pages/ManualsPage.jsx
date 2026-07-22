@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { metadataService } from '../services/api';
 import { RiLinksLine, RiFileDownloadLine, RiCheckboxCircleFill } from 'react-icons/ri';
 import AppHeader from '../components/AppHeader';
 
@@ -15,7 +16,7 @@ export default function ManualsPage() {
       try {
         const [manualsRes, catRes] = await Promise.all([
           axios.get(`${API_URL}/manuals`),
-          axios.get(`${API_URL}/manuals/categories`)
+          metadataService.getCategories()
         ]);
         setManuals(manualsRes.data);
         setCategories(catRes.data);
@@ -86,17 +87,17 @@ export default function ManualsPage() {
               
               {categories.map(cat => (
                 <button 
-                  key={cat} 
-                  onClick={() => toggleCategory(cat)}
-                  className={`cyber-btn ${selectedCategories.includes(cat) ? '' : 'cyber-btn-outline'}`}
+                  key={cat.id} 
+                  onClick={() => toggleCategory(cat.name)}
+                  className={`cyber-btn ${selectedCategories.includes(cat.name) ? '' : 'cyber-btn-outline'}`}
                   style={{
-                    background: selectedCategories.includes(cat) ? 'var(--cyber-accent-secondary)' : 'transparent',
-                    color: selectedCategories.includes(cat) ? '#fff' : 'var(--cyber-foreground)',
+                    background: selectedCategories.includes(cat.name) ? 'var(--cyber-accent-secondary)' : 'transparent',
+                    color: selectedCategories.includes(cat.name) ? '#fff' : 'var(--cyber-foreground)',
                     borderColor: 'var(--cyber-border)'
                   }}
                 >
-                  {selectedCategories.includes(cat) && <RiCheckboxCircleFill style={{ marginRight: '0.5rem' }}/>}
-                  {cat.toUpperCase()}
+                  {selectedCategories.includes(cat.name) && <RiCheckboxCircleFill style={{ marginRight: '0.5rem' }}/>}
+                  {cat.name.toUpperCase()}
                 </button>
               ))}
             </div>
