@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { RiDeleteBin6Line, RiEdit2Line, RiAddLine, RiLink, RiFile2Line } from 'react-icons/ri';
-import { metadataService } from '../services/api';
 
 const API_URL = 'http://localhost:5000/api'; // Or use an environment variable
 
@@ -24,12 +23,12 @@ export default function AdminManuals() {
       setLoading(true);
       const [manualsRes, catRes] = await Promise.all([
         axios.get(`${API_URL}/manuals`),
-        metadataService.getCategories()
+        axios.get(`${API_URL}/manuals/categories`)
       ]);
       setManuals(manualsRes.data);
       setCategories(catRes.data);
       if (catRes.data.length > 0 && !formData.category) {
-        setFormData(prev => ({ ...prev, category: catRes.data[0].name }));
+        setFormData(prev => ({ ...prev, category: catRes.data[0] }));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -75,7 +74,7 @@ export default function AdminManuals() {
       }
       setShowModal(false);
       fetchData();
-      setFormData({ title: '', category: categories.length > 0 ? categories[0].name : '', type: 'link', content_url: '' });
+      setFormData({ title: '', category: categories.length > 0 ? categories[0] : '', type: 'link', content_url: '' });
       setFile(null);
       setEditingId(null);
     } catch (error) {
@@ -170,9 +169,10 @@ export default function AdminManuals() {
               
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category</label>
-                <select name="category" value={formData.category} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--cyber-muted)', border: '1px solid var(--cyber-border)', borderRadius: '0.5rem', color: '#fff' }}>
-                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                </select>
+                <input list="category-options" name="category" value={formData.category} onChange={handleInputChange} placeholder="Type or select a category" required style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--cyber-muted)', border: '1px solid var(--cyber-border)', borderRadius: '0.5rem', color: '#fff' }} />
+                <datalist id="category-options">
+                  {categories.map(c => <option key={c} value={c} />)}
+                </datalist>
               </div>
 
               <div>

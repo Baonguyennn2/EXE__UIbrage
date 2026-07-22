@@ -14,6 +14,7 @@ const requireAdmin = (req, res, next) => {
 };
 
 router.get('/', manualController.getAllManuals);
+router.get('/categories', manualController.getManualCategories);
 
 // Admin routes
 router.post('/', authMiddleware, requireAdmin, uploadR2.single('file'), manualController.createManual);

@@ -12,6 +12,21 @@ exports.getAllManuals = async (req, res) => {
   }
 };
 
+exports.getManualCategories = async (req, res) => {
+  try {
+    const categories = await Manual.findAll({
+      attributes: ['category'],
+      group: ['category'],
+      order: [['category', 'ASC']]
+    });
+    // Return array of strings
+    res.json(categories.map(c => c.category));
+  } catch (error) {
+    console.error('Error fetching manual categories:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 exports.createManual = async (req, res) => {
   try {
     const { title, category, type, content_url } = req.body;
