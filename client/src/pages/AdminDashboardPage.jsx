@@ -363,8 +363,8 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       <div className="admin-view-fade">
         <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
           <div>
-            <h1 style={{ fontSize: '2.25rem', marginBottom: '0.4rem' }}>Withdrawal Requests</h1>
-            <p style={{ color: '#64748b' }}>Review creator payout requests and keep commission settings in sync.</p>
+            <h1 className="cyber-glitch-text" data-text="Withdrawals" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Withdrawal Requests</h1>
+            <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)"  }}>Review creator payout requests and keep commission settings in sync.</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontWeight: 700 }}>
             <RiBankCardLine size={20} /> Finance
@@ -372,28 +372,28 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         </section>
 
         <section className="adminx-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-          <article className="surface-card" style={{ padding: '1.5rem' }}>
+          <article className="cyber-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>COMMISSION</small>
+                <small style={{ color: "var(--cyber-muted-foreground)", fontWeight: 700, letterSpacing: '0.08em' }}>COMMISSION</small>
                 <h2 style={{ margin: '0.4rem 0 0' }}>{commissionPercent.toFixed(2)}%</h2>
               </div>
               <RiPercentLine size={22} color="#4f46e5" />
             </div>
           </article>
-          <article className="surface-card" style={{ padding: '1.5rem' }}>
+          <article className="cyber-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>PENDING REQUESTS</small>
+                <small style={{ color: "var(--cyber-muted-foreground)", fontWeight: 700, letterSpacing: '0.08em' }}>PENDING REQUESTS</small>
                 <h2 style={{ margin: '0.4rem 0 0' }}>{pendingCount}</h2>
               </div>
               <RiFileList3Line size={22} color="#f59e0b" />
             </div>
           </article>
-          <article className="surface-card" style={{ padding: '1.5rem' }}>
+          <article className="cyber-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <small style={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>PENDING AMOUNT</small>
+                <small style={{ color: "var(--cyber-muted-foreground)", fontWeight: 700, letterSpacing: '0.08em' }}>PENDING AMOUNT</small>
                 <h2 style={{ margin: '0.4rem 0 0' }}>{formatMoney(pendingAmount)}</h2>
               </div>
               <RiWallet3Line size={22} color="#10b981" />
@@ -401,11 +401,11 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
           </article>
         </section>
 
-        <section className="surface-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <section className="cyber-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div>
               <h3 style={{ margin: 0 }}>Platform commission</h3>
-              <p style={{ margin: '0.35rem 0 0', color: '#64748b' }}>Adjust the fee added on top of creator asset price when a sale completes.</p>
+              <p style={{ margin: '0.35rem 0 0', color: "var(--cyber-muted-foreground)" }}>Adjust the fee added on top of creator asset price when a sale completes.</p>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
@@ -414,17 +414,17 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 step="0.1"
                 value={commissionDraft}
                 onChange={(e) => setCommissionDraft(e.target.value)}
-                style={{ width: '140px', padding: '0.8rem 1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1' }}
+                style={{ width: '140px', padding: '0.8rem 1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)" }}
               />
-              <button onClick={handleSaveCommission} className="btn-solid" disabled={commissionSaving} style={{ background: '#4f46e5' }}>
+              <button onClick={handleSaveCommission} className="cyber-btn" disabled={commissionSaving} style={{ background: "var(--cyber-accent)", color: "#000" }}>
                 {commissionSaving ? 'Saving...' : 'Save commission'}
               </button>
             </div>
           </div>
         </section>
 
-        <section className="surface-card" style={{ padding: 0, overflow: 'hidden' }}>
-          <header style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <section className="cyber-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <header style={{ padding: '1.25rem 1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0 }}>Review queue</h3>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
               <input
@@ -432,13 +432,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 value={withdrawalReviewNote}
                 onChange={(e) => setWithdrawalReviewNote(e.target.value)}
                 placeholder="Admin note for approval/rejection"
-                style={{ minWidth: '280px', padding: '0.7rem 0.9rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1' }}
+                style={{ minWidth: '280px', padding: '0.7rem 0.9rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)" }}
               />
             </div>
           </header>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem' }}>
+              <thead style={{ background: "var(--cyber-muted)", color: "var(--cyber-muted-foreground)", textTransform: 'uppercase', fontSize: '0.75rem' }}>
                 <tr>
                   <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Creator</th>
                   <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Amount</th>
@@ -450,15 +450,15 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               </thead>
               <tbody>
                 {withdrawals.length === 0 ? (
-                  <tr><td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No withdrawal requests yet.</td></tr>
+                  <tr><td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No withdrawal requests yet.</td></tr>
                 ) : withdrawals.map((request) => (
-                  <tr key={request.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <tr key={request.id} style={{ borderBottom: "1px solid var(--cyber-border)" }}>
                     <td style={{ padding: '1rem 1.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <img src={request.creator?.avatarUrl || '/default-avatar.png'} alt="creator" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
                         <div>
                           <div style={{ fontWeight: 700 }}>{request.creator?.fullName || request.creator?.username || 'Unknown creator'}</div>
-                          <small style={{ color: '#94a3b8' }}>{request.creator?.email || request.userId}</small>
+                          <small style={{ color: "var(--cyber-muted-foreground)" }}>{request.creator?.email || request.userId}</small>
                         </div>
                       </div>
                     </td>
@@ -474,30 +474,30 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                         {request.status}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem 1.5rem', color: '#64748b' }}>{new Date(request.createdAt).toLocaleString()}</td>
-                    <td style={{ padding: '1rem 1.5rem', color: '#64748b' }}>{request.note || request.adminNote || '-'}</td>
+                    <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)" }}>{new Date(request.createdAt).toLocaleString()}</td>
+                    <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)" }}>{request.note || request.adminNote || '-'}</td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                       {request.status === 'pending' ? (
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                           <button
                             onClick={() => handleReviewWithdrawal(request.id, 'rejected')}
                             disabled={processingWithdrawalId === request.id}
-                            className="btn-ghost"
-                            style={{ border: '1px solid #fecaca', color: '#b91c1c' }}
+                            className="cyber-btn-outline"
+                            style={{ border: "1px solid var(--cyber-destructive)", color: "var(--cyber-destructive)" }}
                           >
                             Reject
                           </button>
                           <button
                             onClick={() => handleReviewWithdrawal(request.id, 'approved')}
                             disabled={processingWithdrawalId === request.id}
-                            className="btn-solid"
-                            style={{ background: '#10b981' }}
+                            className="cyber-btn"
+                            style={{ background: "var(--cyber-accent-tertiary)", color: "#000" }}
                           >
                             {processingWithdrawalId === request.id ? 'Working...' : 'Approve'}
                           </button>
                         </div>
                       ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Reviewed</span>
+                        <span style={{ color: "var(--cyber-muted-foreground)", fontSize: '0.9rem' }}>Reviewed</span>
                       )}
                     </td>
                   </tr>
@@ -514,12 +514,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     <div className="admin-view-fade">
       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Dashboard</h1>
-          <p style={{ color: '#64748b' }}>Welcome back, {adminUser?.fullName || adminUser?.username}. Here&apos;s what&apos;s happening with your store.</p>
+          <h1 className="cyber-glitch-text" data-text="Dashboard" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.5rem", marginBottom: "0.5rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Dashboard</h1>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)"  }}>Welcome back, {adminUser?.fullName || adminUser?.username}. Here&apos;s what&apos;s happening with your store.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <button className="btn-ghost" style={{ background: '#fff', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiLayoutMasonryFill /> View Analytics</button>
-           <button className="btn-solid" onClick={() => navigate('/admin/upload-asset')} style={{ background: '#4f46e5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiUploadCloud2Fill /> Upload New Asset</button>
+           <button className="cyber-btn-outline" style={{ background: "var(--cyber-card)", border: "1px solid var(--cyber-border)", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiLayoutMasonryFill /> View Analytics</button>
+           <button className="cyber-btn" onClick={() => navigate('/admin/upload-asset')} style={{ background: "var(--cyber-accent)", color: "#000", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiUploadCloud2Fill /> Upload New Asset</button>
         </div>
       </section>
 
@@ -527,16 +527,16 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         {(() => {
           const t = stats.trends || {}
           const trendItems = [
-            { key: 'totalAssets', label: 'Total Assets', value: stats.totalAssets || 0, icon: <RiGalleryFill />, color: '#4f46e5' },
-            { key: 'downloads', label: 'Total Downloads', value: (stats.totalDownloads || 0).toLocaleString(), icon: <RiDownload2Line />, color: '#8b5cf6' },
-            { key: 'sales', label: 'Total Sales', value: `$${(stats.totalSales || 0).toLocaleString()}`, icon: <RiShoppingCartLine />, color: '#f59e0b' },
-            { key: 'revenue', label: 'Monthly Revenue', value: `$${(stats.revenue || 0).toLocaleString()}`, icon: <RiWallet3Line />, color: '#10b981' }
+            { key: 'totalAssets', label: 'Total Assets', value: stats.totalAssets || 0, icon: <RiGalleryFill />, color: "var(--cyber-accent)" },
+            { key: 'downloads', label: 'Total Downloads', value: (stats.totalDownloads || 0).toLocaleString(), icon: <RiDownload2Line />, color: "var(--cyber-accent-secondary)" },
+            { key: 'sales', label: 'Total Sales', value: `$${(stats.totalSales || 0).toLocaleString()}`, icon: <RiShoppingCartLine />, color: "var(--cyber-accent-secondary)" },
+            { key: 'revenue', label: 'Monthly Revenue', value: `$${(stats.revenue || 0).toLocaleString()}`, icon: <RiWallet3Line />, color: "var(--cyber-accent-tertiary)" }
           ]
           return trendItems.map((item) => {
             const trendVal = t[item.key]
             const trendDisplay = trendVal != null ? (trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`) : null
             return (
-              <article key={item.label} className="surface-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <article key={item.label} className="cyber-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '0.75rem', background: `${item.color}15`, color: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem' }}>
                     {item.icon}
@@ -546,7 +546,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   </span>
                 </div>
                 <div>
-                  <small style={{ color: '#64748b', fontWeight: 600 }}>{item.label}</small>
+                  <small style={{ color: "var(--cyber-muted-foreground)", fontWeight: 600 }}>{item.label}</small>
                   <h2 style={{ fontSize: '1.75rem', margin: '0.25rem 0' }}>{item.value}</h2>
                 </div>
               </article>
@@ -556,148 +556,164 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </section>
 
       <section className="adminx-grid-two" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-         <article className="surface-card">
-            <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+         <article className="cyber-card">
+            <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <h3 style={{ margin: 0 }}>Top 10 Best-Selling Assets</h3>
                <button className="btn-link" style={{ fontSize: '0.85rem' }}>View All</button>
             </header>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-               <thead style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>
-                  <tr>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Downloads</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Revenue</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (b.downloads||0) - (a.downloads||0)).slice(0, 5).map(a => (
-                    <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                       <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
-                            <small style={{ color: '#94a3b8' }}>{a.category || 'General'}</small>
-                          </div>
-                       </td>
-                       <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.downloads || 0}</td>
-                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: '#4f46e5' }}>${a.revenue || 0}</td>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+                 <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+                    <tr>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Downloads</th>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Revenue</th>
                     </tr>
-                  )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
-               </tbody>
-            </table>
+                 </thead>
+                 <tbody>
+                    {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (b.downloads||0) - (a.downloads||0)).slice(0, 5).map(a => (
+                      <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                         <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
+                              <small style={{ color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</small>
+                            </div>
+                         </td>
+                         <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.downloads || 0}</td>
+                         <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: "var(--cyber-accent)" }}>${a.revenue || 0}</td>
+                      </tr>
+                    )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+                 </tbody>
+              </table>
+            </div>
          </article>
 
-         <article className="surface-card">
-            <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+         <article className="cyber-card">
+            <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <h3 style={{ margin: 0 }}>Underperforming Assets</h3>
                <button className="btn-link" style={{ fontSize: '0.85rem' }}>Improve All</button>
             </header>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-               <thead style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>
-                  <tr>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Visits</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Conversion</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (a.downloads||0) - (b.downloads||0)).slice(0, 5).map(a => (
-                    <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                       <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
-                            <small style={{ color: '#ef4444' }}>Needs attention</small>
-                          </div>
-                       </td>
-                       <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
-                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#94a3b8' }}>{a.downloads && a.viewCount ? ((a.downloads / a.viewCount) * 100).toFixed(1) + '%' : '—'}</td>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+                 <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+                    <tr>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Visits</th>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Conversion</th>
                     </tr>
-                  )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
-               </tbody>
-            </table>
+                 </thead>
+                 <tbody>
+                    {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (a.downloads||0) - (b.downloads||0)).slice(0, 5).map(a => (
+                      <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                         <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
+                              <small style={{ color: "var(--cyber-destructive)" }}>Needs attention</small>
+                            </div>
+                         </td>
+                         <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
+                         <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: "var(--cyber-muted-foreground)" }}>{a.downloads && a.viewCount ? ((a.downloads / a.viewCount) * 100).toFixed(1) + '%' : '—'}</td>
+                      </tr>
+                    )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+                 </tbody>
+              </table>
+            </div>
          </article>
       </section>
 
-      <section className="surface-card">
-         <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <section className="cyber-card">
+         <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0 }}>Top Selling Creators</h3>
             <button className="btn-link" style={{ fontSize: '0.85rem' }}>View Full Leaderboard</button>
          </header>
-         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>
-               <tr>
-                  <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Rank</th>
-                  <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Creator</th>
-                  <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Specialization</th>
-                  <th style={{ padding: '1rem 2rem', textAlign: 'center' }}>Total Assets</th>
-                  <th style={{ padding: '1rem 2rem', textAlign: 'right' }}>Total Revenue</th>
-               </tr>
-            </thead>
-            <tbody>
-               {creators.length > 0 ? creators.sort((a,b) => (b.revenue||0) - (a.revenue||0)).slice(0, 5).map((c, i) => (
-                  <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                     <td style={{ padding: '1rem 2rem' }}>
-                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: i===0 ? '#fef3c7' : '#f1f5f9', color: i===0 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>{i+1}</div>
-                     </td>
-                     <td style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <img src={c.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-                        <div>
-                           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{c.fullName || c.username}</div>
-                           <small style={{ color: '#10b981' }}>Top Rated</small>
-                        </div>
-                     </td>
-                     <td style={{ padding: '1rem 2rem', color: '#4f46e5', fontWeight: 600 }}>{c.jobTitle || 'Contributor'}</td>
-                     <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
-                     <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 800 }}>${(c.revenue || 0).toLocaleString()}</td>
-                  </tr>
-               )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No data available</td></tr>}
-            </tbody>
-         </table>
+         <div style={{ overflowX: 'auto' }}>
+           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+              <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+                 <tr>
+                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Rank</th>
+                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Creator</th>
+                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Specialization</th>
+                    <th style={{ padding: '1rem 2rem', textAlign: 'center' }}>Total Assets</th>
+                    <th style={{ padding: '1rem 2rem', textAlign: 'right' }}>Total Revenue</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 {creators.length > 0 ? creators.sort((a,b) => (b.revenue||0) - (a.revenue||0)).slice(0, 5).map((c, i) => (
+                    <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                       <td style={{ padding: '1rem 2rem' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: i===0 ? '#fef3c7' : '#f1f5f9', color: i===0 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>{i+1}</div>
+                       </td>
+                       <td style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <img src={c.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                          <div>
+                             <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{c.fullName || c.username}</div>
+                             <small style={{ color: "var(--cyber-accent-tertiary)" }}>Top Rated</small>
+                          </div>
+                       </td>
+                       <td style={{ padding: '1rem 2rem', color: "var(--cyber-accent)", fontWeight: 600 }}>{c.jobTitle || 'Contributor'}</td>
+                       <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
+                       <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 800 }}>${(c.revenue || 0).toLocaleString()}</td>
+                    </tr>
+                 )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+              </tbody>
+           </table>
+         </div>
       </section>
     </div>
   )
 
   const renderCreators = () => (
     <div className="admin-view-fade">
-      <section className="adminx-header" style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem' }}>Creators Management</h1>
+      <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+        <div>
+          <h1 className="cyber-glitch-text" data-text="Creators" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Creators Management</h1>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Manage platform creators, view their performance and account status.</p>
+        </div>
       </section>
-      <section className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-        <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-            <tr>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>CREATOR</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>EMAIL</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>ASSETS</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>SALES</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>STATUS</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'right' }}>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {creators.length === 0 ? <tr><td colSpan="6" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No creators found.</td></tr> : creators.map(c => (
-              <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '1.25rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <img src={c.avatarUrl} style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-                  <strong>{c.fullName || c.username}</strong>
-                </td>
-                <td style={{ padding: '1.25rem 2rem' }}>{c.email}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>{c.totalSales}</td>
-                <td style={{ padding: '1.25rem 2rem' }}>
-                  <span className="status-badge active" style={{ background: '#dcfce7', color: '#15803d', padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 700 }}>ACTIVE</span>
-                </td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'right' }}>
-                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', color: '#94a3b8' }}>
-                      <RiEyeLine size={20} style={{ cursor: 'pointer' }} />
-                      <RiProhibitedLine size={20} style={{ cursor: 'pointer' }} />
-                   </div>
-                </td>
+      <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
+        <header style={{ padding: '1.25rem 1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>All Creators</h3>
+        </header>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+            <thead style={{ background: "var(--cyber-muted)", color: "var(--cyber-muted-foreground)", textTransform: 'uppercase', fontSize: '0.75rem', borderBottom: "1px solid var(--cyber-border)" }}>
+              <tr>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Creator</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Email</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Assets</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Sales</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Status</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {creators.length === 0 ? <tr><td colSpan="6" style={{ padding: '4rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No creators found.</td></tr> : creators.map(c => (
+                <tr key={c.id} style={{ borderBottom: "1px solid var(--cyber-border)" }}>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <img src={c.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div style={{ fontWeight: 700 }}>{c.fullName || c.username}</div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)" }}>{c.email}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{c.assetCount}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{c.totalSales}</td>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                    <span className="status-badge active" style={{ display: 'inline-flex', alignItems: 'center', background: "rgba(0, 212, 255, 0.1)", color: "var(--cyber-accent-tertiary)", padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>ACTIVE</span>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
+                        <RiEyeLine size={20} style={{ cursor: 'pointer' }} />
+                        <RiProhibitedLine size={20} style={{ cursor: 'pointer' }} />
+                     </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   )
@@ -713,26 +729,26 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       margin: '0 auto'
     }}>
       <aside style={{ 
-        background: '#fff', 
+        background: "var(--cyber-card)", 
         borderRadius: '1.5rem', 
         display: 'flex', 
         flexDirection: 'column', 
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-        border: '1px solid #f1f5f9'
+        border: "1px solid var(--cyber-border)"
       }}>
-        <header style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h2 style={{ fontSize: '1.35rem', margin: 0, fontWeight: 800 }}>Messages</h2>
           <span style={{
             width: 10, height: 10, borderRadius: '50%',
             background: '#22c55e',
-            border: '2px solid #fff',
-            boxShadow: '0 0 0 2px #dcfce7'
+            border: "2px solid var(--cyber-card)",
+            boxShadow: "0 0 0 2px rgba(0, 212, 255, 0.2)"
           }} title="Server Connected" />
         </header>
         <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
           {conversations.length === 0 && (
-            <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: '#94a3b8' }}>
+            <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>
               <RiMessage3Fill size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
               <p>No conversations found</p>
             </div>
@@ -754,22 +770,22 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 transition: 'all 0.2s ease',
                 position: 'relative'
               }}>
-                {isActive && <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: '#4f46e5', borderRadius: '0 4px 4px 0' }} />}
+                {isActive && <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: "var(--cyber-accent)", color: "#000", borderRadius: '0 4px 4px 0' }} />}
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <img src={conv.otherUser?.avatarUrl || '/default-avatar.png'} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
                   {isOtherOnline && (
                     <span style={{
                       position: 'absolute', bottom: 2, right: 2,
                       width: 12, height: 12, borderRadius: '50%',
-                      background: '#22c55e', border: '2px solid #fff'
+                      background: '#22c55e', border: "2px solid var(--cyber-card)"
                     }} />
                   )}
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ fontWeight: 700, color: "var(--cyber-foreground)", fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
                     <span>{conv.otherUser?.username || 'Unknown'}</span>
                     {conv.lastMessage?.createdAt && (
-                       <small style={{ fontWeight: 400, color: '#94a3b8' }}>
+                       <small style={{ fontWeight: 400, color: "var(--cyber-muted-foreground)" }}>
                          {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                        </small>
                     )}
@@ -793,18 +809,18 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </aside>
 
       <section style={{ 
-        background: '#fff', 
+        background: "var(--cyber-card)", 
         borderRadius: '1.5rem', 
         display: 'flex', 
         flexDirection: 'column', 
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-        border: '1px solid #f1f5f9'
+        border: "1px solid var(--cyber-border)"
       }}>
         {activeConversation ? (
           <>
             <header style={{ 
-              padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #f1f5f9',
+              padding: '1rem 2rem', background: "var(--cyber-card)", borderBottom: "1px solid var(--cyber-border)",
               display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -814,7 +830,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                     <span style={{
                       position: 'absolute', bottom: 0, right: 0,
                       width: 10, height: 10, borderRadius: '50%',
-                      background: '#22c55e', border: '2px solid #fff'
+                      background: '#22c55e', border: "2px solid var(--cyber-card)"
                     }} />
                   )}
                 </div>
@@ -833,7 +849,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             <div style={{ 
               flex: 1, padding: '2rem', overflowY: 'auto', 
               display: 'flex', flexDirection: 'column', gap: '0.5rem',
-              background: '#f8fafc'
+              background: "var(--cyber-muted)"
             }}>
               {messages.map((m, i) => {
                 const isMine = m.senderId === adminUser.id
@@ -842,7 +858,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 return (
                   <div key={m._id || i}>
                     {showDate && (
-                      <div style={{ textAlign: 'center', margin: '1.5rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <div style={{ textAlign: 'center', margin: '1.5rem 0', fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         {new Date(m.createdAt).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     )}
@@ -876,7 +892,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                       <small style={{ 
                         display: 'flex', alignItems: 'center', gap: '4px',
                         marginTop: '0.35rem', 
-                        color: '#94a3b8',
+                        color: "var(--cyber-muted-foreground)",
                         fontSize: '0.7rem',
                         fontWeight: 600
                       }}>
@@ -894,12 +910,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               
               {typingUsers[activeConversation._id] && (
                 <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0' }}>
-                  <div className="typing-dots" style={{ display: 'flex', gap: '4px', padding: '0.6rem 1.2rem', background: '#fff', borderRadius: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+                  <div className="typing-dots" style={{ display: 'flex', gap: '4px', padding: '0.6rem 1.2rem', background: "var(--cyber-card)", borderRadius: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
                     <span className="dot"></span>
                     <span className="dot"></span>
                     <span className="dot"></span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#4f46e5', fontStyle: 'italic', fontWeight: 600 }}>{activeConversation.otherUser?.username} đang soạn tin...</span>
+                  <span style={{ fontSize: '0.75rem', color: "var(--cyber-accent)", fontStyle: 'italic', fontWeight: 600 }}>{activeConversation.otherUser?.username} đang soạn tin...</span>
                 </div>
               )}
               
@@ -907,7 +923,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             </div>
             
             <form onSubmit={handleSendMessage} style={{ 
-              padding: '1.25rem 2rem', background: '#fff', borderTop: '1px solid #f1f5f9', 
+              padding: '1.25rem 2rem', background: "var(--cyber-card)", borderTop: "1px solid var(--cyber-border)", 
               display: 'flex', gap: '0.75rem', alignItems: 'center' 
             }}>
               <label style={{ cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', transition: 'background 0.2s' }} className="hover-bg-f1">
@@ -924,21 +940,21 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 disabled={uploadingImage}
                 style={{ 
                   flex: 1, padding: '0.85rem 1.5rem', borderRadius: '2rem', 
-                  border: '1px solid #e2e8f0', background: '#f8fafc',
+                  border: "1px solid var(--cyber-border)", background: "var(--cyber-muted)",
                   outline: 'none', fontSize: '0.95rem',
                   transition: 'all 0.2s'
                 }} 
               />
               <button 
                 type="submit" 
-                className="btn-solid" 
+                className="cyber-btn" 
                 disabled={!newMessage.trim() || uploadingImage} 
                 style={{ 
                   width: '45px', height: '45px', borderRadius: '50%', padding: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   opacity: (!newMessage.trim() || uploadingImage) ? 0.5 : 1,
                   cursor: (!newMessage.trim() || uploadingImage) ? 'not-allowed' : 'pointer',
-                  background: '#4f46e5'
+                  background: "var(--cyber-accent)", color: "#000"
                 }}
               >
                 <RiSendPlane2Fill size={20} />
@@ -946,9 +962,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             </form>
           </>
         ) : (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', background: '#f8fafc' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: "var(--cyber-muted-foreground)", background: "var(--cyber-muted)" }}>
             <RiCustomerService2Fill size={80} style={{ marginBottom: '1.5rem', opacity: 0.1 }} />
-            <h3 style={{ margin: 0, color: '#64748b' }}>Select a conversation</h3>
+            <h3 style={{ margin: 0, color: "var(--cyber-muted-foreground)" }}>Select a conversation</h3>
             <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Choose a user from the list to start chatting</p>
           </div>
         )}
@@ -958,79 +974,109 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
   const renderAllAssets = () => (
     <div className="admin-view-fade">
-       <section className="adminx-header" style={{ marginBottom: '2rem' }}>
-        <h1>All Assets Management</h1>
+       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+        <div>
+          <h1 className="cyber-glitch-text" data-text="All Assets" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>All Assets Management</h1>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Browse and manage all assets uploaded by creators across the platform.</p>
+        </div>
       </section>
-      <section className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-        <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-            <tr>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>ASSET</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>CREATOR</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>STATUS</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allUserAssets.length === 0 ? <tr><td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>No assets found.</td></tr> : allUserAssets.map(a => (
-              <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '1.25rem 2rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <img src={a.coverImageUrl} style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                      <div><strong>{a.title}</strong><div style={{ fontSize: '0.8rem', color: '#64748b' }}>{a.category || 'General'}</div></div>
-                   </div>
-                </td>
-                <td style={{ padding: '1.25rem 2rem' }}>{a.author?.username || 'Unknown'}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>
-                   <span className={`status-badge ${a.status}`} style={{ padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 700, background: a.status === 'published' ? '#dcfce7' : '#fef9c3', color: a.status === 'published' ? '#15803d' : '#a16207' }}>{a.status?.toUpperCase()}</span>
-                </td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>
-                   <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}><RiEyeLine size={20} style={{ cursor: 'pointer' }} onClick={() => navigate(`/marketplace/assets/${a.id}`)} /><RiLockLine size={20} style={{ cursor: 'pointer' }} /></div>
-                </td>
+      <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
+        <header style={{ padding: '1.25rem 1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>Asset Directory</h3>
+        </header>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+            <thead style={{ background: "var(--cyber-muted)", color: "var(--cyber-muted-foreground)", textTransform: 'uppercase', fontSize: '0.75rem', borderBottom: "1px solid var(--cyber-border)" }}>
+              <tr>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Creator</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {allUserAssets.length === 0 ? <tr><td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No assets found.</td></tr> : allUserAssets.map(a => (
+                <tr key={a.id} style={{ borderBottom: "1px solid var(--cyber-border)" }}>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <img src={a.coverImageUrl} style={{ width: '50px', height: '36px', objectFit: 'cover', borderRadius: '4px' }} />
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{a.title}</div>
+                          <div style={{ fontSize: '0.8rem', color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</div>
+                        </div>
+                     </div>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)", fontWeight: 600 }}>{a.author?.username || 'Unknown'}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+                     <span className={`status-badge ${a.status}`} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, background: a.status === 'published' ? '#dcfce7' : '#fef9c3', color: a.status === 'published' ? '#15803d' : '#a16207' }}>{a.status?.toUpperCase()}</span>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
+                        <RiEyeLine size={20} style={{ cursor: 'pointer' }} onClick={() => navigate(`/marketplace/assets/${a.id}`)} />
+                        <RiLockLine size={20} style={{ cursor: 'pointer' }} />
+                     </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   )
 
   const renderApproval = () => (
     <div className="admin-view-fade">
-       <section className="adminx-header" style={{ marginBottom: '2rem' }}>
-        <h1>Asset Approval Management</h1>
+       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+        <div>
+          <h1 className="cyber-glitch-text" data-text="Approvals" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Asset Approval</h1>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Review and approve or reject newly uploaded assets from creators.</p>
+        </div>
       </section>
-      <section className="surface-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
-        <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-            <tr>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>ASSET REVIEW</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'left' }}>CREATOR</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>PRICE</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>UPLOAD DATE</th>
-              <th style={{ padding: '1.25rem 2rem', textAlign: 'right' }}>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {approvalQueue.map(a => (
-              <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '1.25rem 2rem' }}><strong>{a.title}</strong><div style={{ fontSize: '0.85rem', color: '#64748b' }}>{a.category}</div></td>
-                <td style={{ padding: '1.25rem 2rem' }}>{a.author?.username}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>${a.price}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'center' }}>{new Date(a.createdAt).toLocaleDateString()}</td>
-                <td style={{ padding: '1.25rem 2rem', textAlign: 'right' }}><button onClick={() => setSelectedAsset(a)} className="btn-solid small">Review</button></td>
+      <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
+        <header style={{ padding: '1.25rem 1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>Pending Queue</h3>
+        </header>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="admin-data-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+            <thead style={{ background: "var(--cyber-muted)", color: "var(--cyber-muted-foreground)", textTransform: 'uppercase', fontSize: '0.75rem', borderBottom: "1px solid var(--cyber-border)" }}>
+              <tr>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset Review</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Creator</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Price</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Upload Date</th>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {approvalQueue.length === 0 ? (
+                <tr><td colSpan="5" style={{ padding: '4rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No assets pending approval.</td></tr>
+              ) : approvalQueue.map(a => (
+                <tr key={a.id} style={{ borderBottom: "1px solid var(--cyber-border)" }}>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                    <div style={{ fontWeight: 700 }}>{a.title}</div>
+                    <div style={{ fontSize: '0.85rem', color: "var(--cyber-muted-foreground)" }}>{a.category}</div>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)", fontWeight: 600 }}>{a.author?.username}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center', fontWeight: 700 }}>${a.price}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>{new Date(a.createdAt).toLocaleDateString()}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                    <button onClick={() => setSelectedAsset(a)} className="cyber-btn small" style={{ background: "var(--cyber-accent)", color: "#000", padding: '0.4rem 1rem', borderRadius: '0.5rem' }}>Review</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
       {selectedAsset && (
-        <section className="surface-card" style={{ marginTop: '2rem', padding: '2rem' }}>
-           <h3>Reviewing: {selectedAsset.title}</h3>
-           <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} style={{ width: '100%', minHeight: '100px', margin: '1rem 0', padding: '1rem' }} placeholder="Rejection feedback..." />
+        <section className="cyber-card" style={{ marginTop: '2rem', padding: '2rem', borderRadius: '1.5rem' }}>
+           <h3 style={{ margin: '0 0 1rem 0' }}>Reviewing: {selectedAsset.title}</h3>
+           <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} style={{ width: '100%', minHeight: '100px', marginBottom: '1.5rem', padding: '1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)", outline: 'none' }} placeholder="Rejection feedback..." />
            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'published' }).then(fetchData)} className="btn-solid" style={{ background: '#10b981' }}>Approve</button>
-              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'rejected', rejectionReason }).then(fetchData)} className="btn-solid" style={{ background: '#ef4444' }}>Reject</button>
+              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'published' }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-accent-tertiary)", color: "#000", padding: '0.75rem 1.5rem' }}>Approve</button>
+              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'rejected', rejectionReason }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-destructive)", color: "#000", padding: '0.75rem 1.5rem' }}>Reject</button>
+              <button onClick={() => setSelectedAsset(null)} className="cyber-btn-outline" style={{ border: "1px solid var(--cyber-border)", padding: '0.75rem 1.5rem' }}>Cancel</button>
            </div>
         </section>
       )}
@@ -1044,13 +1090,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
       
-      <main className="admin-shell dashboard-container" style={{ minHeight: '100vh', padding: 0, position: 'relative', zIndex: 10 }}>
-        <header className="admin-topbar" style={{ background: '#0a0a0f', color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--cyber-border)' }}>
+      <main className="admin-shell dashboard-container" style={{ background: "var(--cyber-bg)", minHeight: '100vh', padding: 0, position: 'relative', zIndex: 10 }}>
+        <header className="admin-topbar" style={{ background: "var(--cyber-bg)", color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--cyber-border)' }}>
         <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
           </button>
-          <div style={{ width: '32px', height: '32px', background: '#4f46e5', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '32px', height: '32px', background: "var(--cyber-accent)", color: "#000", borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
              <RiLayoutMasonryFill size={20} color="#fff" />
           </div>
           <strong style={{ fontSize: '1.25rem', letterSpacing: '0.02em' }}>UIbrage</strong>
@@ -1058,12 +1104,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         <div className="admin-user-nav" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <div style={{ position: 'relative', cursor: 'pointer' }}>
             <RiNotification3Line size={24} />
-            {notifications.filter(n => !n.isRead).length > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #232a3b' }} />}
+            {notifications.filter(n => !n.isRead).length > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', background: "var(--cyber-destructive)", color: "#000", borderRadius: '50%', border: "2px solid var(--cyber-bg)" }} />}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>
             <div className="admin-user-info" style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{adminUser?.fullName || adminUser?.username}</div>
-              <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Admin</small>
+              <small style={{ color: "var(--cyber-muted-foreground)", fontSize: '0.75rem' }}>Admin</small>
             </div>
             <img src={adminUser?.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)' }} />
           </div>
@@ -1072,7 +1118,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
       <section className="admin-layout" style={{ display: 'grid', minHeight: 'calc(100vh - 60px)' }}>
         <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: 'rgba(0,0,0,0.5)', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)', borderRight: '1px solid var(--cyber-border)' }}>
-          <h4 style={{ color: 'var(--cyber-cyan)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Admin_Node</h4>
+          <h4 style={{ color: 'var(--cyber-accent-tertiary)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Admin_Node</h4>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
             <button onClick={() => navigate('/admin/dashboard')} className={`side-link ${variant === 'overview' ? 'active' : ''}`}><RiLayoutMasonryFill /> Dashboard</button>
             <button onClick={() => navigate('/admin/my-assets')} className={`side-link ${variant === 'library' ? 'active' : ''}`}><RiGalleryFill /> My Assets</button>
@@ -1107,21 +1153,22 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </section>
 
       <style>{`
-        .side-link { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; color: #94a3b8; text-decoration: none; border-radius: 0.75rem; transition: 0.2s; font-weight: 600; background: none; border: none; width: 100%; text-align: left; cursor: pointer; }
-        .side-link:hover, .side-link.active { background: rgba(255,255,255,0.05); color: #fff; }
-        .side-link.active { background: #4f46e5; }
-        .side-link.danger:hover { background: #ef4444; }
-        .side-link .badge { margin-left: auto; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 1rem; }
-        .btn-link { background: none; border: none; color: #4f46e5; font-weight: 600; cursor: pointer; }
+        .side-link { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; color: var(--cyber-muted-foreground); text-decoration: none; border-radius: 0.75rem; transition: 0.2s; font-weight: 600; background: none; border: none; width: 100%; text-align: left; cursor: pointer; }
+        .side-link:hover, .side-link.active { background: rgba(0,255,136,0.1); color: var(--cyber-accent); box-shadow: var(--neon-glow-primary-sm); }
+        .side-link.active { background: rgba(0,255,136,0.15); border-left: 2px solid var(--cyber-accent); }
+        .side-link.danger:hover { background: rgba(255,51,102,0.15); color: var(--cyber-destructive); box-shadow: var(--neon-glow-secondary); }
+        .side-link .badge { margin-left: auto; background: var(--cyber-destructive); color: #000; font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 1rem; }
+        .btn-link { background: none; border: none; color: var(--cyber-accent); font-weight: 600; cursor: pointer; }
+        .btn-link:hover { text-shadow: var(--neon-glow-primary); }
         .admin-view-fade { animation: fadeIn 0.4s ease-out; width: 100%; }
         
-        .hover-bg-f1:hover { background: #f1f5f9; }
+        .hover-bg-f1:hover { background: var(--cyber-muted); }
         
         .typing-dots .dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #94a3b8;
+          background: var(--cyber-muted-foreground);
           animation: dot-pulse 1.4s infinite ease-in-out;
         }
         .typing-dots .dot:nth-child(2) { animation-delay: 0.2s; }
