@@ -21,7 +21,6 @@ export default function AdminManuals() {
   const [editingId, setEditingId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [showCatDropdown, setShowCatDropdown] = useState(false);
-  const [showCatDropdown, setShowCatDropdown] = useState(false);
 
   const fetchData = async () => {
     try {
