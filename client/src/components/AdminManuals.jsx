@@ -13,7 +13,7 @@ export default function AdminManuals() {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Cursor AI',
+    category: '',
     type: 'link',
     content_url: ''
   });
@@ -244,6 +244,12 @@ export default function AdminManuals() {
                           onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                           + Add "{catSearch.trim()}"
+                        </div>
+                      )}
+
+                      {categories.filter(c => c.toLowerCase().includes(catSearch.toLowerCase())).length === 0 && !catSearch.trim() && (
+                        <div style={{ padding: '0.75rem', color: 'var(--cyber-muted-foreground)', fontSize: '0.85rem', textAlign: 'center', fontFamily: 'var(--font-cyber-mono)' }}>
+                          No categories found.<br/>Type above to add one.
                         </div>
                       )}
                     </div>
