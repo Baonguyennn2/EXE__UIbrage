@@ -4,8 +4,8 @@ import { useSocket } from '../services/SocketContext'
 import MyLibraryPage from './MyLibraryPage.jsx'
 import UploadAssetPage from './UploadAssetPage.jsx'
 import ProfileEditPage from './ProfileEditPage.jsx'
-import { 
-  RiLayoutMasonryFill, RiGalleryFill, RiUploadCloud2Fill, RiGroupFill, 
+import {
+  RiLayoutMasonryFill, RiGalleryFill, RiUploadCloud2Fill, RiGroupFill,
   RiShieldCheckFill, RiMessage3Fill, RiNotification3Line, RiLogoutBoxRLine,
   RiSettings4Line, RiEyeLine, RiProhibitedLine, RiDeleteBin6Line, RiCheckLine,
   RiCloseLine, RiSendPlane2Fill, RiMore2Fill, RiStackFill, RiLockLine, RiArrowUpSLine,
@@ -43,10 +43,10 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   const [withdrawalReviewNote, setWithdrawalReviewNote] = useState('')
   const [processingWithdrawalId, setProcessingWithdrawalId] = useState(null)
   const [commissionSaving, setCommissionSaving] = useState(false)
-  
+
   const typingTimeoutRef = useRef(null)
   const isTypingRef = useRef(false)
-  
+
   const navigate = useNavigate()
   const chatEndRef = useRef(null)
   const activeConvRef = useRef(null)
@@ -66,12 +66,12 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       console.error('Error parsing user', e)
     }
     if (!user || user.role !== 'admin') {
-       navigate('/auth/login')
-       return
+      navigate('/auth/login')
+      return
     }
     setAdminUser(user)
     adminUserRef.current = user
-    
+
     if (!socket) return
 
     const handleNewMessage = (msg) => {
@@ -122,7 +122,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     try {
       setLoading(true)
       const currentUser = adminUser || JSON.parse(localStorage.getItem('user') || 'null')
-      
+
       const [statsRes, creatorsRes, pendingRes, notifyRes, convRes, allAssetsRes, myAssetsRes, withdrawalsRes, commissionRes] = await Promise.all([
         adminService.getStats(),
         adminService.getCreators(),
@@ -134,9 +134,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         adminService.getWithdrawals({ status: 'all' }),
         adminService.getCommission()
       ])
-      
+
       console.log('Admin Dashboard Stats:', statsRes.data)
-      
+
       // Calculate real trends by comparing with data from stats API
       // If the API provides previousPeriod data, use it; otherwise compute from what we have
       const statsData = statsRes.data
@@ -163,7 +163,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       setWithdrawals(withdrawalsRes.data || [])
       setCommissionPercent(Number(commissionRes.data?.commissionPercent || statsData.commissionPercent || 5))
       setCommissionDraft(Number(commissionRes.data?.commissionPercent || statsData.commissionPercent || 5))
-      
+
       const unread = convRes.data.filter(c => !c.lastMessage?.isRead && c.lastMessage?.senderId !== adminUser?.id).length
       setUnreadMessages(unread)
 
@@ -207,11 +207,11 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
     setTypingUsers(prev => ({ ...prev, [conv._id]: false }))
     const res = await messageService.getMessages(conv._id)
     setMessages(res.data)
-    
+
     // Mark as read
     if (conv.lastMessage && !conv.lastMessage.isRead && conv.lastMessage.senderId !== adminUser.id) {
-       socket?.emit('markRead', { conversationId: conv._id, userId: adminUser.id })
-       fetchConversations()
+      socket?.emit('markRead', { conversationId: conv._id, userId: adminUser.id })
+      fetchConversations()
     }
   }
 
@@ -291,19 +291,19 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       const uploadRes = await messageService.uploadImage(formData)
       const imageUrl = uploadRes.data.url
 
-      const msgData = { 
-        conversationId: activeConversation._id, 
-        receiverId: activeConversation.otherUser.id, 
-        image: imageUrl 
+      const msgData = {
+        conversationId: activeConversation._id,
+        receiverId: activeConversation.otherUser.id,
+        image: imageUrl
       }
-      
+
       const res = await messageService.sendMessage(msgData)
       setMessages(prev => [...prev, res.data])
-      
+
       if (socket) {
-        socket.emit('sendMessage', { 
-          ...res.data, 
-          receiverId: msgData.receiverId, 
+        socket.emit('sendMessage', {
+          ...res.data,
+          receiverId: msgData.receiverId,
           senderId: adminUser.id,
           conversationId: activeConversation._id
         })
@@ -364,7 +364,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
           <div>
             <h1 className="cyber-glitch-text" data-text="Withdrawals" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Withdrawal Requests</h1>
-            <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)"  }}>Review creator payout requests and keep commission settings in sync.</p>
+            <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" }}>Review creator payout requests and keep commission settings in sync.</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontWeight: 700 }}>
             <RiBankCardLine size={20} /> Finance
@@ -414,7 +414,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 step="0.1"
                 value={commissionDraft}
                 onChange={(e) => setCommissionDraft(e.target.value)}
-                style={{ width: '140px', padding: '0.8rem 1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)" }}
+                style={{ width: '140px', padding: '0.8rem 1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)", color: 'black' }}
               />
               <button onClick={handleSaveCommission} className="cyber-btn" disabled={commissionSaving} style={{ background: "var(--cyber-accent)", color: "#000" }}>
                 {commissionSaving ? 'Saving...' : 'Save commission'}
@@ -515,11 +515,11 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
           <h1 className="cyber-glitch-text" data-text="Dashboard" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.5rem", marginBottom: "0.5rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Dashboard</h1>
-          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)"  }}>Welcome back, {adminUser?.fullName || adminUser?.username}. Here&apos;s what&apos;s happening with your store.</p>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" }}>Welcome back, {adminUser?.fullName || adminUser?.username}. Here&apos;s what&apos;s happening with your store.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <button className="cyber-btn-outline" style={{ background: "var(--cyber-card)", border: "1px solid var(--cyber-border)", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiLayoutMasonryFill /> View Analytics</button>
-           <button className="cyber-btn" onClick={() => navigate('/admin/upload-asset')} style={{ background: "var(--cyber-accent)", color: "#000", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiUploadCloud2Fill /> Upload New Asset</button>
+          <button className="cyber-btn-outline" style={{ background: "var(--cyber-card)", border: "1px solid var(--cyber-border)", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiLayoutMasonryFill /> View Analytics</button>
+          <button className="cyber-btn" onClick={() => navigate('/admin/upload-asset')} style={{ background: "var(--cyber-accent)", color: "#000", display: 'flex', alignItems: 'center', gap: '0.5rem' }}><RiUploadCloud2Fill /> Upload New Asset</button>
         </div>
       </section>
 
@@ -556,110 +556,110 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </section>
 
       <section className="adminx-grid-two" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-         <article className="cyber-card">
-            <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <h3 style={{ margin: 0 }}>Top 10 Best-Selling Assets</h3>
-               <button className="btn-link" style={{ fontSize: '0.85rem' }}>View All</button>
-            </header>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
-                 <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
-                    <tr>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Downloads</th>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Revenue</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (b.downloads||0) - (a.downloads||0)).slice(0, 5).map(a => (
-                      <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                         <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
-                            <div>
-                              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
-                              <small style={{ color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</small>
-                            </div>
-                         </td>
-                         <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.downloads || 0}</td>
-                         <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: "var(--cyber-accent)" }}>${a.revenue || 0}</td>
-                      </tr>
-                    )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
-                 </tbody>
-              </table>
-            </div>
-         </article>
+        <article className="cyber-card">
+          <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Top 10 Best-Selling Assets</h3>
+            <button className="btn-link" style={{ fontSize: '0.85rem' }}>View All</button>
+          </header>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+              <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+                <tr>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Downloads</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allUserAssets.length > 0 ? [...allUserAssets].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 5).map(a => (
+                  <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                    <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
+                        <small style={{ color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</small>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.downloads || 0}</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 700, color: "var(--cyber-accent)" }}>${a.revenue || 0}</td>
+                  </tr>
+                )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </article>
 
-         <article className="cyber-card">
-            <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <h3 style={{ margin: 0 }}>Underperforming Assets</h3>
-               <button className="btn-link" style={{ fontSize: '0.85rem' }}>Improve All</button>
-            </header>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
-                 <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
-                    <tr>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Visits</th>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Conversion</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {allUserAssets.length > 0 ? [...allUserAssets].sort((a,b) => (a.downloads||0) - (b.downloads||0)).slice(0, 5).map(a => (
-                      <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                         <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
-                            <div>
-                              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
-                              <small style={{ color: "var(--cyber-destructive)" }}>Needs attention</small>
-                            </div>
-                         </td>
-                         <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
-                         <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: "var(--cyber-muted-foreground)" }}>{a.downloads && a.viewCount ? ((a.downloads / a.viewCount) * 100).toFixed(1) + '%' : '—'}</td>
-                      </tr>
-                    )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
-                 </tbody>
-              </table>
-            </div>
-         </article>
+        <article className="cyber-card">
+          <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Underperforming Assets</h3>
+            <button className="btn-link" style={{ fontSize: '0.85rem' }}>Improve All</button>
+          </header>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+              <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+                <tr>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left' }}>Asset</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>Visits</th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Conversion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allUserAssets.length > 0 ? [...allUserAssets].sort((a, b) => (a.downloads || 0) - (b.downloads || 0)).slice(0, 5).map(a => (
+                  <tr key={a.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                    <td style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <img src={a.coverImageUrl} style={{ width: '40px', height: '30px', borderRadius: '4px', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{a.title}</div>
+                        <small style={{ color: "var(--cyber-destructive)" }}>Needs attention</small>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>{a.viewCount || 0}</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: "var(--cyber-muted-foreground)" }}>{a.downloads && a.viewCount ? ((a.downloads / a.viewCount) * 100).toFixed(1) + '%' : '—'}</td>
+                  </tr>
+                )) : <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </article>
       </section>
 
       <section className="cyber-card">
-         <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0 }}>Top Selling Creators</h3>
-            <button className="btn-link" style={{ fontSize: '0.85rem' }}>View Full Leaderboard</button>
-         </header>
-         <div style={{ overflowX: 'auto' }}>
-           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-              <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
-                 <tr>
-                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Rank</th>
-                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Creator</th>
-                    <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Specialization</th>
-                    <th style={{ padding: '1rem 2rem', textAlign: 'center' }}>Total Assets</th>
-                    <th style={{ padding: '1rem 2rem', textAlign: 'right' }}>Total Revenue</th>
-                 </tr>
-              </thead>
-              <tbody>
-                 {creators.length > 0 ? creators.sort((a,b) => (b.revenue||0) - (a.revenue||0)).slice(0, 5).map((c, i) => (
-                    <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                       <td style={{ padding: '1rem 2rem' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: i===0 ? '#fef3c7' : '#f1f5f9', color: i===0 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>{i+1}</div>
-                       </td>
-                       <td style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <img src={c.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-                          <div>
-                             <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{c.fullName || c.username}</div>
-                             <small style={{ color: "var(--cyber-accent-tertiary)" }}>Top Rated</small>
-                          </div>
-                       </td>
-                       <td style={{ padding: '1rem 2rem', color: "var(--cyber-accent)", fontWeight: 600 }}>{c.jobTitle || 'Contributor'}</td>
-                       <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
-                       <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 800 }}>${(c.revenue || 0).toLocaleString()}</td>
-                    </tr>
-                 )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
-              </tbody>
-           </table>
-         </div>
+        <header style={{ padding: '1.5rem', borderBottom: "1px solid var(--cyber-border)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>Top Selling Creators</h3>
+          <button className="btn-link" style={{ fontSize: '0.85rem' }}>View Full Leaderboard</button>
+        </header>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+            <thead style={{ fontSize: '0.75rem', color: "var(--cyber-muted-foreground)", textTransform: 'uppercase' }}>
+              <tr>
+                <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Rank</th>
+                <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Creator</th>
+                <th style={{ padding: '1rem 2rem', textAlign: 'left' }}>Specialization</th>
+                <th style={{ padding: '1rem 2rem', textAlign: 'center' }}>Total Assets</th>
+                <th style={{ padding: '1rem 2rem', textAlign: 'right' }}>Total Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {creators.length > 0 ? creators.sort((a, b) => (b.revenue || 0) - (a.revenue || 0)).slice(0, 5).map((c, i) => (
+                <tr key={c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                  <td style={{ padding: '1rem 2rem' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: i === 0 ? '#fef3c7' : '#f1f5f9', color: i === 0 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>{i + 1}</div>
+                  </td>
+                  <td style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <img src={c.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{c.fullName || c.username}</div>
+                      <small style={{ color: "var(--cyber-accent-tertiary)" }}>Top Rated</small>
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem 2rem', color: "var(--cyber-accent)", fontWeight: 600 }}>{c.jobTitle || 'Contributor'}</td>
+                  <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>{c.assetCount}</td>
+                  <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 800 }}>${(c.revenue || 0).toLocaleString()}</td>
+                </tr>
+              )) : <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No data available</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   )
@@ -669,7 +669,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
           <h1 className="cyber-glitch-text" data-text="Creators" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Creators Management</h1>
-          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Manage platform creators, view their performance and account status.</p>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)", margin: 0 }}>Manage platform creators, view their performance and account status.</p>
         </div>
       </section>
       <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
@@ -704,10 +704,10 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                     <span className="status-badge active" style={{ display: 'inline-flex', alignItems: 'center', background: "rgba(0, 212, 255, 0.1)", color: "var(--cyber-accent-tertiary)", padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>ACTIVE</span>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
-                        <RiEyeLine size={20} style={{ cursor: 'pointer' }} />
-                        <RiProhibitedLine size={20} style={{ cursor: 'pointer' }} />
-                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
+                      <RiEyeLine size={20} style={{ cursor: 'pointer' }} />
+                      <RiProhibitedLine size={20} style={{ cursor: 'pointer' }} />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -719,20 +719,20 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
   )
 
   const renderMessages = () => (
-    <div className="messenger-container" style={{ 
-      display: 'grid', 
-      gridTemplateColumns: '320px 1fr', 
-      height: 'calc(100vh - 200px)', 
+    <div className="messenger-container" style={{
+      display: 'grid',
+      gridTemplateColumns: '320px 1fr',
+      height: 'calc(100vh - 200px)',
       gap: '1.5rem',
       width: '100%',
       maxWidth: '1400px',
       margin: '0 auto'
     }}>
-      <aside style={{ 
-        background: "var(--cyber-card)", 
-        borderRadius: '1.5rem', 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <aside style={{
+        background: "var(--cyber-card)",
+        borderRadius: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
         border: "1px solid var(--cyber-border)"
@@ -759,14 +759,14 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             const isOtherOnline = onlineUsers[conv.otherUser?.id]
 
             return (
-              <div key={conv._id} onClick={() => fetchMessages(conv)} style={{ 
-                padding: '1rem 1.25rem', 
-                display: 'flex', 
-                gap: '1rem', 
-                cursor: 'pointer', 
+              <div key={conv._id} onClick={() => fetchMessages(conv)} style={{
+                padding: '1rem 1.25rem',
+                display: 'flex',
+                gap: '1rem',
+                cursor: 'pointer',
                 borderRadius: '1rem',
                 margin: '2px 0',
-                background: isActive ? '#f1f5ff' : 'transparent', 
+                background: isActive ? '#f1f5ff' : 'transparent',
                 transition: 'all 0.2s ease',
                 position: 'relative'
               }}>
@@ -785,13 +785,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   <div style={{ fontWeight: 700, color: "var(--cyber-foreground)", fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
                     <span>{conv.otherUser?.username || 'Unknown'}</span>
                     {conv.lastMessage?.createdAt && (
-                       <small style={{ fontWeight: 400, color: "var(--cyber-muted-foreground)" }}>
-                         {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                       </small>
+                      <small style={{ fontWeight: 400, color: "var(--cyber-muted-foreground)" }}>
+                        {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </small>
                     )}
                   </div>
-                  <div style={{ 
-                    fontSize: '0.82rem', 
+                  <div style={{
+                    fontSize: '0.82rem',
                     color: isTyping ? '#4f46e5' : '#64748b',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -808,18 +808,18 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
         </div>
       </aside>
 
-      <section style={{ 
-        background: "var(--cyber-card)", 
-        borderRadius: '1.5rem', 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <section style={{
+        background: "var(--cyber-card)",
+        borderRadius: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
         border: "1px solid var(--cyber-border)"
       }}>
         {activeConversation ? (
           <>
-            <header style={{ 
+            <header style={{
               padding: '1rem 2rem', background: "var(--cyber-card)", borderBottom: "1px solid var(--cyber-border)",
               display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
@@ -845,16 +845,16 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 <RiMore2Fill size={24} color="#64748b" style={{ cursor: 'pointer' }} />
               </div>
             </header>
-            
-            <div style={{ 
-              flex: 1, padding: '2rem', overflowY: 'auto', 
+
+            <div style={{
+              flex: 1, padding: '2rem', overflowY: 'auto',
               display: 'flex', flexDirection: 'column', gap: '0.5rem',
               background: "var(--cyber-muted)"
             }}>
               {messages.map((m, i) => {
                 const isMine = m.senderId === adminUser.id
                 const showDate = i === 0 || new Date(m.createdAt).toDateString() !== new Date(messages[i - 1]?.createdAt).toDateString()
-                
+
                 return (
                   <div key={m._id || i}>
                     {showDate && (
@@ -862,8 +862,8 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                         {new Date(m.createdAt).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     )}
-                    <div style={{ 
-                      alignSelf: isMine ? 'flex-end' : 'flex-start', 
+                    <div style={{
+                      alignSelf: isMine ? 'flex-end' : 'flex-start',
                       maxWidth: '75%',
                       marginLeft: isMine ? 'auto' : 0,
                       marginRight: isMine ? 0 : 'auto',
@@ -871,27 +871,27 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                       flexDirection: 'column',
                       alignItems: isMine ? 'flex-end' : 'flex-start'
                     }}>
-                      <div style={{ 
-                        padding: m.image ? '0.5rem' : '0.75rem 1.25rem', 
+                      <div style={{
+                        padding: m.image ? '0.5rem' : '0.75rem 1.25rem',
                         borderRadius: isMine ? '1.25rem 1.25rem 0.25rem 1.25rem' : '1.25rem 1.25rem 1.25rem 0.25rem',
-                        background: isMine ? '#4f46e5' : '#fff', 
-                        color: isMine ? '#fff' : '#1e293b', 
+                        background: isMine ? '#4f46e5' : '#fff',
+                        color: isMine ? '#fff' : '#1e293b',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
                         border: m.error ? '1px solid #ef4444' : 'none',
                         position: 'relative'
                       }}>
                         {m.image ? (
-                           <img 
-                             src={m.image} 
-                             alt="Sent image" 
-                             style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.75rem', display: 'block', cursor: 'pointer' }} 
-                             onClick={() => window.open(m.image, '_blank')}
-                           />
+                          <img
+                            src={m.image}
+                            alt="Sent image"
+                            style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '0.75rem', display: 'block', cursor: 'pointer' }}
+                            onClick={() => window.open(m.image, '_blank')}
+                          />
                         ) : m.text}
                       </div>
-                      <small style={{ 
+                      <small style={{
                         display: 'flex', alignItems: 'center', gap: '4px',
-                        marginTop: '0.35rem', 
+                        marginTop: '0.35rem',
                         color: "var(--cyber-muted-foreground)",
                         fontSize: '0.7rem',
                         fontWeight: 600
@@ -907,7 +907,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   </div>
                 )
               })}
-              
+
               {typingUsers[activeConversation._id] && (
                 <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0' }}>
                   <div className="typing-dots" style={{ display: 'flex', gap: '4px', padding: '0.6rem 1.2rem', background: "var(--cyber-card)", borderRadius: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
@@ -918,38 +918,38 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                   <span style={{ fontSize: '0.75rem', color: "var(--cyber-accent)", fontStyle: 'italic', fontWeight: 600 }}>{activeConversation.otherUser?.username} đang soạn tin...</span>
                 </div>
               )}
-              
+
               <div ref={chatEndRef} />
             </div>
-            
-            <form onSubmit={handleSendMessage} style={{ 
-              padding: '1.25rem 2rem', background: "var(--cyber-card)", borderTop: "1px solid var(--cyber-border)", 
-              display: 'flex', gap: '0.75rem', alignItems: 'center' 
+
+            <form onSubmit={handleSendMessage} style={{
+              padding: '1.25rem 2rem', background: "var(--cyber-card)", borderTop: "1px solid var(--cyber-border)",
+              display: 'flex', gap: '0.75rem', alignItems: 'center'
             }}>
               <label style={{ cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', transition: 'background 0.2s' }} className="hover-bg-f1">
                 <input type="file" accept="image/*" hidden onChange={handleImageSelect} disabled={uploadingImage} />
                 <RiImageAddLine size={24} color={uploadingImage ? "#cbd5e1" : "#64748b"} />
               </label>
-              
-              <input 
-                type="text" 
-                value={newMessage} 
-                onChange={handleTyping} 
+
+              <input
+                type="text"
+                value={newMessage}
+                onChange={handleTyping}
                 onKeyDown={handleKeyDown}
                 placeholder={uploadingImage ? "Uploading image..." : "Type your message..."}
                 disabled={uploadingImage}
-                style={{ 
-                  flex: 1, padding: '0.85rem 1.5rem', borderRadius: '2rem', 
+                style={{
+                  flex: 1, padding: '0.85rem 1.5rem', borderRadius: '2rem',
                   border: "1px solid var(--cyber-border)", background: "var(--cyber-muted)",
                   outline: 'none', fontSize: '0.95rem',
                   transition: 'all 0.2s'
-                }} 
+                }}
               />
-              <button 
-                type="submit" 
-                className="cyber-btn" 
-                disabled={!newMessage.trim() || uploadingImage} 
-                style={{ 
+              <button
+                type="submit"
+                className="cyber-btn"
+                disabled={!newMessage.trim() || uploadingImage}
+                style={{
                   width: '45px', height: '45px', borderRadius: '50%', padding: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   opacity: (!newMessage.trim() || uploadingImage) ? 0.5 : 1,
@@ -974,10 +974,10 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
   const renderAllAssets = () => (
     <div className="admin-view-fade">
-       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+      <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
           <h1 className="cyber-glitch-text" data-text="All Assets" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>All Assets Management</h1>
-          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Browse and manage all assets uploaded by creators across the platform.</p>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)", margin: 0 }}>Browse and manage all assets uploaded by creators across the platform.</p>
         </div>
       </section>
       <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
@@ -998,23 +998,23 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               {allUserAssets.length === 0 ? <tr><td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>No assets found.</td></tr> : allUserAssets.map(a => (
                 <tr key={a.id} style={{ borderBottom: "1px solid var(--cyber-border)" }}>
                   <td style={{ padding: '1rem 1.5rem' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <img src={a.coverImageUrl} style={{ width: '50px', height: '36px', objectFit: 'cover', borderRadius: '4px' }} />
-                        <div>
-                          <div style={{ fontWeight: 700 }}>{a.title}</div>
-                          <div style={{ fontSize: '0.8rem', color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</div>
-                        </div>
-                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <img src={a.coverImageUrl} style={{ width: '50px', height: '36px', objectFit: 'cover', borderRadius: '4px' }} />
+                      <div>
+                        <div style={{ fontWeight: 700 }}>{a.title}</div>
+                        <div style={{ fontSize: '0.8rem', color: "var(--cyber-muted-foreground)" }}>{a.category || 'General'}</div>
+                      </div>
+                    </div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', color: "var(--cyber-muted-foreground)", fontWeight: 600 }}>{a.author?.username || 'Unknown'}</td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                     <span className={`status-badge ${a.status}`} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, background: a.status === 'published' ? '#dcfce7' : '#fef9c3', color: a.status === 'published' ? '#15803d' : '#a16207' }}>{a.status?.toUpperCase()}</span>
+                    <span className={`status-badge ${a.status}`} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, background: a.status === 'published' ? '#dcfce7' : '#fef9c3', color: a.status === 'published' ? '#15803d' : '#a16207' }}>{a.status?.toUpperCase()}</span>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
-                        <RiEyeLine size={20} style={{ cursor: 'pointer' }} onClick={() => navigate(`/marketplace/assets/${a.id}`)} />
-                        <RiLockLine size={20} style={{ cursor: 'pointer' }} />
-                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', color: "var(--cyber-muted-foreground)" }}>
+                      <RiEyeLine size={20} style={{ cursor: 'pointer' }} onClick={() => navigate(`/marketplace/assets/${a.id}`)} />
+                      <RiLockLine size={20} style={{ cursor: 'pointer' }} />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1027,10 +1027,10 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
   const renderApproval = () => (
     <div className="admin-view-fade">
-       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+      <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
           <h1 className="cyber-glitch-text" data-text="Approvals" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>Asset Approval</h1>
-          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)" , margin: 0 }}>Review and approve or reject newly uploaded assets from creators.</p>
+          <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)", margin: 0 }}>Review and approve or reject newly uploaded assets from creators.</p>
         </div>
       </section>
       <section className="cyber-card" style={{ padding: 0, borderRadius: '1.5rem', overflow: 'hidden' }}>
@@ -1071,13 +1071,13 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
       </section>
       {selectedAsset && (
         <section className="cyber-card" style={{ marginTop: '2rem', padding: '2rem', borderRadius: '1.5rem' }}>
-           <h3 style={{ margin: '0 0 1rem 0' }}>Reviewing: {selectedAsset.title}</h3>
-           <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} style={{ width: '100%', minHeight: '100px', marginBottom: '1.5rem', padding: '1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)", outline: 'none' }} placeholder="Rejection feedback..." />
-           <div style={{ display: 'flex', gap: '1rem' }}>
-              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'published' }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-accent-tertiary)", color: "#000", padding: '0.75rem 1.5rem' }}>Approve</button>
-              <button onClick={() => adminService.approve(selectedAsset.id, { status: 'rejected', rejectionReason }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-destructive)", color: "#000", padding: '0.75rem 1.5rem' }}>Reject</button>
-              <button onClick={() => setSelectedAsset(null)} className="cyber-btn-outline" style={{ border: "1px solid var(--cyber-border)", padding: '0.75rem 1.5rem' }}>Cancel</button>
-           </div>
+          <h3 style={{ margin: '0 0 1rem 0' }}>Reviewing: {selectedAsset.title}</h3>
+          <textarea value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} style={{ width: '100%', minHeight: '100px', marginBottom: '1.5rem', padding: '1rem', borderRadius: '0.75rem', border: "1px solid var(--cyber-border)", outline: 'none' }} placeholder="Rejection feedback..." />
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button onClick={() => adminService.approve(selectedAsset.id, { status: 'published' }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-accent-tertiary)", color: "#000", padding: '0.75rem 1.5rem' }}>Approve</button>
+            <button onClick={() => adminService.approve(selectedAsset.id, { status: 'rejected', rejectionReason }).then(() => { fetchData(); setSelectedAsset(null); })} className="cyber-btn" style={{ background: "var(--cyber-destructive)", color: "#000", padding: '0.75rem 1.5rem' }}>Reject</button>
+            <button onClick={() => setSelectedAsset(null)} className="cyber-btn-outline" style={{ border: "1px solid var(--cyber-border)", padding: '0.75rem 1.5rem' }}>Cancel</button>
+          </div>
         </section>
       )}
     </div>
@@ -1087,58 +1087,58 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
 
   return (
     <div className="dashboard-layout">
-      
+
       <div className="fixed inset-0 cyber-grid pointer-events-none z-0"></div>
-      
+
       <main className="admin-shell dashboard-container" style={{ background: "var(--cyber-bg)", minHeight: '100vh', padding: 0, position: 'relative', zIndex: 10 }}>
         <header className="admin-topbar" style={{ background: "var(--cyber-bg)", color: '#fff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--cyber-border)' }}>
-        <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-            {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
-          </button>
-          <div style={{ width: '32px', height: '32px', background: "var(--cyber-accent)", color: "#000", borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <RiLayoutMasonryFill size={20} color="#fff" />
-          </div>
-          <strong style={{ fontSize: '1.25rem', letterSpacing: '0.02em' }}>UIbrage</strong>
-        </div>
-        <div className="admin-user-nav" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <div style={{ position: 'relative', cursor: 'pointer' }}>
-            <RiNotification3Line size={24} />
-            {notifications.filter(n => !n.isRead).length > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', background: "var(--cyber-destructive)", color: "#000", borderRadius: '50%', border: "2px solid var(--cyber-bg)" }} />}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>
-            <div className="admin-user-info" style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{adminUser?.fullName || adminUser?.username}</div>
-              <small style={{ color: "var(--cyber-muted-foreground)", fontSize: '0.75rem' }}>Admin</small>
-            </div>
-            <img src={adminUser?.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)' }} />
-          </div>
-        </div>
-      </header>
-
-      <section className="admin-layout" style={{ display: 'grid', minHeight: 'calc(100vh - 60px)' }}>
-        <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: 'rgba(0,0,0,0.5)', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)', borderRight: '1px solid var(--cyber-border)' }}>
-          <h4 style={{ color: 'var(--cyber-accent-tertiary)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Admin_Node</h4>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
-            <button onClick={() => navigate('/admin/dashboard')} className={`side-link ${variant === 'overview' ? 'active' : ''}`}><RiLayoutMasonryFill /> Dashboard</button>
-            <button onClick={() => navigate('/admin/my-assets')} className={`side-link ${variant === 'library' ? 'active' : ''}`}><RiGalleryFill /> My Assets</button>
-            <button onClick={() => navigate('/admin/upload-asset')} className={`side-link ${variant === 'upload' ? 'active' : ''}`}><RiUploadCloud2Fill /> Upload Asset</button>
-            <button onClick={() => navigate('/admin/creators')} className={`side-link ${variant === 'users' ? 'active' : ''}`}><RiGroupFill /> Creators</button>
-            <button onClick={() => navigate('/admin/asset-approval')} className={`side-link ${variant === 'moderation' ? 'active' : ''}`}><RiShieldCheckFill /> Asset Approval</button>
-            <button onClick={() => navigate('/admin/withdrawals')} className={`side-link ${variant === 'withdrawals' ? 'active' : ''}`}><RiBankCardLine /> Withdrawals</button>
-            <button onClick={() => navigate('/admin/all-assets')} className={`side-link ${variant === 'all-assets' ? 'active' : ''}`}><RiStackFill /> All User Assets</button>
-            <button onClick={() => navigate('/admin/messages')} className={`side-link ${variant === 'messages' ? 'active' : ''}`}>
-              <RiMessage3Fill /> Messages {unreadMessages > 0 && <span className="badge">{unreadMessages}</span>}
+          <div className="admin-brand" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+              {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
             </button>
-          </nav>
-          <div style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <button onClick={() => navigate('/admin/settings')} className={`side-link ${variant === 'settings' ? 'active' : ''}`}><RiSettings4Line /> Settings</button>
-            <button className="side-link danger" onClick={handleLogout}><RiLogoutBoxRLine /> Logout</button>
+            <div style={{ width: '32px', height: '32px', background: "var(--cyber-accent)", color: "#000", borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <RiLayoutMasonryFill size={20} color="#fff" />
+            </div>
+            <strong style={{ fontSize: '1.25rem', letterSpacing: '0.02em' }}>UIbrage</strong>
           </div>
-        </aside>
+          <div className="admin-user-nav" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+            <div style={{ position: 'relative', cursor: 'pointer' }}>
+              <RiNotification3Line size={24} />
+              {notifications.filter(n => !n.isRead).length > 0 && <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', background: "var(--cyber-destructive)", color: "#000", borderRadius: '50%', border: "2px solid var(--cyber-bg)" }} />}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.5rem' }}>
+              <div className="admin-user-info" style={{ textAlign: 'right' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{adminUser?.fullName || adminUser?.username}</div>
+                <small style={{ color: "var(--cyber-muted-foreground)", fontSize: '0.75rem' }}>Admin</small>
+              </div>
+              <img src={adminUser?.avatarUrl} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)' }} />
+            </div>
+          </div>
+        </header>
 
-        <div className="admin-page-content" style={{ padding: '2.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-           <div style={{ width: '100%', maxWidth: '1200px' }}>
+        <section className="admin-layout" style={{ display: 'grid', minHeight: 'calc(100vh - 60px)' }}>
+          <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ background: 'rgba(0,0,0,0.5)', padding: '2rem 1rem', color: '#fff', display: 'flex', flexDirection: 'column', position: 'sticky', top: '60px', height: 'calc(100vh - 60px)', borderRight: '1px solid var(--cyber-border)' }}>
+            <h4 style={{ color: 'var(--cyber-accent-tertiary)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', padding: '0 1rem' }}>Admin_Node</h4>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
+              <button onClick={() => navigate('/admin/dashboard')} className={`side-link ${variant === 'overview' ? 'active' : ''}`}><RiLayoutMasonryFill /> Dashboard</button>
+              <button onClick={() => navigate('/admin/my-assets')} className={`side-link ${variant === 'library' ? 'active' : ''}`}><RiGalleryFill /> My Assets</button>
+              <button onClick={() => navigate('/admin/upload-asset')} className={`side-link ${variant === 'upload' ? 'active' : ''}`}><RiUploadCloud2Fill /> Upload Asset</button>
+              <button onClick={() => navigate('/admin/creators')} className={`side-link ${variant === 'users' ? 'active' : ''}`}><RiGroupFill /> Creators</button>
+              <button onClick={() => navigate('/admin/asset-approval')} className={`side-link ${variant === 'moderation' ? 'active' : ''}`}><RiShieldCheckFill /> Asset Approval</button>
+              <button onClick={() => navigate('/admin/withdrawals')} className={`side-link ${variant === 'withdrawals' ? 'active' : ''}`}><RiBankCardLine /> Withdrawals</button>
+              <button onClick={() => navigate('/admin/all-assets')} className={`side-link ${variant === 'all-assets' ? 'active' : ''}`}><RiStackFill /> All User Assets</button>
+              <button onClick={() => navigate('/admin/messages')} className={`side-link ${variant === 'messages' ? 'active' : ''}`}>
+                <RiMessage3Fill /> Messages {unreadMessages > 0 && <span className="badge">{unreadMessages}</span>}
+              </button>
+            </nav>
+            <div style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <button onClick={() => navigate('/admin/settings')} className={`side-link ${variant === 'settings' ? 'active' : ''}`}><RiSettings4Line /> Settings</button>
+              <button className="side-link danger" onClick={handleLogout}><RiLogoutBoxRLine /> Logout</button>
+            </div>
+          </aside>
+
+          <div className="admin-page-content" style={{ padding: '2.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: '1200px' }}>
               {variant === 'overview' && renderOverview()}
               {variant === 'users' && renderCreators()}
               {variant === 'moderation' && renderApproval()}
@@ -1148,11 +1148,11 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               {variant === 'library' && <MyLibraryPage isAdmin={true} customStats={myAssetStats} />}
               {variant === 'upload' && <UploadAssetPage isAdmin={true} />}
               {variant === 'settings' && <ProfileEditPage isAdminContext={true} />}
-           </div>
-        </div>
-      </section>
+            </div>
+          </div>
+        </section>
 
-      <style>{`
+        <style>{`
         .side-link { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; color: var(--cyber-muted-foreground); text-decoration: none; border-radius: 0.75rem; transition: 0.2s; font-weight: 600; background: none; border: none; width: 100%; text-align: left; cursor: pointer; }
         .side-link:hover, .side-link.active { background: rgba(0,255,136,0.1); color: var(--cyber-accent); box-shadow: var(--neon-glow-primary-sm); }
         .side-link.active { background: rgba(0,255,136,0.15); border-left: 2px solid var(--cyber-accent); }
