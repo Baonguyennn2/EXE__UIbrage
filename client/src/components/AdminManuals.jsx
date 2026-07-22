@@ -21,13 +21,14 @@ export default function AdminManuals() {
   const [editingId, setEditingId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [showCatDropdown, setShowCatDropdown] = useState(false);
+  const [catSearch, setCatSearch] = useState('');
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [manualsRes, catRes] = await Promise.all([
         axios.get(`${API_URL}/manuals`),
-        metadataService.getCategories()
+        axios.get(`${API_URL}/manuals/categories`)
       ]);
       setManuals(manualsRes.data);
       setCategories(catRes.data);
@@ -170,62 +171,81 @@ export default function AdminManuals() {
               
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category (Multiple)</label>
+                
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  {formData.category ? formData.category.split(',').filter(Boolean).map(cat => (
+                    <span key={cat.trim()} style={{ background: 'var(--cyber-accent)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      {cat.trim()}
+                      <RiDeleteBin6Line 
+                        size={12} 
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const currentCats = formData.category.split(',').map(c => c.trim()).filter(Boolean);
+                          const newCats = currentCats.filter(c => c !== cat.trim());
+                          setFormData(prev => ({ ...prev, category: newCats.join(', ') }));
+                        }}
+                      />
+                    </span>
+                  )) : null}
+                </div>
+
                 <div style={{ position: 'relative' }}>
-                  <div 
-                    className="cyber-input"
-                    style={{ minHeight: '45px', padding: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', cursor: 'pointer', alignItems: 'center' }}
-                    onClick={() => setShowCatDropdown(!showCatDropdown)}
-                  >
-                    {formData.category ? formData.category.split(',').map(cat => (
-                      <span key={cat.trim()} style={{ background: 'var(--cyber-accent)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        {cat.trim()}
-                        <RiDeleteBin6Line 
-                          size={12} 
-                          style={{ cursor: 'pointer' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const currentCats = formData.category.split(',').map(c => c.trim());
-                            const newCats = currentCats.filter(c => c !== cat.trim());
-                            setFormData(prev => ({ ...prev, category: newCats.join(', ') }));
-                          }}
-                        />
-                      </span>
-                    )) : <span style={{ color: 'var(--cyber-muted-foreground)' }}>Select categories...</span>}
-                    <RiArrowDownSLine style={{ marginLeft: 'auto', color: 'var(--cyber-accent)' }} />
-                  </div>
+                  <input 
+                    type="text" 
+                    className="cyber-input" 
+                    placeholder="Type to search or add new category..." 
+                    value={catSearch}
+                    onChange={(e) => setCatSearch(e.target.value)}
+                    onFocus={() => setShowCatDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCatDropdown(false), 200)}
+                    style={{ width: '100%', padding: '0.75rem 1rem' }}
+                  />
                   
-                  {showCatDropdown && categories.length > 0 && (
-                    <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)', background: 'var(--cyber-panel)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
-                        <button type="button" className="cyber-btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => setFormData(prev => ({ ...prev, category: categories.map(c => c.name).join(', ') }))}>SELECT ALL</button>
-                      </div>
-                      {categories.map(c => {
-                        const isSelected = formData.category && formData.category.split(',').map(cat => cat.trim()).includes(c.name);
+                  {showCatDropdown && (
+                    <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 9999, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)', background: '#0f172a', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
+                      {categories.filter(c => c.toLowerCase().includes(catSearch.toLowerCase())).map(c => {
+                        const isSelected = formData.category && formData.category.split(',').map(cat => cat.trim()).includes(c);
                         return (
                           <div 
-                            key={c.id}
+                            key={c}
                             onClick={() => { 
-                              const currentCats = formData.category ? formData.category.split(',').map(cat => cat.trim()) : [];
+                              const currentCats = formData.category ? formData.category.split(',').map(cat => cat.trim()).filter(Boolean) : [];
                               if (isSelected) {
-                                setFormData(prev => ({ ...prev, category: currentCats.filter(cat => cat !== c.name).join(', ') }));
+                                setFormData(prev => ({ ...prev, category: currentCats.filter(cat => cat !== c).join(', ') }));
                               } else {
-                                setFormData(prev => ({ ...prev, category: [...currentCats, c.name].join(', ') }));
+                                setFormData(prev => ({ ...prev, category: [...currentCats, c].join(', ') }));
                               }
                             }}
                             style={{ 
                               padding: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.9rem', 
                               color: isSelected ? 'var(--cyber-accent)' : 'var(--cyber-foreground)', 
-                              borderBottom: '1px solid rgba(0,212,255,0.1)',
+                              borderBottom: '1px solid rgba(255,255,255,0.1)',
                               display: 'flex', justifyContent: 'space-between'
                             }}
                             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,212,255,0.1)'}
                             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                           >
-                            {c.name}
+                            {c}
                             {isSelected && <span>✓</span>}
                           </div>
                         )
                       })}
+                      
+                      {catSearch.trim() && !categories.some(c => c.toLowerCase() === catSearch.trim().toLowerCase()) && (
+                        <div 
+                          onClick={() => { 
+                            const currentCats = formData.category ? formData.category.split(',').map(cat => cat.trim()).filter(Boolean) : [];
+                            setFormData(prev => ({ ...prev, category: [...currentCats, catSearch.trim()].join(', ') }));
+                            setCatSearch('');
+                          }} 
+                          style={{ padding: '0.75rem', cursor: 'pointer', color: 'var(--cyber-accent)', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.9rem' }}
+                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,212,255,0.1)'}
+                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          + Add "{catSearch.trim()}"
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

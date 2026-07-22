@@ -18,7 +18,7 @@ export default function ManualsPage() {
       try {
         const [manualsRes, catRes] = await Promise.all([
           axios.get(`${API_URL}/manuals`),
-          metadataService.getCategories()
+          axios.get(`${API_URL}/manuals/categories`)
         ]);
         setManuals(manualsRes.data);
         setCategories(catRes.data);
@@ -91,17 +91,17 @@ export default function ManualsPage() {
               
               {categories.map(cat => (
                 <button 
-                  key={cat.id} 
-                  onClick={() => toggleCategory(cat.name)}
-                  className={`cyber-btn ${selectedCategories.includes(cat.name) ? '' : 'cyber-btn-outline'}`}
+                  key={cat} 
+                  onClick={() => toggleCategory(cat)}
+                  className={`cyber-btn ${selectedCategories.includes(cat) ? '' : 'cyber-btn-outline'}`}
                   style={{
-                    background: selectedCategories.includes(cat.name) ? 'var(--cyber-accent-secondary)' : 'transparent',
-                    color: selectedCategories.includes(cat.name) ? '#fff' : 'var(--cyber-foreground)',
+                    background: selectedCategories.includes(cat) ? 'var(--cyber-accent-secondary)' : 'transparent',
+                    color: selectedCategories.includes(cat) ? '#fff' : 'var(--cyber-foreground)',
                     borderColor: 'var(--cyber-border)'
                   }}
                 >
-                  {selectedCategories.includes(cat.name) && <RiCheckboxCircleFill style={{ marginRight: '0.5rem' }}/>}
-                  {cat.name.toUpperCase()}
+                  {selectedCategories.includes(cat) && <RiCheckboxCircleFill style={{ marginRight: '0.5rem' }}/>}
+                  {cat.toUpperCase()}
                 </button>
               ))}
             </div>
