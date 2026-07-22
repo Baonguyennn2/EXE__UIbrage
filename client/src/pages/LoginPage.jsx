@@ -78,7 +78,7 @@ export default function LoginPage({ variant = 'v1' }) {
           <form className="auth-figma__form" onSubmit={handleSubmit}>
             <label style={{ display: 'block', marginBottom: '1.25rem' }}>
               <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: 'var(--cyber-accent)' }}>USERNAME_OR_EMAIL</span>
-              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
                 <MdOutlineEmail size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none', background: 'white' }} />
                 <input
                   type="email"
@@ -97,7 +97,7 @@ export default function LoginPage({ variant = 'v1' }) {
                 <span style={{ fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: 'var(--cyber-accent)' }}>PASSWORD</span>
                 <Link to="/auth/forgot-password" style={{ fontFamily: 'var(--font-cyber-mono)', fontSize: '0.8rem', color: 'var(--cyber-accent-secondary)' }}>Forgot password?</Link>
               </div>
-              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
                 <RiLock2Line size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none', background: 'white' }} />
                 <input
                   type="password"
