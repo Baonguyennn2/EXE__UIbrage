@@ -51,10 +51,19 @@ export default function ManualsPage() {
 
   // Group by category for display
   const groupedManuals = filteredManuals.reduce((acc, manual) => {
-    if (!acc[manual.category]) acc[manual.category] = [];
-    acc[manual.category].push(manual);
+    const cat = manual.category || 'Uncategorized';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(manual);
     return acc;
   }, {});
+
+  const getCategoryHeading = (catStr) => {
+    if (catStr === 'Uncategorized') return 'UNCATEGORIZED';
+    const cats = catStr.split(',').map(c => c.trim()).filter(Boolean);
+    if (categories.length > 0 && cats.length === categories.length) return 'ALL CATEGORIES';
+    if (cats.length > 3) return cats.slice(0, 3).join(', ') + ' ...';
+    return catStr;
+  };
 
   return (
     <div className="dashboard-layout" style={{ minHeight: '100vh', background: 'var(--cyber-bg)', display: 'flex', flexDirection: 'column' }}>
@@ -115,8 +124,8 @@ export default function ManualsPage() {
             ) : (
               Object.keys(groupedManuals).map(category => (
                 <div key={category} style={{ marginBottom: '4rem' }}>
-                  <h2 style={{ fontSize: '1.8rem', color: 'var(--cyber-accent)', marginBottom: '1.5rem', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '0.5rem' }}>
-                    // {category.toUpperCase()}
+                  <h2 style={{ fontSize: '1.25rem', color: 'var(--cyber-accent)', marginBottom: '1.5rem', borderBottom: '1px solid var(--cyber-border)', paddingBottom: '0.5rem' }}>
+                    // {getCategoryHeading(category).toUpperCase()}
                   </h2>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
