@@ -55,7 +55,7 @@ export default function AppRoutes() {
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       <Route path="/profile/:username" element={<UserProfilePage />} />
-      <Route path="/manuals" element={<ManualsPage />} />
+      <Route path="/marketplace/manuals" element={<ManualsPage />} />
       
       {/* Customer Protected Routes */}
       <Route path="/wishlist" element={

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { RiDeleteBin6Line, RiEdit2Line, RiAddLine, RiLink, RiFile2Line } from 'react-icons/ri';
+import { metadataService } from '../services/api';
 
 const API_URL = 'http://localhost:5000/api'; // Or use an environment variable
 
@@ -16,23 +17,29 @@ export default function AdminManuals() {
   });
   const [file, setFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [categories, setCategories] = useState([]);
 
-  const categories = ['Cursor AI', 'Codex AI', 'Kiro AI', 'Claude AI', 'ChatGPT'];
-
-  const fetchManuals = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_URL}/manuals`);
-      setManuals(res.data);
+      const [manualsRes, catRes] = await Promise.all([
+        axios.get(`${API_URL}/manuals`),
+        metadataService.getCategories()
+      ]);
+      setManuals(manualsRes.data);
+      setCategories(catRes.data);
+      if (catRes.data.length > 0 && !formData.category) {
+        setFormData(prev => ({ ...prev, category: catRes.data[0].name }));
+      }
     } catch (error) {
-      console.error('Error fetching manuals:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchManuals();
+    fetchData();
   }, []);
 
   const handleInputChange = (e) => {
@@ -67,8 +74,8 @@ export default function AdminManuals() {
         await axios.post(`${API_URL}/manuals`, data, { headers });
       }
       setShowModal(false);
-      fetchManuals();
-      setFormData({ title: '', category: 'Cursor AI', type: 'link', content_url: '' });
+      fetchData();
+      setFormData({ title: '', category: categories.length > 0 ? categories[0].name : '', type: 'link', content_url: '' });
       setFile(null);
       setEditingId(null);
     } catch (error) {
@@ -96,7 +103,7 @@ export default function AdminManuals() {
       await axios.delete(`${API_URL}/manuals/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchManuals();
+      fetchData();
     } catch (error) {
       console.error('Error deleting manual:', error);
       alert('Failed to delete manual');
@@ -164,7 +171,7 @@ export default function AdminManuals() {
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category</label>
                 <select name="category" value={formData.category} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--cyber-muted)', border: '1px solid var(--cyber-border)', borderRadius: '0.5rem', color: '#fff' }}>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
 
