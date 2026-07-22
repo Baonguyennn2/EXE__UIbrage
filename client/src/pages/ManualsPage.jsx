@@ -43,9 +43,11 @@ export default function ManualsPage() {
     setSelectedCategories([]); // Empty means "All"
   };
 
-  const filteredManuals = selectedCategories.length === 0 
-    ? manuals 
-    : manuals.filter(m => selectedCategories.includes(m.category));
+  const filteredManuals = manuals.filter(manual => {
+    if (selectedCategories.length === 0) return true;
+    const manualCats = manual.category ? manual.category.split(',').map(c => c.trim()) : [];
+    return manualCats.some(cat => selectedCategories.includes(cat));
+  });
 
   // Group by category for display
   const groupedManuals = filteredManuals.reduce((acc, manual) => {
@@ -73,18 +75,18 @@ export default function ManualsPage() {
 
           <section className="cyber-card" style={{ padding: '2rem', marginBottom: '3rem', borderRadius: '1rem', border: '1px solid var(--cyber-border)' }}>
             <h3 style={{ margin: '0 0 1rem 0', color: 'var(--cyber-foreground)' }}>Filter by Categories</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
               <button 
-                onClick={selectAll}
+                onClick={() => setSelectedCategories([])}
                 className={`cyber-btn ${selectedCategories.length === 0 ? '' : 'cyber-btn-outline'}`}
                 style={{
                   background: selectedCategories.length === 0 ? 'var(--cyber-accent)' : 'transparent',
-                  color: selectedCategories.length === 0 ? '#000' : 'var(--cyber-accent)',
-                  borderColor: 'var(--cyber-accent)'
+                  color: selectedCategories.length === 0 ? '#000' : 'var(--cyber-foreground)',
+                  borderColor: 'var(--cyber-border)'
                 }}
               >
                 {selectedCategories.length === 0 && <RiCheckboxCircleFill style={{ marginRight: '0.5rem' }}/>}
-                ALL_SYSTEMS
+                ALL MANUALS
               </button>
               
               {categories.map(cat => (

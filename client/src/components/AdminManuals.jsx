@@ -21,6 +21,7 @@ export default function AdminManuals() {
   const [editingId, setEditingId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [showCatDropdown, setShowCatDropdown] = useState(false);
+  const [showCatDropdown, setShowCatDropdown] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -31,9 +32,6 @@ export default function AdminManuals() {
       ]);
       setManuals(manualsRes.data);
       setCategories(catRes.data);
-      if (catRes.data.length > 0 && !formData.category) {
-        setFormData(prev => ({ ...prev, category: catRes.data[0].name }));
-      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -78,7 +76,7 @@ export default function AdminManuals() {
       }
       setShowModal(false);
       fetchData();
-      setFormData({ title: '', category: categories.length > 0 ? categories[0].name : '', type: 'link', content_url: '' });
+      setFormData({ title: '', category: '', type: 'link', content_url: '' });
       setFile(null);
       setEditingId(null);
     } catch (error) {
@@ -172,19 +170,65 @@ export default function AdminManuals() {
               </div>
               
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category (Multiple)</label>
                 <div style={{ position: 'relative' }}>
-                  <select 
-                    name="category" 
-                    value={formData.category} 
-                    onChange={handleInputChange} 
-                    required 
+                  <div 
                     className="cyber-input"
-                    style={{ width: '100%', padding: '0.75rem 1rem', appearance: 'none', cursor: 'pointer' }} 
+                    style={{ minHeight: '45px', padding: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', cursor: 'pointer', alignItems: 'center' }}
+                    onClick={() => setShowCatDropdown(!showCatDropdown)}
                   >
-                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                  </select>
-                  <RiArrowDownSLine style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--cyber-accent)' }} size={20} />
+                    {formData.category ? formData.category.split(',').map(cat => (
+                      <span key={cat.trim()} style={{ background: 'var(--cyber-accent)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        {cat.trim()}
+                        <RiDeleteBin6Line 
+                          size={12} 
+                          style={{ cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentCats = formData.category.split(',').map(c => c.trim());
+                            const newCats = currentCats.filter(c => c !== cat.trim());
+                            setFormData(prev => ({ ...prev, category: newCats.join(', ') }));
+                          }}
+                        />
+                      </span>
+                    )) : <span style={{ color: 'var(--cyber-muted-foreground)' }}>Select categories...</span>}
+                    <RiArrowDownSLine style={{ marginLeft: 'auto', color: 'var(--cyber-accent)' }} />
+                  </div>
+                  
+                  {showCatDropdown && categories.length > 0 && (
+                    <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)', background: 'var(--cyber-panel)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
+                        <button type="button" className="cyber-btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => setFormData(prev => ({ ...prev, category: categories.map(c => c.name).join(', ') }))}>SELECT ALL</button>
+                      </div>
+                      {categories.map(c => {
+                        const isSelected = formData.category && formData.category.split(',').map(cat => cat.trim()).includes(c.name);
+                        return (
+                          <div 
+                            key={c.id}
+                            onClick={() => { 
+                              const currentCats = formData.category ? formData.category.split(',').map(cat => cat.trim()) : [];
+                              if (isSelected) {
+                                setFormData(prev => ({ ...prev, category: currentCats.filter(cat => cat !== c.name).join(', ') }));
+                              } else {
+                                setFormData(prev => ({ ...prev, category: [...currentCats, c.name].join(', ') }));
+                              }
+                            }}
+                            style={{ 
+                              padding: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.9rem', 
+                              color: isSelected ? 'var(--cyber-accent)' : 'var(--cyber-foreground)', 
+                              borderBottom: '1px solid rgba(0,212,255,0.1)',
+                              display: 'flex', justifyContent: 'space-between'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,212,255,0.1)'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {c.name}
+                            {isSelected && <span>✓</span>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
