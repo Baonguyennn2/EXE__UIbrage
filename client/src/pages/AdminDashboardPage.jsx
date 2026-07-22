@@ -874,9 +874,9 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                       <div style={{
                         padding: m.image ? '0.5rem' : '0.75rem 1.25rem',
                         borderRadius: isMine ? '1.25rem 1.25rem 0.25rem 1.25rem' : '1.25rem 1.25rem 1.25rem 0.25rem',
-                        background: isMine ? '#4f46e5' : '#fff',
-                        color: isMine ? '#fff' : '#1e293b',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                        background: isMine ? '#468f6dff' : '#2563eb',
+                        color: 'white',
+                        boxShadow: isMine ? 'rgb(0 255 136) 0px 2px 8px' : 'rgba(37, 99, 235, 0.6) 0px 2px 8px',
                         border: m.error ? '1px solid #ef4444' : 'none',
                         position: 'relative'
                       }}>
