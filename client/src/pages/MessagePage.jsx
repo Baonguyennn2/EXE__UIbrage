@@ -657,11 +657,11 @@ export default function MessagePage() {
                               borderRadius: isMine
                                 ? '18px 18px 4px 18px'
                                 : '18px 18px 18px 4px',
-                              background: isMine ? '#468f6dff' : 'var(--cyber-card)',
-                              color: isMine ? 'white' : 'white',
+                              background: isMine ? '#468f6dff' : '#2563eb',
+                              color: 'white',
                               boxShadow: isMine
                                 ? 'rgb(0 255 136) 0px 2px 8px'
-                                : '0 1px 4px rgba(255, 255, 255, 0.06)',
+                                : 'rgba(37, 99, 235, 0.6) 0px 2px 8px',
                               opacity: msg.sending ? 0.7 : 1,
                               border: msg.error ? '1px solid #ef4444' : 'none',
                               fontSize: '0.92rem',
