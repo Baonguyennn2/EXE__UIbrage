@@ -17,6 +17,7 @@ export default function AdminManuals() {
   const [file, setFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [showCatDropdown, setShowCatDropdown] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -115,7 +116,7 @@ export default function AdminManuals() {
     <div className="admin-view-fade">
       <section className="adminx-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
         <div>
-          <h1 className="cyber-glitch-text" data-text="Manuals" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>User Manuals</h1>
+          <h1 className="cyber-glitch-text" data-text="USER MANUALS" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "2.25rem", marginBottom: "0.4rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>USER MANUALS</h1>
           <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)", margin: 0 }}>Manage user guides and Notion links.</p>
         </div>
         <button className="cyber-btn" onClick={() => { setEditingId(null); setShowModal(true); }} style={{ background: "var(--cyber-accent)", color: "#000", display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -169,10 +170,34 @@ export default function AdminManuals() {
               
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--cyber-muted-foreground)' }}>Category</label>
-                <input list="category-options" name="category" value={formData.category} onChange={handleInputChange} placeholder="Type or select a category" required style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--cyber-muted)', border: '1px solid var(--cyber-border)', borderRadius: '0.5rem', color: '#fff' }} />
-                <datalist id="category-options">
-                  {categories.map(c => <option key={c} value={c} />)}
-                </datalist>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    name="category" 
+                    value={formData.category} 
+                    onChange={handleInputChange} 
+                    onFocus={() => setShowCatDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCatDropdown(false), 200)}
+                    placeholder="Type or select a category" 
+                    required 
+                    className="cyber-input"
+                    style={{ width: '100%', padding: '0.75rem 1rem' }} 
+                  />
+                  {showCatDropdown && categories.length > 0 && (
+                    <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)' }}>
+                      {categories.filter(c => c.toLowerCase().includes(formData.category.toLowerCase())).map(c => (
+                        <div 
+                          key={c}
+                          onClick={() => { setFormData(prev => ({ ...prev, category: c })); setShowCatDropdown(false); }}
+                          style={{ padding: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.9rem', color: 'var(--cyber-foreground)', borderBottom: '1px solid rgba(0,212,255,0.1)' }}
+                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,212,255,0.1)'}
+                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {c}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

@@ -60,8 +60,8 @@ export default function ManualsPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
           <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
-            <h1 className="cyber-glitch-text" data-text="USER_MANUALS" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "3.5rem", marginBottom: "1rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>
-              USER_MANUALS
+            <h1 className="cyber-glitch-text" data-text="USER MANUALS" style={{ fontFamily: "var(--font-cyber-heading)", fontSize: "3.5rem", marginBottom: "1rem", textTransform: "uppercase", color: "var(--cyber-accent)" }}>
+              USER MANUALS
             </h1>
             <p style={{ color: "var(--cyber-muted-foreground)", fontFamily: "var(--font-cyber-mono)", fontSize: '1.1rem' }}>
               [SYSTEM_MESSAGE]: Access technical documentation and guides.
