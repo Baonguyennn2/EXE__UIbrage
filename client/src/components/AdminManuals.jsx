@@ -204,6 +204,14 @@ export default function AdminManuals() {
                   
                   {showCatDropdown && (
                     <div className="cyber-card" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 9999, marginTop: '0.5rem', padding: '0.5rem', maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--cyber-accent-tertiary)', background: '#0f172a', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--cyber-muted-foreground)', display: 'flex', alignItems: 'center' }}>Quick Select:</span>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button type="button" className="cyber-btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onMouseDown={(e) => { e.preventDefault(); setFormData(prev => ({ ...prev, category: categories.join(', ') })) }}>SELECT ALL</button>
+                          <button type="button" className="cyber-btn-ghost" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onMouseDown={(e) => { e.preventDefault(); setFormData(prev => ({ ...prev, category: '' })) }}>CLEAR</button>
+                        </div>
+                      </div>
+                      
                       {categories.filter(c => c.toLowerCase().includes(catSearch.toLowerCase())).map(c => {
                         const isSelected = formData.category && formData.category.split(',').map(cat => cat.trim()).includes(c);
                         return (
