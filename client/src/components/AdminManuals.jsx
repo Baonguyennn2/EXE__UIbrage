@@ -3,7 +3,9 @@ import axios from 'axios';
 import { RiDeleteBin6Line, RiEdit2Line, RiAddLine, RiLink, RiFile2Line, RiArrowDownSLine } from 'react-icons/ri';
 import { metadataService } from '../services/api';
 
-const API_URL = 'http://localhost:5000/api'; // Or use an environment variable
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : 'https://exe-uibrage.onrender.com/api');
 
 export default function AdminManuals() {
   const [manuals, setManuals] = useState([]);

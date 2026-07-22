@@ -4,7 +4,9 @@ import { metadataService } from '../services/api';
 import { RiLinksLine, RiFileDownloadLine, RiCheckboxCircleFill } from 'react-icons/ri';
 import AppHeader from '../components/AppHeader';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : 'https://exe-uibrage.onrender.com/api');
 
 export default function ManualsPage() {
   const [manuals, setManuals] = useState([]);
