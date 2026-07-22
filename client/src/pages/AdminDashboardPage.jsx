@@ -746,7 +746,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             boxShadow: "0 0 0 2px rgba(0, 212, 255, 0.2)"
           }} title="Server Connected" />
         </header>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+        <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
           {conversations.length === 0 && (
             <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: "var(--cyber-muted-foreground)" }}>
               <RiMessage3Fill size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
@@ -766,7 +766,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
                 cursor: 'pointer',
                 borderRadius: '1rem',
                 margin: '2px 0',
-                background: isActive ? '#f1f5ff' : 'transparent',
+                background: isActive ? 'rgba(0, 212, 255, 0.1)' : 'transparent',
                 transition: 'all 0.2s ease',
                 position: 'relative'
               }}>
@@ -846,7 +846,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
               </div>
             </header>
 
-            <div style={{
+            <div className="custom-scrollbar" style={{
               flex: 1, padding: '2rem', overflowY: 'auto',
               display: 'flex', flexDirection: 'column', gap: '0.5rem',
               background: "var(--cyber-muted)"
@@ -1096,10 +1096,7 @@ export default function AdminDashboardPage({ variant = 'overview' }) {
             <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
               {isSidebarOpen ? <RiCloseLine size={24} /> : <RiMenuLine size={24} />}
             </button>
-            <div style={{ width: '32px', height: '32px', background: "var(--cyber-accent)", color: "#000", borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <RiLayoutMasonryFill size={20} color="#fff" />
-            </div>
-            <strong style={{ fontSize: '1.25rem', letterSpacing: '0.02em' }}>UIbrage</strong>
+            <strong className="cyber-glitch-text" data-text="UIBRAGE" style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--cyber-accent)' }}>UIBRAGE</strong>
           </div>
           <div className="admin-user-nav" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <div style={{ position: 'relative', cursor: 'pointer' }}>

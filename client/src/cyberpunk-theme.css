@@ -68,3 +68,19 @@
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100vh); }
 }
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cyber-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cyber-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyber-accent-tertiary);
+}

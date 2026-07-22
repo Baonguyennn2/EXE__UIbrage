@@ -453,7 +453,7 @@ export default function MessagePage() {
           </div>
 
           {/* Danh sách */}
-          <div style={{
+          <div className="custom-scrollbar" style={{
             flex: 1,
             overflowY: 'auto',
             overflowX: 'hidden'
@@ -580,6 +580,7 @@ export default function MessagePage() {
 
               {/* Messages area - scrollable */}
               <div
+                className="custom-scrollbar"
                 ref={chatContainerRef}
                 style={{
                   flex: 1,
