@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="auth-figma" style={{ background: 'var(--cyber-bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <main className="auth-figma" style={{ background: 'var(--cyber-bg)' }}>
       <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
       <section className="auth-figma__canvas" style={{ background: 'transparent', border: 'none', position: 'relative', zIndex: 10 }}>
         <header className="auth-figma__brand">
