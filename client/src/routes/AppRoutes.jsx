@@ -26,6 +26,7 @@ import MessagePage from '../pages/MessagePage.jsx'
 import GoogleCallbackPage from '../pages/GoogleCallbackPage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import { legacyRouteBySlug } from '../data/routeCatalog.js'
+import ManualsPage from '../pages/ManualsPage.jsx'
 
 function LegacyFrameRoute() {
   const { slug } = useParams()
@@ -54,6 +55,7 @@ export default function AppRoutes() {
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/marketplace/assets/:id" element={<DetailPage />} />
       <Route path="/profile/:username" element={<UserProfilePage />} />
+      <Route path="/marketplace/manuals" element={<ManualsPage />} />
       
       {/* Customer Protected Routes */}
       <Route path="/wishlist" element={
@@ -111,6 +113,9 @@ export default function AppRoutes() {
       } />
       <Route path="/admin/all-assets" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="all-assets" /></ProtectedRoute>
+      } />
+      <Route path="/admin/manuals" element={
+        <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="manuals" /></ProtectedRoute>
       } />
       <Route path="/admin/reports" element={
         <ProtectedRoute allowedRoles={['admin']}><AdminDashboardPage variant="reports" /></ProtectedRoute>

@@ -13,6 +13,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const postRoutes = require('./routes/postRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const manualRoutes = require('./routes/manualRoutes');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/manuals', manualRoutes);
 app.use('/api', metadataRoutes);
 
 // Health check

@@ -138,6 +138,7 @@ export default function AppHeader({ onSearch }) {
           </div>
 
           <Link to="/community">Community</Link>
+          <Link to="/marketplace/manuals">Manuals</Link>
           {user && (
             <Link to={user.role === 'admin' ? '/admin/upload-asset' : '/assets/upload'}>Upload Asset</Link>
           )}
@@ -229,6 +230,7 @@ export default function AppHeader({ onSearch }) {
         <nav className="mobile-nav-links">
           <Link to="/" onClick={() => setIsDrawerOpen(false)}><RiHome4Line /> Home</Link>
           <Link to="/marketplace" onClick={() => setIsDrawerOpen(false)}><RiCompass3Line /> Browse Assets</Link>
+          <Link to="/marketplace/manuals" onClick={() => setIsDrawerOpen(false)}><RiBookletLine /> Manuals</Link>
           <Link to="/community" onClick={() => setIsDrawerOpen(false)}><RiCommunityLine /> Community</Link>
 
           <div style={{ margin: '1rem 0', height: '1px', background: '#f1f5f9' }} />
