@@ -4740,7 +4740,7 @@
   align-content: start;
   gap: 1.5rem;
   position: relative;
-  padding: 10vh 1.25rem 2.5rem;
+  padding: 1vh 1.25rem 2.5rem;
   overflow-y: auto;
 }
 
