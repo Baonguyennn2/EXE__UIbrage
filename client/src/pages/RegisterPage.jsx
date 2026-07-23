@@ -4,7 +4,8 @@ import { authService } from '../services/api'
 import Toast from '../components/Toast.jsx'
 import { FaFacebookF } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
-import { RiEyeLine, RiEyeOffLine } from 'react-icons/ri'
+import { RiEyeLine, RiEyeOffLine, RiLock2Line, RiUser3Line } from 'react-icons/ri'
+import { MdOutlineEmail } from 'react-icons/md'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -105,88 +106,135 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="auth-figma auth-figma--register-page">
-      <section className="auth-figma__canvas">
+    <main className="auth-figma auth-figma--register-page" style={{ background: 'var(--cyber-bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="cyber-grid-bg" style={{ opacity: 0.05, position: 'fixed', inset: 0, zIndex: 0 }}></div>
+      <section className="auth-figma__canvas" style={{ background: 'transparent', border: 'none', position: 'relative', zIndex: 10 }}>
         <header className="auth-figma__brand">
-          <span className="auth-figma__brand-tile">▦</span>
-          <strong>Ulbrage</strong>
+          <strong className="cyber-glitch-text" data-text="UIBRAGE" style={{ fontFamily: 'var(--font-cyber-heading)', fontSize: '2.5rem', letterSpacing: '0.1em', color: 'var(--cyber-accent)' }}>UIBRAGE</strong>
         </header>
 
-      {notification && (
-        <div className="toast-container">
-          <Toast 
-            type={notification.type} 
-            message={notification.message} 
-            onClose={() => setNotification(null)} 
-          />
-        </div>
-      )}
+        {notification && (
+          <div className="toast-container">
+            <Toast 
+              type={notification.type} 
+              message={notification.message} 
+              onClose={() => setNotification(null)} 
+            />
+          </div>
+        )}
 
-      <section className="auth-figma__card auth-figma__card--register">
-          <header>
-            <h1>Create your Ulbrage account</h1>
+        <section className="auth-figma__card cyber-card" style={{ background: 'rgba(5, 5, 10, 0.7)', border: '1px solid var(--cyber-border)', padding: '2.5rem' }}>
+          <header style={{ marginBottom: '2rem' }}>
+            <h1 className="cyber-glitch-text" data-text="CREATE_ACCOUNT" style={{ fontFamily: 'var(--font-cyber-heading)', textTransform: 'uppercase', color: '#fff', fontSize: '1.5rem', marginBottom: '0.5rem' }}>CREATE_ACCOUNT</h1>
+            <p style={{ color: 'var(--cyber-accent-secondary)', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem' }}>// INITIALIZE_NEW_USER_NODE</p>
           </header>
 
           <form className="auth-figma__form" onSubmit={handleSubmit}>
-            <label className={errors.username ? 'has-error' : ''}>
-              Username
-              <div className="auth-figma__input-wrap">
-                <input type="text" value={form.username} onChange={setField('username')} placeholder="gameder_pro" required />
+            <label style={{ display: 'block', marginBottom: '1.25rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: errors.username ? 'var(--cyber-destructive)' : 'var(--cyber-accent)' }}>USERNAME</span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
+                <RiUser3Line size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
+                <input 
+                  type="text" 
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', borderColor: errors.username ? 'var(--cyber-destructive)' : '' }}
+                  value={form.username} 
+                  onChange={setField('username')} 
+                  placeholder="gameder_pro" 
+                  required 
+                />
               </div>
-              {errors.username && <span className="error-text">{errors.username}</span>}
+              {errors.username && <span style={{ color: 'var(--cyber-destructive)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.username}</span>}
             </label>
-            <label className={errors.email ? 'has-error' : ''}>
-              Email address
-              <div className="auth-figma__input-wrap">
-                <input type="email" value={form.email} onChange={setField('email')} placeholder="you@example.com" required />
+
+            <label style={{ display: 'block', marginBottom: '1.25rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: errors.email ? 'var(--cyber-destructive)' : 'var(--cyber-accent)' }}>EMAIL_ADDRESS</span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
+                <MdOutlineEmail size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
+                <input 
+                  type="email" 
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', borderColor: errors.email ? 'var(--cyber-destructive)' : '' }}
+                  value={form.email} 
+                  onChange={setField('email')} 
+                  placeholder="you@example.com" 
+                  required 
+                />
               </div>
-              {errors.email && <span className="error-text">{errors.email}</span>}
+              {errors.email && <span style={{ color: 'var(--cyber-destructive)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.email}</span>}
             </label>
-            <label className={errors.password ? 'has-error' : ''}>
-              Password
-              <div className="auth-figma__input-wrap">
-                <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={setField('password')} placeholder="••••••••" required />
-                <span onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
+
+            <label style={{ display: 'block', marginBottom: '1.25rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: errors.password ? 'var(--cyber-destructive)' : 'var(--cyber-accent)' }}>PASSWORD</span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
+                <RiLock2Line size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '3rem', borderColor: errors.password ? 'var(--cyber-destructive)' : '' }}
+                  value={form.password} 
+                  onChange={setField('password')} 
+                  placeholder="••••••••" 
+                  required 
+                />
+                <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1rem', cursor: 'pointer', color: '#64748b' }}>
                   {showPassword ? <RiEyeOffLine /> : <RiEyeLine />}
                 </span>
               </div>
-              {errors.password && <span className="error-text">{errors.password}</span>}
+              {errors.password && <span style={{ color: 'var(--cyber-destructive)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.password}</span>}
             </label>
-            <label className={errors.confirmPassword ? 'has-error' : ''}>
-              Confirm password
-              <div className="auth-figma__input-wrap">
-                <input type={showConfirm ? 'text' : 'password'} value={form.confirmPassword} onChange={setField('confirmPassword')} placeholder="••••••••" required />
-                <span onClick={() => setShowConfirm(!showConfirm)} style={{ cursor: 'pointer' }}>
+
+            <label style={{ display: 'block', marginBottom: '2rem' }}>
+              <span style={{ display: 'block', marginBottom: '0.5rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: errors.confirmPassword ? 'var(--cyber-destructive)' : 'var(--cyber-accent)' }}>CONFIRM_PASSWORD</span>
+              <div className="cyber-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'white' }}>
+                <RiLock2Line size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--cyber-accent-tertiary)', pointerEvents: 'none' }} />
+                <input 
+                  type={showConfirm ? 'text' : 'password'} 
+                  className="cyber-input"
+                  style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '3rem', borderColor: errors.confirmPassword ? 'var(--cyber-destructive)' : '' }}
+                  value={form.confirmPassword} 
+                  onChange={setField('confirmPassword')} 
+                  placeholder="••••••••" 
+                  required 
+                />
+                <span onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '1rem', cursor: 'pointer', color: '#64748b' }}>
                   {showConfirm ? <RiEyeOffLine /> : <RiEyeLine />}
                 </span>
               </div>
-              {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
+              {errors.confirmPassword && <span style={{ color: 'var(--cyber-destructive)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.confirmPassword}</span>}
             </label>
 
-            <button type="submit" className="auth-figma__submit" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account'}
+            <button type="submit" className="cyber-btn" disabled={loading} style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}>
+              {loading ? 'CREATING_ACCOUNT...' : 'CREATE_ACCOUNT'}
             </button>
           </form>
 
-          <div className="auth-figma__divider">
-            <span>OR SIGN UP WITH</span>
+          <div style={{ margin: '2rem 0', position: 'relative', textAlign: 'center' }}>
+            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--cyber-border)', zIndex: 1 }}></div>
+            <span style={{ position: 'relative', zIndex: 2, background: 'rgba(5, 5, 10, 0.95)', padding: '0 1rem', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.75rem', color: '#64748b' }}>OR_SIGN_UP_WITH</span>
           </div>
 
-          <div className="auth-figma__socials">
-            <button type="button" className="auth-figma__social-btn" onClick={handleFacebookLogin}>
-              <FaFacebookF />
-              Facebook
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <button type="button" className="cyber-btn-outline" onClick={handleFacebookLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
+              <FaFacebookF /> FACEBOOK
             </button>
-            <button type="button" className="auth-figma__social-btn" onClick={handleGoogleLogin}>
-              <FcGoogle />
-              Google
+            <button type="button" className="cyber-btn-outline" onClick={handleGoogleLogin} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', minHeight: 'auto', fontSize: '0.85rem', clipPath: 'none', background: 'var(--cyber-muted)' }}>
+              <FcGoogle /> GOOGLE
             </button>
           </div>
 
-          <footer className="auth-figma__footer">
-            Already have an account? <Link to="/auth/login">Log in</Link>
+          <footer style={{ marginTop: '2.5rem', textAlign: 'center', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.85rem', color: '#94a3b8' }}>
+            ALREADY_HAVE_ACCOUNT? <Link to="/auth/login" style={{ color: 'var(--cyber-accent)', marginLeft: '0.5rem' }}>LOG_IN</Link>
           </footer>
         </section>
+        
+        <nav style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center', fontFamily: 'var(--font-cyber-mono)', fontSize: '0.8rem', color: 'var(--cyber-muted-foreground)', marginTop: '2rem' }}>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>ABOUT</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>FAQ</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>BLOG</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>CONTACT</a>
+          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>TERMS_OF_SERVICE</a>
+        </nav>
       </section>
     </main>
   )
