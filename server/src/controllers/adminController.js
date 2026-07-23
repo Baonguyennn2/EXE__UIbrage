@@ -28,8 +28,8 @@ const getAdminStats = async (req, res) => {
       limit: 5,
       order: [['createdAt', 'DESC']],
       include: [
-        { model: User, attributes: ['username', 'fullName'] }, 
-        { model: Asset, attributes: ['title', 'coverImageUrl'] }
+        { model: User, as: 'buyer', attributes: ['username', 'fullName'] }, 
+        { model: Asset, as: 'asset', attributes: ['title', 'coverImageUrl'] }
       ]
     });
 
