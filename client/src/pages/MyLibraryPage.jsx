@@ -121,7 +121,7 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
             ) : (
               <div className="library-grid">
                 {myAssets.map((asset, index) => (
-                  <div className="cyber-card cyber-card-dynamic group library-card" key={asset.id} style={{ padding: 0 }}>
+                  <div className="cyber-card cyber-card-dynamic group library-card" key={asset.id} style={{ padding: 0, backgroundColor: 'var(--cyber-muted)', border: '1px solid var(--cyber-accent)', boxShadow: 'var(--neon-glow-primary)' }}>
                     <div className="dynamic-card-img-wrapper">
                       <div className="dynamic-card-overlay" style={{ backgroundColor: index % 2 === 0 ? 'rgba(0, 212, 255, 0.1)' : 'rgba(255, 0, 255, 0.1)' }}></div>
                       <img src={asset.coverImageUrl || 'https://picsum.photos/seed/cyber/400/225'} alt={asset.title} className="dynamic-card-img" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
@@ -132,12 +132,12 @@ export default function MyLibraryPage({ isAdmin = false, customStats }) {
                     </div>
                     <div className="dynamic-card-body" style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                        <Link to={`/marketplace/assets/${asset.id}`} className="dynamic-card-title" style={{ color: '#fff', fontSize: '1.1rem', margin: 0, fontFamily: 'var(--font-cyber-heading)', textDecoration: 'none' }}>
+                        <Link to={`/marketplace/assets/${asset.id}`} className="dynamic-card-title" style={{ color: '#fff', fontSize: '1.1rem', margin: 0, fontFamily: 'var(--font-cyber-heading)', textDecoration: 'none', textShadow: '0 0 5px rgba(255,255,255,0.5)' }}>
                           {asset.title}
                         </Link>
                       </div>
                       <div className="dynamic-card-desc-wrapper" style={{ flex: 1, marginBottom: '1rem' }}>
-                        <p className="dynamic-card-desc" style={{ color: '#94a3b8', fontSize: '12px', lineHeight: 1.5, margin: 0 }}>
+                        <p className="dynamic-card-desc" style={{ color: '#fff', fontSize: '12px', lineHeight: 1.5, margin: 0 }}>
                           By <span style={{ color: 'var(--cyber-accent-tertiary)', fontWeight: 700 }}>{asset.author?.fullName || asset.author?.username || 'Unknown_Entity'}</span>
                         </p>
                       </div>
